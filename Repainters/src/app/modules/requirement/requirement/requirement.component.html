@@ -1,0 +1,142 @@
+<div class="page-container">
+  <div class="form-card">
+    <div class="main-form">
+      <div class="painting-container">
+        <div class="section-card">
+          <div class="card-banner">
+            <h2>B. Internal Painting</h2>
+          </div>
+          <br>
+          <br>
+          <form [formGroup]="requirementForm">
+            <div class="carpet-area-section">
+              <div class="section-highlight">
+                <label class="highlight-label">Carpet Area (In Sft)</label>
+                <div class="premium-input">
+                  <input type="number" formControlName="carpetArea" placeholder="Enter carpet area">
+                  <div class="input-line"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ceiling Section -->
+            <div class="paint-block">
+              <div class="block-header">
+                <span class="block-number">Ceiling</span>
+              </div>
+              
+              <div class="input-grid">
+                <div class="premium-group">
+                  <label>Type</label>
+                  <div class="custom-select">
+                    <select formControlName="ceilingType">
+                      <option value="">Select paint type</option>
+                      <option *ngFor="let type of ceilingTypes" [value]="type">{{type}}</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="premium-group">
+                  <label>Price</label>
+                  <div class="premium-input">
+                    <input type="number" formControlName="ceilingPrice" placeholder="Price" readonly>
+                    <div class="input-line"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="premium-input mt-3">
+                <textarea formControlName="ceilingRemarsk" placeholder="Enter remarks for ceiling" class="remarks-input"></textarea>
+                <div class="input-line"></div>
+              </div>
+            </div>
+
+            <!-- Wall Section -->
+            <div class="paint-block">
+              <div class="block-header">
+                <span class="block-number">Wall</span>
+              </div>
+              
+              <div class="input-grid">
+                <div class="premium-group">
+                  <label>Type</label>
+                  <div class="custom-select">
+                    <select formControlName="wallType">
+                      <option value="">Select paint type</option>
+                      <option *ngFor="let type of wallTypes" [value]="type">{{type}}</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="premium-group">
+                  <label>Price</label>
+                  <div class="premium-input">
+                    <input type="number" formControlName="wallPrice" placeholder="Price" readonly>
+                    <div class="input-line"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="premium-input mt-3">
+                <textarea formControlName="wallRemarks" placeholder="Enter remarks for wall" class="remarks-input"></textarea>
+                <div class="input-line"></div>
+              </div>
+            </div>
+            <div class="paint-block">
+              <div class="block-header">
+                <span class="block-number">Dark Color Wall</span>
+              </div>
+              
+              <div class="input-grid">
+                <div class="premium-group">
+                  <label>Number of Dark Color Walls</label>
+                  <div class="premium-input">
+                    <input type="number" formControlName="noofWall" placeholder="Number of walls">
+                    <div class="input-line"></div>
+                  </div>
+                </div>
+                
+                <div class="premium-group">
+                  <label>Price</label>
+                  <div class="premium-input">
+                    <input type="number" formControlName="darkPrice" placeholder="Price">
+                    <div class="input-line"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="premium-input mt-3">
+                <textarea formControlName="darkRemarks" placeholder="Enter remarks for wall" class="remarks-input"></textarea>
+                <div class="input-line"></div>
+              </div>
+            </div>
+            <!-- Split Total Section -->
+            <div class="total-section">
+              <div class="input-grid">
+                <div class="premium-group">
+                  <label>Section Total (Pre-tax)</label>
+                  <div class="premium-input">
+                    <input type="number" formControlName="sectionTotalPre_tax" placeholder="Pre-tax Total">
+                    <div class="input-line"></div>
+                  </div>
+                </div>
+                
+                <div class="premium-group">
+                  <label>Section Total (Post-tax)</label>
+                  <div class="premium-input">
+                    <input type="number" formControlName="sectionTotalPost_tax" placeholder="Post-tax Total" readonly>
+                    <div class="input-line"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="premium-input mt-3">
+                <textarea formControlName="totalRemarks" placeholder="Enter remarks" class="remarks-input"></textarea>
+                <div class="input-line"></div>
+              </div>
+            </div>
+          </form>
+          <div class="confirm-btn">
+            <button type="submit" class="internalBtn" id="packageConfirm" (click)="OnAddInternalPainting()">Confirm</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

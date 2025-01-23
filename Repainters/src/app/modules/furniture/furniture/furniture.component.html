@@ -1,0 +1,84 @@
+<!-- furniture.component.html -->
+<div class="page-container">
+  <div class="form-card">
+    <div class="card-header">
+      <div class="header-content">
+        <h1>G. Furniture</h1>
+        <button class="add-furniture-btn" (click)="addFurniture()">
+          <span class="plus-icon">+</span>
+          <span>Add New Wallpaper</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="main-form">
+      <div class="section-card">
+        <form [formGroup]="furnitureForm">
+          <div formArrayName="furniture">
+            <div *ngFor="let item of furniture.controls; let i=index" [formGroupName]="i" class="paint-block">
+              <div class="block-header">
+                <div class="block-number">Furniture {{i + 1}}</div>
+                <button *ngIf="furniture.length > 1" class="remove-btn" (click)="removeFurniture(i)">
+                  <i class="fas fa-trash"></i> Remove
+                </button>
+              </div>
+              
+              <div class="input-grid">
+                <div class="premium-group">
+                  <label>Product Code</label>
+                  <div class="premium-input">
+                    <input type="text" formControlName="productCode" placeholder="Product Code">
+                    <div class="input-line"></div>
+                  </div>
+                </div>
+                
+                <div class="premium-group">
+                  <label>Type</label>
+                  <div class="custom-select">
+                    <select formControlName="type">
+                      <option value="">Select type</option>
+                      <option *ngFor="let type of packageType" [value]="type">{{type}}</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="premium-group">
+                  <label>Room</label>
+                  <div class="premium-input">
+                    <input type="text" formControlName="room" placeholder="Room">
+                    <div class="input-line"></div>
+                  </div>
+                </div>
+                
+                <div class="premium-group">
+                  <label>Description</label>
+                  <div class="premium-input">
+                    <input type="text" formControlName="description" placeholder="Description">
+                    <div class="input-line"></div>
+                  </div>
+                </div>
+
+                <div class="premium-group">
+                  <label>Remarks</label>
+                  <div class="premium-input">
+                    <input type="text" formControlName="remarks" placeholder="Enter Remarks">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="total-block">
+            <div class="premium-group total-section">
+              <label>Section Total Furniture F</label>
+              <div class="premium-input">
+                <input type="number" placeholder="Total" readonly>
+                <div class="input-line"></div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

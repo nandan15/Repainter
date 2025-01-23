@@ -1,0 +1,225 @@
+<!-- curtains.component.html -->
+<div class="page-container">
+  <form [formGroup]="curtainForm">
+    <!-- Curtains Section -->
+    <div class="section-card">
+      <div class="card-banner">
+        <h2>F. Curtains</h2>
+        <button type="button" class="add-window-btn" (click)="addCurtainSet()">
+        + Add New Balcony
+        </button>
+      </div>
+
+      <div formArrayName="curtains">
+        <div *ngFor="let curtainSet of curtains.controls; let i = index" [formGroupName]="i" class="paint-block">
+          <div class="block-header">
+            <span class="block-number">Balcony {{i + 1}}</span>
+            <button type="button" class="remove-btn" (click)="removeCurtainSet(i)">
+              Remove
+            </button>
+          </div>
+
+          <div formArrayName="balconies">
+            <div *ngFor="let balcony of getBalconies(curtainSet).controls; let j = index" [formGroupName]="j" class="paint-block">
+              <!-- Curtain Fields -->
+              <div formGroupName="curtain" class="input-grid">
+                <div class="premium-group">
+                  <label>Curtain Type</label>
+                  <div class="custom-select">
+                    <select formControlName="curtainType">
+                      <option value="">Select Type</option>
+                      <option *ngFor="let type of curtainTypes" [value]="type">{{type}}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="premium-group">
+                  <label>Fabric Type</label>
+                  <div class="custom-select">
+                    <select formControlName="fabricType">
+                      <option value="">Select Type</option>
+                      <option *ngFor="let type of fabricTypes" [value]="type">{{type}}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="premium-group">
+                  <label>Product Code</label>
+                  <div class="premium-input">
+                    <input type="text" formControlName="productCode">
+                  </div>
+                </div>
+
+                <div class="premium-group">
+                  <label>Price</label>
+                  <div class="premium-input">
+                    <input type="number" formControlName="price">
+                  </div>
+                </div>
+
+                <div class="premium-group">
+                  <label>Remarks</label>
+                  <div class="premium-input">
+                    <input type="text" formControlName="remarks">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Rod Fields -->
+              <div formGroupName="rod" class="input-grid">
+                <div class="premium-group">
+                  <label>Rod Type</label>
+                  <div class="custom-select">
+                    <select formControlName="rodType">
+                      <option value="">Select Type</option>
+                      <option *ngFor="let type of rodTypes" [value]="type">{{type}}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="premium-group">
+                  <label>Product Code</label>
+                  <div class="premium-input">
+                    <input type="text" formControlName="productCode">
+                  </div>
+                </div>
+
+                <div class="premium-group">
+                  <label>Price</label>
+                  <div class="premium-input">
+                    <input type="number" formControlName="price">
+                  </div>
+                </div>
+
+                <div class="premium-group">
+                  <label>Remarks</label>
+                  <div class="premium-input">
+                    <input type="text" formControlName="remarks">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Finial Fields -->
+              <div formGroupName="finial" class="input-grid">
+                <div class="premium-group">
+                  <label>Finial Type</label>
+                  <div class="custom-select">
+                    <select formControlName="finialType">
+                      <option value="">Select Type</option>
+                      <option *ngFor="let type of finialTypes" [value]="type">{{type}}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="premium-group">
+                  <label>Product Code</label>
+                  <div class="premium-input">
+                    <input type="text" formControlName="productCode">
+                  </div>
+                </div>
+
+                <div class="premium-group">
+                  <label>Price</label>
+                  <div class="premium-input">
+                    <input type="number" formControlName="price">
+                  </div>
+                </div>
+
+                <div class="premium-group">
+                  <label>Remarks</label>
+                  <div class="premium-input">
+                    <input type="text" formControlName="remarks">
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+          
+          </div>
+        </div>
+        <div class="section-total">
+          <div class="premium-group">
+            <label class="total-label">Section Total Curtain E</label>
+            <div class="premium-input">
+              <input type="number" formControlName="sectionTotalE" readonly>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+<br>
+    <!-- Windows Section -->
+    <div class="section-card">
+      <div class="card-banner">
+        <h2>Windows</h2>
+        <button type="button" class="add-window-btn" (click)="addWindow()">
+          Add New Window
+        </button>
+      </div>
+
+      <div formArrayName="windows">
+        <div *ngFor="let window of windows.controls; let i = index" [formGroupName]="i" class="paint-block">
+          <div class="block-header">
+            <span class="block-number">Window {{i + 1}}</span>
+            <button type="button" class="remove-btn" (click)="removeWindow(i)">
+              Remove
+            </button>
+          </div>
+
+          <div class="input-grid">
+            <div class="premium-group">
+              <label>Type</label>
+              <div class="custom-select">
+                <select formControlName="type">
+                  <option value="">Select Type</option>
+                  <option *ngFor="let type of windowTypes" [value]="type">{{type}}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="premium-group">
+              <label>Package</label>
+              <div class="custom-select">
+                <select formControlName="package">
+                  <option value="">Select Package</option>
+                  <option *ngFor="let type of packageTypes" [value]="type">{{type}}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="premium-group">
+              <label>Amount</label>
+              <div class="premium-input">
+                <input type="number" formControlName="amount">
+              </div>
+            </div>
+
+            <div class="premium-group">
+              <label>Description</label>
+              <div class="premium-input">
+                <input type="text" formControlName="description">
+              </div>
+            </div>
+
+            <div class="premium-group">
+              <label>Remarks</label>
+              <div class="premium-input">
+                <input type="text" formControlName="remarks">
+              </div>
+            </div>
+          </div>
+      
+        </div>
+      </div>
+      <div class="section-total">
+        <div class="premium-group">
+          <label class="total-label">Section Total Windows</label>
+          <div class="premium-input">
+            <input type="number" formControlName="sectionTotalWindows" readonly>
+          </div>
+        </div>
+        </div>
+    </div>
+
+  </form>
+</div>

@@ -1,0 +1,92 @@
+<div class="quotation-builder-container">
+  <div class="header">
+    <h2>Quotation Builder - Customer Name: {{ customerName }}</h2>
+    <button mat-raised-button [ngStyle]="{'background-color': isFormModified ? 'red' : 'green'}"(click)="generateScopeDoc()">
+    
+    Generate Scope Doc
+ </button>
+    <img src="/assets/left.png" width="45" height="45"style="background-size: cover; cursor: pointer;"routerLink="/customer/view" />
+  </div>
+  <form [formGroup]="quotationForm">
+    <mat-tab-group #tabGroup [(selectedIndex)]="activeTabIndex"(selectedIndexChange)="onTabChange($event)"
+      [preserveContent]="true">
+      <mat-tab>
+        <ng-template mat-tab-label>
+          {{ getTabLabel('Package', 'package').label }}
+          <span class="modified-indicator" *ngIf="getTabLabel('Package', 'package').modified">🖉</span>
+        </ng-template>
+        <ng-template matTabContent>
+          <app-dashboard
+            formGroupName="package"
+            (formModified)="onPackageModified()">
+          </app-dashboard>
+        </ng-template>
+      </mat-tab>
+    
+      <mat-tab>
+        <ng-template mat-tab-label>
+          {{ getTabLabel('Internal Painting', 'internalPainting').label }}
+          <span class="modified-indicator" *ngIf="getTabLabel('Internal Painting', 'internalPainting').modified">●</span>
+        </ng-template>
+        <ng-template matTabContent>
+          <app-requirement 
+            formGroupName="internalPainting"
+            (formModified)="onTabModified('internalPainting')">
+          </app-requirement>
+        </ng-template>
+      </mat-tab>
+      <mat-tab label="Wallpaper">
+        <ng-template matTabContent>
+          <app-wallpaper formGroupName="wallpaper"></app-wallpaper>
+        </ng-template>
+      </mat-tab>
+
+      <mat-tab label="Texture Painting">
+        <ng-template matTabContent>
+          <app-texture-painting formGroupName="texturePainting"></app-texture-painting>
+        </ng-template>
+      </mat-tab>
+
+      <mat-tab label="Paneling">
+        <ng-template matTabContent>
+          <app-paneling formGroupName="paneling"></app-paneling>
+        </ng-template>
+      </mat-tab>
+
+      <mat-tab label="Curtains">
+        <ng-template matTabContent>
+          <app-curtains formGroupName="curtains"></app-curtains>
+        </ng-template>
+      </mat-tab>
+
+      <mat-tab label="Furniture">
+        <ng-template matTabContent>
+          <app-furniture formGroupName="furniture"></app-furniture>
+        </ng-template>
+      </mat-tab>
+
+      <mat-tab label="Services">
+        <ng-template matTabContent>
+          <app-services formGroupName="services"></app-services>
+        </ng-template>
+      </mat-tab>
+
+      <mat-tab label="Doors & Grills">
+        <ng-template matTabContent>
+          <app-door-grills formGroupName="doorGrills"></app-door-grills>
+        </ng-template>
+      </mat-tab>
+
+      <mat-tab label="Summary">
+        <ng-template matTabContent><app-summary></app-summary></ng-template>
+      </mat-tab>
+
+      <mat-tab label="Note">
+        <ng-template matTabContent><app-note formGroupName="note"></app-note></ng-template>
+      </mat-tab>
+    </mat-tab-group>
+
+    <!-- Generate Scope Doc Button -->
+   
+  </form>
+</div>

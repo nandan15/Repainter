@@ -1,0 +1,83 @@
+<div class="main-container">
+  <div class="header">
+    <h2 class="title">E. Texture Painting</h2>
+    <button type="button" class="add-wall-btn" (click)="addNewWall()">
+      <span class="plus-icon">+</span>
+      <span>Add New Wall</span>
+    </button>
+  </div>
+
+  <form [formGroup]="textureForm">
+    <div class="walls-container">
+      <div *ngFor="let wall of texturePaintings.controls; let i = index" class="wall-card" @fadeSlideInOut>
+        <div [formGroup]="getWallFormGroup(wall)">
+          <div class="wall-header">
+            <span class="wall-number">Wall {{i + 1}}</span>
+            <button type="button" class="remove-btn" (click)="removeWall(i)">Remove</button>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Area Sft</label>
+              <div class="input-wrapper">
+                <input type="string" formControlName="area" placeholder="100">
+                <span class="input-suffix">sq ft</span>
+              </div>
+              <div class="error-message" *ngIf="!isWallAreaValid(wall) && getWallFormGroup(wall).get('area')?.touched">
+                Area must be at least 100 sq ft
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Type</label>
+              <div class="select-wrapper">
+                <select formControlName="type">
+                  <option value="">Select paint type</option>
+                  <option *ngFor="let type of texturetype" [value]="type">
+                    {{type}}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Product Code</label>
+              <div class="input-wrapper">
+                <input type="text" formControlName="productCode" placeholder="Enter product code">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Price</label>
+              <div class="input-wrapper">
+                <span class="input-prefix">₹</span>
+                <input type="number" formControlName="price" readonly>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Remarks</label>
+              <div class="input-wrapper">
+                <input type="text" formControlName="remarks" placeholder="Enter Remarks">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="total-section">
+      <div class="total-content">
+        <span class="total-label">Section Total Texture Painting</span>
+        <div class="total-input-wrapper">
+          <span class="input-prefix">₹</span>
+          <input type="number" formControlName="sectionTotal" [formControl]="getSectionTotalControl()" readonly>
+        </div>
+        <div class="row-count">
+          <span>Total Rows: {{textureForm.get('totalRows')?.value}}</span>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+<div class="confirm-section">
+  <button class="confirm-btn" (click)="onConfirmTexturePainting()">
+    Confirm Texture Painting
+  </button>
+</div>

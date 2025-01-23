@@ -1,0 +1,62 @@
+
+<div class="testimonials-container">
+    <div class="sidebar" [ngClass]="{'expanded': isSidebarExpanded}">
+      <app-view (sidebarToggled)="onSidebarToggle($event)"></app-view>
+    </div>
+    
+    <div class="main-content">
+      <div class="header-section">
+        <div class="header-content">
+          <span class="subtitle-badge">TESTIMONIALS</span>
+          <h1 class="title">What Our Customers Say</h1>
+          <p class="subtitle">Discover why thousands of customers trust and love our services</p>
+        </div>
+      </div>
+  
+    <div class="testimonials-grid">
+      <div class="testimonial-card" *ngFor="let testimonial of testimonials" [@fadeInOut]>
+        <div class="card-inner">
+          <div class="profile-section">
+            <div class="profile-image-container">
+              <div class="profile-image">
+                <img [src]="testimonial.image" [alt]="testimonial.name" (error)="handleImageError($event)">
+              </div>
+              <div class="profile-badge">✓</div>
+            </div>
+            <div class="rating">
+              <span *ngFor="let star of [1,2,3,4,5]" class="star" [class.filled]="star <= testimonial.rating">★</span>
+            </div>
+          </div>
+          <div class="content-section">
+            <div class="quote-marks">❝</div>
+            <p class="testimonial-text" [class.expanded]="testimonial.expanded">
+              {{testimonial.expanded ? testimonial.message : (testimonial.message | slice:0:150) + "..."}}
+            </p>
+            <button *ngIf="testimonial.message.length > 150" class="read-more" (click)="toggleExpand(testimonial)">
+              {{testimonial.expanded ? "Read Less" : "Read More"}}
+              <span class="arrow">{{testimonial.expanded ? "↑" : "↓"}}</span>
+            </button>
+            <div class="customer-info">
+              <h3 class="customer-name">{{testimonial.name}}</h3>
+              <p class="customer-designation">{{testimonial.designation}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <div class="navigation">
+      <button class="nav-button prev" (click)="previousPage()" [disabled]="currentPage === 0">
+        <span class="arrow">←</span>
+      </button>
+      <div class="pagination-dots">
+        <span class="dot" *ngFor="let dot of getPaginationArray(); let i = index" 
+              [class.active]="i === currentPage" 
+              (click)="goToPage(i)">
+        </span>
+      </div>
+      <button class="nav-button next" (click)="nextPage()" [disabled]="currentPage === totalPages - 1">
+        <span class="arrow">→</span>
+      </button>
+    </div>
+  </div>

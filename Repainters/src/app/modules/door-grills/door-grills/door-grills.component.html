@@ -1,0 +1,141 @@
+<div class="child-section">
+  <!-- Main Header -->
+  <div class="section-title">I. Doors & Grills</div>
+  
+  <!-- Main Door Section -->
+  <div class="section-header">
+    <div class="section-subtitle">Main Door</div>
+    <button type="button" class="add-btn" (click)="addMainDoor()">Add Door</button>
+  </div>
+  <div id="mainDoorSection">
+    <div class="field-container">
+      <div class="field">
+        <label class="label-text">Width in Ft</label>
+        <input type="number" class="form-input" placeholder="Length">
+      </div>
+      <div class="field">
+        <label class="label-text">Height in Ft</label>
+        <input type="number" class="form-input" placeholder="Height">
+      </div>
+      <div class="field">
+        <label class="label-text">Number of Doors</label>
+        <input type="number" class="form-input" placeholder="Number of Doors">
+      </div>
+      <div class="field">
+        <label class="label-text">Surface</label>
+        <div class="checkbox-group">
+          <label><input type="radio" name="surface" value="1"> 1</label>
+          <label><input type="radio" name="surface" value="2"> 2</label>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label-text">Price</label>
+        <input type="number" class="form-input price-input" placeholder="Price" readonly>
+      </div>
+      <div class="field">
+        <label class="label-text">Remarks</label>
+        <input type="text" class="form-input" placeholder="Remarks">
+      </div>
+      <button type="button" class="remove-btn" (click)="removeSection($event)">Remove</button>
+    </div>
+  </div>
+
+  <!-- Internal Door Section -->
+  <div class="section-header">
+    <div class="section-subtitle">Internal Door</div>
+    <button type="button" class="add-btn" (click)="addInternalDoor()">Add Door</button>
+  </div>
+  <div id="internalDoorSection">
+    <div class="field-container">
+      <div class="field">
+        <label class="label-text">Width in Ft</label>
+        <input type="number" class="form-input" placeholder="Length">
+      </div>
+      <div class="field">
+        <label class="label-text">Height in Ft</label>
+        <input type="number" class="form-input" placeholder="Height">
+      </div>
+      <div class="field">
+        <label class="label-text">Number of Doors</label>
+        <input type="number" class="form-input" placeholder="Number of Doors">
+      </div>
+      <div class="field">
+        <label class="label-text">Surface</label>
+        <div class="checkbox-group">
+          <label><input type="radio" name="surface-internal" value="1"> 1</label>
+          <label><input type="radio" name="surface-internal" value="2"> 2</label>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label-text">Price</label>
+        <input type="number" class="form-input price-input" placeholder="Price" readonly>
+      </div>
+      <div class="field">
+        <label class="label-text">Remarks</label>
+        <input type="text" class="form-input" placeholder="Remarks">
+      </div>
+      <button type="button" class="remove-btn" (click)="removeSection($event)">Remove</button>
+    </div>
+  </div>
+
+  <!-- Window Grill Section -->
+  <div class="section-header">
+    <div class="section-subtitle">Window Grill</div>
+    <button type="button" class="add-btn" (click)="addWindow()">Add Window</button>
+  </div>
+  <div id="windowGrillSection">
+    <div class="field-container">
+      <div class="field">
+        <label class="label-text">Length</label>
+        <input type="number" class="form-input window-length" (input)="calculateWindowGrill($event)">
+      </div>
+      <div class="field">
+        <label class="label-text">Height</label>
+        <input type="number" class="form-input window-height" (input)="calculateWindowGrill($event)">
+      </div>
+      <div class="field">
+        <label class="label-text">Price</label>
+        <input type="number" class="form-input price-input" readonly>
+      </div>
+      <div class="field">
+        <label class="label-text">Remarks</label>
+        <input type="text" class="form-input" placeholder="Remarks">
+      </div>
+      <button type="button" class="remove-btn" (click)="removeSection($event)">Remove</button>
+    </div>
+  </div>
+
+  <!-- Balcony Grill Section -->
+  <div class="section-header">
+    <div class="section-subtitle">Balcony Grill</div>
+    <button type="button" class="add-btn" (click)="addBalcony()">Add Balcony</button>
+  </div>
+  <div id="balconyGrillSection">
+    <div class="field-container">
+      <div class="field">
+        <label class="label-text">Length</label>
+        <input type="number" class="form-input balcony-length" (input)="calculateBalconyGrill($event)">
+      </div>
+      <div class="field">
+        <label class="label-text">Height</label>
+        <input type="number" class="form-input balcony-height" (input)="calculateBalconyGrill($event)">
+      </div>
+      <div class="field">
+        <label class="label-text">Price</label>
+        <input type="number" class="form-input price-input" readonly>
+      </div>
+      <div class="field">
+        <label class="label-text">Remarks</label>
+        <input type="text" class="form-input" placeholder="Remarks">
+      </div>
+      <button type="button" class="remove-btn" (click)="removeSection($event)">Remove</button>
+    </div>
+  </div>
+
+  <!-- Section Total -->
+  <div class="section-title">Total</div>
+  <div class="field">
+    <label class="label-text">Section Total</label>
+    <input type="number" id="sectionTotal" class="form-input" placeholder="Total" readonly>
+  </div>
+</div>

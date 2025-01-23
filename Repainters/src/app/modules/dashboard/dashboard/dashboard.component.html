@@ -1,0 +1,83 @@
+<!-- dashboard.component.html -->
+<div class="layout-container" style="background-image: url('/assets/espressobackground.jpg');background-size:cover; background-image: url('/assets/espressobackground.jpg');
+background-size: cover;
+background-repeat: no-repeat; 
+background-position: center;
+height: 100%; 
+width: 100%; ">
+  <div class="sidebar" [ngClass]="{'expanded': isSidebarExpanded}">
+    <app-view (sidebarToggled)="onSidebarToggle($event)"></app-view>
+  </div>
+
+  <div class="main-content" [ngClass]="{'sidebar-expanded': isSidebarExpanded}">
+    <header class="header">
+      <div class="header-left">
+        <img src="/assets/logo.png" alt="Logo"/>
+      </div>
+      <div class="header-right">
+        <button class="notification-btn">
+          <i class="fas fa-bell"></i>
+          <span class="notification-badge">3</span>
+        </button>
+        <div class="user-profile">
+          <img src="assets/avatar.jpg" alt="User">
+          <span>John Doe</span>
+        </div>
+      </div>
+    </header>
+    <div class="dashboard-container">
+      <div class="page-header">
+        <h1>Dashboard Overview</h1>
+        <button class="btn-primary">
+          <i class="fas fa-plus"></i>
+          New Project
+        </button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card" *ngFor="let card of cardData" style="background: rgb(36, 34, 34);;">
+          <div class="card-icon">
+            <i [class]="'fas fa-' + card.icon"></i>
+          </div>
+          <div class="card-content">
+            <h3>{{card.title}}</h3>
+            <div class="card-value">{{card.value}}</div>
+            <div class="card-trend" [ngClass]="{'positive': card.trend.includes('+'), 
+                                              'negative': card.trend.includes('-')}">
+              <i [class]="card.trend.includes('+') ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
+              {{card.trend}}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <section class="chart-section">
+          <div class="section-header">
+            <h2>Revenue Overview</h2>
+            <div class="chart-controls">
+              <select class="time-select">
+                <option>Last 7 days</option>
+                <option>Last 30 days</option>
+                <option>Last 90 days</option>
+              </select>
+            </div>
+          </div>
+          <div class="chart-container">
+            <!-- Chart component goes here -->
+          </div>
+        </section>
+
+        <section class="recent-activity">
+          <div class="section-header">
+            <h2>Recent Activity</h2>
+            <button class="btn-text">View All</button>
+          </div>
+          <div class="activity-list">
+            <!-- Activity list component goes here -->
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>

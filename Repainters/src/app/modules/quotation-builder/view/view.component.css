@@ -1,0 +1,44 @@
+.quotation-builder-container {
+    padding: 20px;
+  }
+  
+  .header {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .generate-scope-doc-btn {
+    color: white;
+    border: none;
+    padding: 10px;
+    margin-top: 20px;
+    cursor: pointer;
+  }
+  
+  .generate-scope-doc-btn:hover {
+    opacity: 0.9;
+  }
+ /* view.component.css */
+.modified-indicator {
+  color: #ff4444;
+  font-size: 18px;
+  margin-left: 5px;
+  display: inline-block;
+}
+
+::ng-deep .mat-tab-label {
+  height: auto !important;
+  padding: 12px 24px !important;
+}
+
+::ng-deep .mat-tab-label-content {
+  display: flex !important;
+  align-items: center !important;
+}
+  

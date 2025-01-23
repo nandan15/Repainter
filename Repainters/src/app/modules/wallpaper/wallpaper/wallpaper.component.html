@@ -1,0 +1,81 @@
+<div class="main-container">
+    <div class="header">
+      <h2 class="title">C. Wallpaper</h2>
+      <button class="add-wall-btn" (click)="addNewWallpaper()">
+        <span class="plus-icon">+</span>
+        <span>Add New Wallpaper</span>
+      </button>
+    </div>
+  
+    <div class="walls-container">
+      <div *ngFor="let wallpaper of wallpapers.controls; let i = index" class="wall-card">
+        <div class="wall-header">
+          <span class="wall-number">Wall  {{ i + 1 }}</span>
+          <div class="wall-actions">
+            <span class="wall-drag-handle"></span>
+            <button class="remove-btn" (click)="removeWallpaper(i)">Remove</button>
+          </div>
+        </div>
+  
+        <form class="form-grid" [formGroup]="getWallpaperGroup(i)">
+          <div class="form-group">
+            <label class="form-label">Product Type</label>
+            <div class="select-wrapper">
+              <select formControlName="productType">
+                <option value="">Select product type</option>
+                <option *ngFor="let type of productTypes" [value]="type">{{ type }}</option>
+              </select>
+            </div>
+          </div>
+  
+          <div class="form-group">
+            <label class="form-label">Product Code</label>
+            <div class="input-wrapper">
+              <input type="text" formControlName="productCode" placeholder="Enter product code">
+            </div>
+          </div>
+  
+          <div class="form-group">
+            <label class="form-label">Number of Rolls</label>
+            <div class="input-wrapper">
+              <input type="number" formControlName="noOfRolls" placeholder="Number of rolls">
+            </div>
+            
+            <div class="warning" *ngIf="getWallpaperGroup(i).get('noOfRolls')?.errors?.['rollsLimitExceeded']">
+              ⚠️ Number of rolls exceeds the limit of 20!
+            </div>
+          </div>
+          
+         
+          <div class="form-group">
+            <label class="form-label">Price</label>
+            <div class="input-wrapper">
+              <span class="input-prefix">₹</span>
+              <input type="number" formControlName="price" placeholder="Amount">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Remarks</label>
+            <div class="input-wrapper">
+              <input type="text" formControlName="remarks"placeholder="Enter Remarks">
+            </div>
+    </div>
+  </form>
+    <div class="total-section">
+      <div class="total-content">
+        <span class="total-label">Section Total Wallpaper B</span>
+        <div class="total-input-wrapper">
+          <input type="number" formControlName="sectionTotal" placeholder="0.00" readonly>
+        </div>
+        <div class="row-count">
+          <span>Total Rows: {{ wallpaperForm.get('totalRows')?.value }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="confirm-section">
+    <button class="confirm-btn" (click)="onConfirmWallpaper()">
+      Confirm Wallpaper
+    </button>
+  </div>
+  

@@ -1,0 +1,52 @@
+.dialog-container {
+    padding: 20px;
+  }
+
+  .dialog-title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .send-options {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin: 20px 0;
+  }
+
+  .option-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .option-button.active {
+    background-color: #f0f7ff;
+    color: #1976d2;
+  }
+
+  .option-button mat-icon {
+    font-size: 28px;
+    height: 28px;
+    width: 28px;
+    margin-bottom: 8px;
+  }
+
+  .form-container {
+    margin-top: 20px;
+  }
+
+  .full-width {
+    width: 100%;
+    margin-bottom: 15px;
+  }
+
+  .file-upload {
+    margin: 15px 0;
+  }

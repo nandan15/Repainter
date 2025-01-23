@@ -1,0 +1,182 @@
+<div class="procurement-layout">
+  <div class="sidebar" [ngClass]="{'expanded': isSidebarExpanded}">
+    <app-view (sidebarToggled)="onSidebarToggle($event)"></app-view>
+  </div>
+  
+  <div class="content" [ngClass]="{'sidebar-expanded': isSidebarExpanded}">
+    <div class="header-section">
+      <div class="header-left">
+        <h1>Procurement Dashboard</h1>
+        <p class="subtitle">Welcome back! Here's what's happening with your quotes today.</p>
+      </div>
+      <div class="header-controls">
+        <div class="search-container">
+          <i class="search-icon">🔍</i>
+          <input type="text" placeholder="Search customers..." class="search-input">
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon pending">📊</div>
+        <div class="stat-content">
+          <h3>Pending Quotes</h3>
+          <p class="stat-value">24</p>
+          <p class="stat-change positive">+12.5% from last month</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon approved">💰</div>
+        <div class="stat-content">
+          <h3>Approved Quotes</h3>
+          <p class="stat-value">156</p>
+          <p class="stat-change positive">+8.2% from last month</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon total">📈</div>
+        <div class="stat-content">
+          <h3>Total Value</h3>
+          <p class="stat-value">₹1.Cr</p>
+          <p class="stat-change positive">+15.3% from last month</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer Cards Grid -->
+    <div class="card-container">
+      <!-- Customer Card 1 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="customer-info">
+            <div class="customer-avatar">JD</div>
+            <div>
+              <h2>John Doe Industries</h2>
+              <span class="customer-id">#CUS-001</span>
+            </div>
+          </div>
+          <span class="status approved">Approved</span>
+        </div>
+        <div class="card-body">
+          <div class="info-row">
+            <div class="info-group">
+              <label>Quote Value</label>
+              <span class="quote-value">₹45,000</span>
+            </div>
+            <div class="upload-section">
+              <div class="upload-item">
+                <i class="fas fa-download upload-icon"></i>
+                <span class="upload-text">Upload Floor</span>
+              </div>
+              <div class="upload-item">
+                <i class="fas fa-download upload-icon"></i>
+                <span class="upload-text">Upload Site</span>
+              </div>
+            </div>
+
+            <div class="info-group">
+              <label>Last Updated</label>
+              <span>2024-01-15</span>
+            </div>
+          </div>
+
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 100%"></div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="action-btn generate">Generate Quote</button>
+          <button class="action-btn view">View Details</button>
+        </div>
+      </div>
+
+      <!-- Customer Card 2 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="customer-info">
+            <div class="customer-avatar">SM</div>
+            <div>
+              <h2>Smith Manufacturing Co.</h2>
+              <span class="customer-id">#CUS-002</span>
+            </div>
+          </div>
+          <span class="status pending">Pending</span>
+        </div>
+        <div class="card-body">
+          <div class="info-row">
+            <div class="info-group">
+              <label>Quote Value</label>
+              <span class="quote-value">₹32,750</span>
+            </div>
+            <div class="upload-section">
+              <div class="upload-item">
+                <i class="fas fa-download upload-icon"></i>
+                <span class="upload-text">Upload Floor</span>
+              </div>
+              <div class="upload-item">
+                <i class="fas fa-download upload-icon"></i>
+                <span class="upload-text">Upload Site</span>
+              </div>
+            </div>
+            <div class="info-group">
+              <label>Last Updated</label>
+              <span>2024-01-18</span>
+            </div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 65%"></div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="action-btn generate">Generate Quote</button>
+          <button class="action-btn view">View Details</button>
+        </div>
+      </div>
+
+      <!-- Customer Card 3 -->
+      <div class="card">
+        <div class="card-header">
+          <div class="customer-info">
+            <div class="customer-avatar">BG</div>
+            <div>
+              <h2>Brown Global Solutions</h2>
+              <span class="customer-id">#CUS-003</span>
+            </div>
+          </div>
+          <span class="status in-review">In Review</span>
+        </div>
+        <div class="card-body">
+          <div class="info-row">
+            <div class="info-group">
+              <label>Quote Value</label>
+              <span class="quote-value">₹78,500</span>
+            </div>
+            <div class="upload-section">
+              <div class="upload-item">
+                <i class="fas fa-download upload-icon"></i>
+                <span class="upload-text">Upload Floor</span>
+              </div>
+              <div class="upload-item">
+                <i class="fas fa-download upload-icon"></i>
+                <span class="upload-text">Upload Site</span>
+              </div>
+            </div>
+            <div class="info-group">
+              <label>Last Updated</label>
+              <span>2024-01-19</span>
+            </div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 85%"></div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="action-btn generate">Generate Quote</button>
+          <button class="action-btn view">View Details</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

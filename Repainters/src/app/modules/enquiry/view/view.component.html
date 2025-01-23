@@ -1,0 +1,200 @@
+<div class="form-container">
+  <div class="enquiry-form">
+    <h2>Customer Details</h2>
+    <form [formGroup]="enquiryForm">
+      <div class="form-section">
+        <h3>Personal Information</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="title">Title</label>
+            <select id="title" formControlName="title">
+              <option value="">Select Title</option>
+              <option *ngFor="let type of title" [value]="type">{{type}}</option>
+            </select>
+            <div class="error-message" *ngIf="enquiryForm.get('title')?.touched && enquiryForm.get('title')?.errors?.['required']">
+              Title is required
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="enquiryId">Cust Id</label>
+            <input type="text" id="enquiryId" formControlName="enquiryId" placeholder="Enter your CustId">
+            <div class="error-message" *ngIf="enquiryForm.get('enquiryId')?.touched && enquiryForm.get('enquiryId')?.errors?.['enquiryId']">
+              CustId is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" formControlName="name" placeholder="Enter your name">
+            <div class="error-message" *ngIf="enquiryForm.get('name')?.touched && enquiryForm.get('name')?.errors?.['required']">
+              Name is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="emailId">Email</label>
+            <input type="email" id="emailId" formControlName="emailId" placeholder="Enter your email">
+            <div class="error-message" *ngIf="enquiryForm.get('emailId')?.touched && enquiryForm.get('emailId')?.errors?.['required']">
+              Email is required
+            </div>
+            <div class="error-message" *ngIf="enquiryForm.get('emailId')?.touched && enquiryForm.get('emailId')?.errors?.['emailId']">
+              Please enter a valid email
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="phoneNumber">Phone Number</label>
+            <input type="tel" id="phoneNumber" formControlName="phoneNumber" placeholder="Enter phone number">
+            <div class="error-message" *ngIf="enquiryForm.get('phoneNumber')?.touched && enquiryForm.get('phoneNumber')?.errors?.['required']">
+              Phone number is required
+            </div>
+            <div class="error-message" *ngIf="enquiryForm.get('phoneNumber')?.touched && enquiryForm.get('phoneNumber')?.errors?.['pattern']">
+              Please enter a valid 10-digit phone number
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="alternatePhoneNumber">Alternative Phone Number</label>
+            <input type="tel" id="alternatePhoneNumber" formControlName="alternatePhoneNumber" placeholder="Enter alternative phone">
+          </div>
+        </div>
+      </div>
+      <div class="form-section">
+        <h3>Project Details</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="projectName">Project Name</label>
+            <input type="text" id="projectName" formControlName="projectName" placeholder="Enter project name">
+            <div class="error-message" *ngIf="enquiryForm.get('projectName')?.touched && enquiryForm.get('projectName')?.errors?.['required']">
+              Project name is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="houseNo">House No</label>
+            <input type="text" id="houseNo" formControlName="houseNo" placeholder="Enter house number">
+            <div class="error-message" *ngIf="enquiryForm.get('houseNo')?.touched && enquiryForm.get('houseNo')?.errors?.['required']">
+              House number is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="projectType">Project Type</label>
+            <select id="projectType" formControlName="projectType">
+              <option value="">Select project type</option>
+              <option *ngFor="let type of projectTypes" [value]="type">{{type}}</option>
+            </select>
+            <div class="error-message" *ngIf="enquiryForm.get('projectType')?.touched && enquiryForm.get('projectType')?.errors?.['required']">
+              Project type is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="configuration">Configuration</label>
+            <select id="configuration" formControlName="configuration">
+              <option value="">Select configuration</option>
+              <option *ngFor="let config of configurations" [value]="config">{{config}}</option>
+            </select>
+            <div class="error-message" *ngIf="enquiryForm.get('configuration')?.touched && enquiryForm.get('configuration')?.errors?.['required']">
+              Configuration is required
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="carpetArea">Carpet Area (sqft)</label>
+            <input type="text" id="carpetArea" formControlName="carpetArea" readonly>
+          </div>
+        </div>
+      </div>
+      <div class="form-section">
+        <h3>Location Details</h3>
+        <div class="form-group">
+          <label for="projectLocation">Project Location</label>
+          <div class="location-input">
+            <input 
+              type="text" 
+              id="projectLocation" 
+              formControlName="projectLocation" 
+              [value]="selectedLocation" 
+              readonly 
+              placeholder="Click to select location">
+            <button type="button" class="map-button" (click)="toggleMap()">
+              <i class="fas fa-map-marker-alt"></i> Toggle Map
+            </button>
+          </div>
+          
+          <div class="map-container" *ngIf="isMapVisible">
+            <div class="search-box">
+              <input
+                #searchInput
+                type="text"
+                placeholder="Search location..."
+                class="map-search-input"
+                (keydown.enter)="$event.preventDefault(); onSearchPlaces()">
+            </div>
+            <google-map
+              [options]="mapOptions"
+              [center]="center"
+              [zoom]="zoom"
+              (mapClick)="onMapClick($event)">
+              <map-marker
+                [position]="markerPosition"
+                [options]="{ draggable: true }">
+              </map-marker>
+            </google-map>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="city">City</label>
+            <input type="text" id="city" formControlName="city" placeholder="Enter city">
+            <div class="error-message" *ngIf="enquiryForm.get('city')?.touched && enquiryForm.get('city')?.errors?.['required']">
+              City is required
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-section">
+        <h3>Floor Plan</h3>
+        <div class="form-group">
+          <div class="file-upload">
+            <input 
+              type="file" 
+              id="floorPlan" 
+              (change)="onFloorPlanSelected($event)" 
+              accept=".png, .jpg, .jpeg"
+              #floorPlanInput>
+            <label for="floorPlan" class="upload-label">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <span>Click to upload floor plan</span>
+              <small>(Max. 5MB)</small>
+            </label>
+          </div>
+          <div class="file-name" *ngIf="selectedFloorPlan">{{selectedFloorPlan.name}}</div>
+        </div>
+      </div>
+      <div class="form-section">
+        <h3>Site Photos</h3>
+        <div class="form-group">
+          <div class="file-upload">
+            <input 
+              type="file" 
+              id="sitePlan" 
+              (change)="onSitePlanSelected($event)" 
+              accept=".png, .jpg, .jpeg"
+              #sitePlanInput>
+            <label for="sitePlan" class="upload-label">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <span>Click to upload site photos</span>
+              <small>(Max. 5MB)</small>
+            </label>
+          </div>
+          <div class="file-name" *ngIf="selectedSitePlan">{{selectedSitePlan.name}}</div>
+        </div>
+      </div>
+      <button type="button" (click)="onAddCustomer()" class="btn btn-primary">
+        Add Customer
+      </button>
+    </form>
+  </div>
+</div>

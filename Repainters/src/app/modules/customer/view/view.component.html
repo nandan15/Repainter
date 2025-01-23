@@ -1,0 +1,53 @@
+<div class="customer-container">
+    <div class="header">
+      <button class="add-customer-btn" routerLink="/enquiry/view">
+        ＋ Add New Customer
+      </button>
+    </div>
+    <div class="sidebar" [class.collapsed]="isSidebarCollapsed">
+      <app-view></app-view>
+    </div>
+    <div class="content-wrapper" [class.expanded]="isSidebarCollapsed">
+      <div class="left-panel">
+    <div class="search-box">
+      <input type="text" placeholder="Search customers..." class="search-input"(keyup.enter)="searchCustomers($event)"[(ngModel)]="searchTerm">
+      <span class="search-icon" (click)="searchCustomers($event)">🔍</span>
+      </div>
+      </div>
+      <div class="right-panel" style="width: 800px;">
+        <div class="customer-details" *ngIf="selectedCustomer">
+          <div class="detail-field">
+            <label>Customer Title:</label>
+           <input type="text" [(ngModel)]="selectedCustomer.title"(blur)="updateCustomer()" />
+          </div>
+          <div class="detail-field">
+            <label>Customer Name:</label>
+            <input type="text" [(ngModel)]="selectedCustomer.name"(blur)="updateCustomer()">
+          </div>
+  
+          <div class="detail-field">
+            <label>Customer Address:</label>
+            <textarea [(ngModel)]="selectedCustomer.city"(blur)="updateCustomer()"></textarea>
+          </div>
+  
+          <div class="detail-field">
+            <label>Phone Number:</label>
+            <input type="tel" [(ngModel)]="selectedCustomer.phoneNumber"(blur)="updateCustomer()">
+          </div>
+          <div class="detail-field">
+            <label>Project Name:</label>
+            <input type="tel" [(ngModel)]="selectedCustomer.projectName"(blur)="updateCustomer()">
+          </div>
+          <div class="detail-field">
+            <label>Configuration:</label>
+            <input type="tel" [(ngModel)]="selectedCustomer.configurtion"(blur)="updateCustomer()">
+          </div>
+          <div class="action-icons" style="cursor: pointer;">
+            <span class="icon" title="View" (click)="viewCustomer(selectedCustomer)">👁</span>
+            <span class="icon" title="Next" (click)="navigateToQuotationBuilder(selectedCustomer)">➡</span>
+            <span class="icon" title="Delete" (click)="deleteCustomer(selectedCustomer)">🗑</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

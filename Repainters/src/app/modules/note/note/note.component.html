@@ -1,0 +1,82 @@
+    <div class="notes-container">
+    <form [formGroup]="noteForm" (ngSubmit)="onSubmit()">
+      <mat-card class="note-card">
+        <mat-card-header>
+          <mat-card-title>Add Note</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>Write your note</mat-label>
+            <textarea 
+              matInput 
+              formControlName="noteContent" 
+              rows="4" 
+              placeholder="Type your note here..."
+            ></textarea>
+            <mat-error *ngIf="noteForm.get('noteContent')?.hasError('required')">
+              Note content is required
+            </mat-error>
+          </mat-form-field>
+          
+          <div class="attachment-section">
+            <button 
+              mat-stroked-button 
+              type="button" 
+              (click)="fileInput.click()"
+            >
+              <mat-icon>attach_file</mat-icon>
+              Attach File
+            </button>
+            <input 
+              #fileInput 
+              type="file" 
+              hidden
+              (change)="onFileSelected($event)"
+            >
+            <div *ngIf="selectedFile" class="file-info">
+              <span class="file-name">{{ selectedFile.name }}</span>
+              <button 
+                mat-icon-button 
+                color="warn" 
+                type="button"
+                (click)="removeAttachment()"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+        
+        <mat-card-actions align="end">
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit"
+            [disabled]="!noteForm.valid"
+          >
+            <mat-icon>send</mat-icon>
+            Send
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </form>
+  
+    <!-- Display submitted notes -->
+    <div class="notes-list" *ngIf="notes.length > 0">
+      <mat-card *ngFor="let note of notes" class="note-item">
+        <mat-card-content>
+          <p class="note-content">{{ note.content }}</p>
+          <div class="note-footer">
+            <span *ngIf="note.attachment" class="attachment-info">
+              <mat-icon>attach_file</mat-icon>
+              {{ note.attachment }}
+            </span>
+            <span class="timestamp">
+              {{ note.timestamp | date:'medium' }}
+            </span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>

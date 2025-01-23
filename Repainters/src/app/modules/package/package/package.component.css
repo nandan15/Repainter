@@ -1,0 +1,397 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+.page-container {
+  padding: 2rem;
+  max-width: 2000px;
+  margin: 0 auto;
+}
+
+.form-card {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  background: linear-gradient(135deg, #b5ac9c 0%, #75ba9d 100%);
+}
+
+.card-header {
+  padding: 1.5rem 2rem;
+  border-bottom: 2px solid #75ba9d;
+}
+
+.header-content h1 {
+  font-size: 1.8rem;
+  color: #000000;
+  font-weight: 600;
+  position: relative;
+  padding-left: 1rem;
+}
+
+.header-content h1::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 70%;
+  background: #75ba9d;
+  border-radius: 2px;
+}
+/* Add these styles to your existing furniture.component.css */
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.add-furniture-btn {
+  background: #ffffff;
+  color: #2c3e50;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.add-furniture-btn:hover {
+  background: #f8f9fa;
+  transform: translateY(-2px);
+}
+
+.remove-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.remove-btn:hover {
+  background: #c82333;
+}
+
+.block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.section-card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #b5ac9c 0%, #75ba9d 100%);
+}
+/* Header for the Description Section */
+.description-header {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    text-align: center;
+  }
+  
+  /* Two-Column Layout for Description and Conditions */
+  .description-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 10px;
+  }
+  
+  .description-section textarea,
+  .conditions-section textarea {
+    width: 100%;
+    height: 120px;
+    padding: 0.8rem 1rem;
+    border: 2px solid rgba(181, 172, 156, 0.2);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    resize: none;
+    transition: all 0.3s ease;
+    background: white;
+  }
+  
+  .description-section textarea:focus,
+  .conditions-section textarea:focus {
+    outline: none;
+    border-color: #75ba9d;
+    box-shadow: 0 0 0 3px rgba(117, 186, 157, 0.1);
+  }
+  
+.paint-block {
+  background: #f8f9fa;
+  border-radius: 16px;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(181, 172, 156, 0.2);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.paint-block:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+.block-header {
+  background: linear-gradient(to right, rgba(117, 186, 157, 0.1), rgba(181, 172, 156, 0.1));
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.block-number {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+.confirm-btn{
+    width: 100%;
+}
+.packageBtn{
+    width: 100px;
+    height: 50px;
+    color: black;
+    border-radius: 10%;
+    background-color: #0e412c;
+    cursor: pointer;
+}
+.input-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.premium-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 10px;
+}
+
+.premium-group label {
+  font-size: 0.9rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.premium-input {
+  position: relative;
+}
+
+.premium-input input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 2px solid rgba(181, 172, 156, 0.2);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.premium-input input:focus {
+  outline: none;
+  border-color: #75ba9d;
+  box-shadow: 0 0 0 3px rgba(117, 186, 157, 0.1);
+}
+
+.input-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+  background: #75ba9d;
+  transition: width 0.3s ease;
+}
+
+.premium-input input:focus + .input-line {
+  width: 100%;
+}
+
+.custom-select {
+  position: relative;
+}
+
+.custom-select select {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 2px solid rgba(181, 172, 156, 0.2);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  background: white;
+  appearance: none;
+  cursor: pointer;
+}
+
+.custom-select select:focus {
+  outline: none;
+  border-color: #75ba9d;
+  box-shadow: 0 0 0 3px rgba(117, 186, 157, 0.1);
+}
+
+.custom-select::after {
+  content: '▼';
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #75ba9d;
+  pointer-events: none;
+  font-size: 0.8rem;
+}
+
+.total-block {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border-top: 2px dashed rgba(181, 172, 156, 0.3);
+}
+
+.total-section {
+  background: linear-gradient(to right, #75ba9d, #b5ac9c);
+  padding: 1.5rem;
+  border-radius: 12px;
+  color: white;
+}
+
+.total-section label {
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.total-section .premium-input input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  font-weight: 500;
+}
+
+.total-section .premium-input input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Updated styles for package.component.css */
+.header-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.type-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.selector-label {
+  font-size: 1.25rem;
+  color: #75ba9d;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+.custom-dropdown {
+  min-width: 150px;
+  padding: 0.8rem 1rem;
+  border: 2px solid rgba(181, 172, 156, 0.2);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #2c3e50;
+}
+
+.custom-dropdown option {
+  color: #2c3e50;
+  padding: 10px;
+  font-size: 0.95rem;
+}
+
+.custom-dropdown option:first-child {
+  color: #757575;
+}
+
+.custom-dropdown:focus {
+  outline: none;
+  border-color: #75ba9d;
+  box-shadow: 0 0 0 3px rgba(117, 186, 157, 0.1);
+}
+
+.block-header {
+  background: linear-gradient(to right, rgba(117, 186, 157, 0.1), rgba(181, 172, 156, 0.1));
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.block-number {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+/* Hover effect for dropdown */
+.custom-dropdown:hover {
+  border-color: #75ba9d;
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 1rem;
+  }
+
+  .input-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .card-header {
+    padding: 1rem;
+  }
+
+  .section-card {
+    padding: 1rem;
+  }
+
+  .paint-block {
+    margin-bottom: 1rem;
+  }
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.paint-block {
+  animation: fadeSlideIn 0.3s ease-out forwards;
+}

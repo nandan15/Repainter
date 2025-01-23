@@ -1,0 +1,62 @@
+<div class="dialog-container">
+    <h2 mat-dialog-title class="dialog-title">Send Quote</h2>
+    
+    <mat-dialog-content>
+      <div class="send-options">
+        <div 
+          [class.active]="activeTab === 'email'"
+          (click)="activeTab = 'email'"
+          class="option-button">
+          <mat-icon>email</mat-icon>
+          <span>Email</span>
+        </div>
+        <div 
+          [class.active]="activeTab === 'whatsapp'"
+          (click)="activeTab = 'whatsapp'"
+          class="option-button">
+          <mat-icon>whatsapp</mat-icon>
+          <span>WhatsApp</span>
+        </div>
+      </div>
+
+      <div class="form-container" *ngIf="activeTab === 'email'">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>From</mat-label>
+          <input matInput value="espresso@gmail.com" readonly>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>To</mat-label>
+          <input matInput [(ngModel)]="emailForm.to">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Subject</mat-label>
+          <input matInput [(ngModel)]="emailForm.subject">
+        </mat-form-field>
+
+        <div class="file-upload">
+          <button mat-stroked-button (click)="fileInput.click()">
+            <mat-icon>folder</mat-icon>
+          Generated Quote File
+          </button>
+          <input #fileInput type="file" (change)="onFileSelected($event)" style="display: none">
+          <span *ngIf="emailForm.attachment">{{emailForm.attachment.name}}</span>
+        </div>
+      </div>
+
+      <div class="form-container" *ngIf="activeTab === 'whatsapp'">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>WhatsApp Number</mat-label>
+          <input matInput [(ngModel)]="whatsappForm.number" placeholder="Enter WhatsApp number">
+        </mat-form-field>
+      </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button (click)="onCancel()">Cancel</button>
+      <button mat-raised-button color="primary" (click)="onSend()">
+        Send Quote
+      </button>
+    </mat-dialog-actions>
+  </div>

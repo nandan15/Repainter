@@ -1,0 +1,107 @@
+<!-- about.component.html -->
+<div class="page-wrapper">
+    <div class="side-decoration"></div>
+    
+    <main class="dashboard-container">
+      <header class="dashboard-header">
+        <div class="header-content">
+          <div class="title-section">
+            <span class="badge">Video Library</span>
+            <h1>Product</h1>
+          </div>
+          
+          <div class="action-section">
+            <div class="stats">
+              <div class="stat-item">
+                <span class="stat-value">{{videos.length}}</span>
+                <span class="stat-label">Videos</span>
+              </div>
+             
+            </div>
+            
+            <label class="upload-button" [class.dragover]="isDragging">
+              <mat-icon>cloud_upload</mat-icon>
+              <span>Upload Video</span>
+              <input 
+                type="file" 
+                (change)="uploadVideo($event)" 
+                (dragenter)="onDragEnter($event)"
+                (dragleave)="onDragLeave($event)"
+                (drop)="onDrop($event)"
+                accept="video/*"
+              >
+            </label>
+          </div>
+        </div>
+      </header>
+  
+      <section class="content-section">
+        <div class="filter-bar">
+          <div class="search-box">
+            <mat-icon>search</mat-icon>
+            <input type="text" placeholder="Search videos...">
+          </div>
+          <div class="view-options">
+            <button mat-icon-button [class.active]="viewMode === 'grid'" (click)="viewMode = 'grid'">
+              <mat-icon>grid_view</mat-icon>
+            </button>
+            <button mat-icon-button [class.active]="viewMode === 'list'" (click)="viewMode = 'list'">
+              <mat-icon>view_list</mat-icon>
+            </button>
+          </div>
+        </div>
+  
+        <div class="video-grid" [class.list-view]="viewMode === 'list'">
+          <mat-card class="video-card" *ngFor="let video of videos">
+            <div class="card-content">
+              <div class="thumbnail-wrapper">
+                <img [src]="video.thumbnail" [alt]="video.title">
+                <div class="duration">{{video.duration}}</div>
+                <div class="hover-controls">
+                  <button mat-fab color="primary" class="play-btn">
+                    <mat-icon>play_arrow</mat-icon>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="video-details">
+                <div class="title-row">
+                  <h3>{{video.title}}</h3>
+                  <div class="actions">
+                    <button mat-icon-button [matMenuTriggerFor]="menu">
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu" class="actions-menu">
+                      <button mat-menu-item (click)="editVideo(video)">
+                        <mat-icon>edit</mat-icon>
+                        <span>Edit</span>
+                      </button>
+                      <button mat-menu-item (click)="deleteVideo(video.id)">
+                        <mat-icon>delete</mat-icon>
+                        <span>Delete</span>
+                      </button>
+                      <button mat-menu-item>
+                        <mat-icon>share</mat-icon>
+                        <span>Share</span>
+                      </button>
+                    </mat-menu>
+                  </div>
+                </div>
+                
+                <div class="meta-info">
+                 
+                  <span class="date">
+                    <mat-icon>schedule</mat-icon>
+                    {{video.uploadDate}}
+                  </span>
+                  <span class="category" [style.background]="video.categoryColor">
+                    {{video.category}}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </mat-card>
+        </div>
+      </section>
+    </main>
+  </div>

@@ -1,0 +1,92 @@
+<!-- paneling.component.html -->
+<div class="main-container">
+    <div class="form-card">
+      <!-- Header Section -->
+      <div class="header">
+        <h2 class="title">E. Paneling</h2>
+      </div>
+      
+      <div class="add-window-btn">
+        <button type="button" class="action-button add-btn" (click)="addWall()">
+          <span class="button-text">Add New Wall</span>
+        </button>
+      </div>
+  
+      <form [formGroup]="panelingForm">
+        <div class="walls-container" formArrayName="walls">
+          <div *ngFor="let wall of wallsArray.controls; let i = index" 
+               [formGroupName]="i" 
+               class="wall-card">
+            <div class="wall-header">
+              <span class="wall-number">Wall {{i + 1}}</span>
+              <button type="button" 
+                      class="action-button remove-btn"
+                      (click)="removeWall(i)"
+                      *ngIf="wallsArray.length > 1">
+                <span class="btn btn-warning">Remove</span>
+              </button>
+            </div>
+  
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Product Code</label>
+                <div class="input-wrapper">
+                  <input type="text" 
+                         formControlName="productCode" 
+                         placeholder="Code">
+                </div>
+              </div>
+  
+              <div class="form-group">
+                <label class="form-label">Product</label>
+                <div class="input-wrapper">
+                  <input type="text" 
+                         formControlName="product" 
+                         placeholder="Product">
+                </div>
+              </div>
+  
+              <div class="form-group">
+                <label class="form-label">Room</label>
+                <div class="input-wrapper">
+                  <input type="text" 
+                         formControlName="room" 
+                         placeholder="Room">
+                </div>
+              </div>
+  
+              <div class="form-group">
+                <label class="form-label">Description</label>
+                <div class="input-wrapper">
+                  <input type="text" 
+                         formControlName="description" 
+                         placeholder="Description">
+                </div>
+              </div>
+  
+              <div class="form-group">
+                <label class="form-label">Remarks</label>
+                <div class="input-wrapper">
+                  <input type="text" 
+                         formControlName="remarks" 
+                         placeholder="Enter Remarks">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Total Section -->
+        <div class="total-section">
+          <div class="total-content">
+            <span class="total-label">Section Total Paneling D</span>
+            <div class="total-input-wrapper">
+              <input type="number" 
+                     formControlName="sectionTotal" 
+                     placeholder="Total">
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>

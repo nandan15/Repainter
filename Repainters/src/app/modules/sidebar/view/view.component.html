@@ -1,0 +1,130 @@
+<div class="sidebar" [@sidebarState]="isExpanded ? 'expanded' : 'collapsed'">
+  <div class="sidebar-header">
+    <button class="toggle-btn" (click)="toggleSidebar()">
+      <i class="fas" [class.fa-chevron-left]="isExpanded" [class.fa-chevron-right]="!isExpanded"></i>
+    </button>
+  </div>
+
+  <nav class="nav-menu">
+    <!-- Base Menu Items -->
+    <ng-container *ngFor="let item of baseMenuItems">
+      <a [routerLink]="item.link" 
+         routerLinkActive="active"
+         class="nav-item"
+         [class.collapsed]="!isExpanded">
+        <div class="icon-wrapper">
+          <i-lucide [name]="item.icon" [size]="20"></i-lucide>
+        </div>
+        <span class="nav-label" *ngIf="isExpanded" [@fadeInOut]>
+          {{item.label}}
+        </span>
+        <span class="notification" *ngIf="item.notifications && isExpanded">
+          {{item.notifications}}
+        </span>
+      </a>
+    </ng-container>
+
+    <!-- Protected Menu Items -->
+    <ng-container *ngFor="let item of protectedMenuItems">
+      <a [routerLink]="isItemUnlocked(item.label) ? item.link : null" 
+         routerLinkActive="active"
+         class="nav-item"
+         [class.collapsed]="!isExpanded"
+         [class.locked]="!isItemUnlocked(item.label)"
+         (click)="handleMenuClick(item, $event)">
+        <div class="icon-wrapper">
+          <i-lucide [name]="item.icon" [size]="20"></i-lucide>
+        </div>
+        <span class="nav-label" *ngIf="isExpanded" [@fadeInOut]>
+          {{item.label}}
+        </span>
+        <div class="lock-status" *ngIf="isExpanded" [@fadeInOut]>
+          <i-lucide 
+            [name]="isItemUnlocked(item.label) ? '' : ''"
+            [size]="16"
+            [class.locked]="!isItemUnlocked(item.label)"
+            [class.unlocked]="isItemUnlocked(item.label)">
+          </i-lucide>
+        </div>
+      </a>
+    </ng-container>
+
+    <!-- Bottom Menu Items -->
+    <ng-container *ngFor="let item of bottomMenuItems">
+      <a [routerLink]="item.link" 
+         routerLinkActive="active"
+         class="nav-item"
+         [class.collapsed]="!isExpanded">
+        <div class="icon-wrapper">
+          <i-lucide [name]="item.icon" [size]="20"></i-lucide>
+        </div>
+        <span class="nav-label" *ngIf="isExpanded" [@fadeInOut]>
+          {{item.label}}
+        </span>
+      </a>
+    </ng-container>
+  </nav>
+
+  <div class="modal-overlay" *ngIf="showPasswordModal" [@fadeInOut] (click)="closePasswordModal()">
+    <div class="password-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Protected Content</h3>
+        <button 
+          class="close-button" 
+          (click)="closePasswordModal()"
+          aria-label="Close modal"
+        >
+          <i-lucide name="x" [size]="20"></i-lucide>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="lock-icon-wrapper">
+          <i-lucide name="lock" [size]="32"></i-lucide>
+        </div>
+
+        <p class="modal-description">
+          Enter your password to access <strong>{{selectedMenuItem}}</strong>
+        </p>
+
+        <form (ngSubmit)="checkPassword()">
+          <div class="input-group">
+            <div class="password-input-wrapper">
+              <i-lucide name="lock" [size]="16" class="input-icon"></i-lucide>
+              <input
+                #passwordInput
+                type="password"
+                class="password-input"
+                [(ngModel)]="password"
+                name="password"
+                placeholder="Enter password"
+                (keyup.escape)="closePasswordModal()"
+              >
+            </div>
+
+            <div class="error-message" *ngIf="error">
+              <i-lucide name="alert-circle" [size]="16"></i-lucide>
+              <span>{{error}}</span>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button 
+              type="button" 
+              class="btn btn-secondary"
+              (click)="closePasswordModal()"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              class="btn btn-primary"
+            >
+              <i-lucide name="lock" [size]="16"></i-lucide>
+              Unlock Access
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+</div>

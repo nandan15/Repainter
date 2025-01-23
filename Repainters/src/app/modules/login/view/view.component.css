@@ -1,0 +1,152 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:host {
+  display: block;
+  height: 100vh;
+}
+
+.page-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.brand-side {
+  flex: 1;
+  background: #5b4343;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.brand-content {
+  text-align: center;
+  
+  .brand-name {
+    font-family: 'Outfit', sans-serif;
+    font-size: 80px;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+    letter-spacing: 8px;
+    text-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    animation: fadeInUp 0.8s ease-out;
+  }
+}
+
+.login-container {
+  flex: 1;
+  background: #b5ac9c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.login-card {
+  background: linear-gradient(145deg, #135f495b, #ffffff);
+  padding: 60px;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  .form-field {
+    mat-form-field {
+      width: 100%;
+      ::ng-deep {
+        .mat-form-field-outline {
+          border-color: rgba(97, 72, 72, 0.9);
+        }
+        .mat-form-field-prefix {
+          color: #5b4343;
+        }
+      }
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.login-button {
+  background: #5b4343;
+  color: white;
+  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 16px;
+  border-radius: 12px;
+  width: 150px;
+  align-self: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover:not([disabled]) {
+    background: #734f4f;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(91, 67, 67, 0.4);
+  }
+
+  &:disabled {
+    background: #a6acab;
+    cursor: not-allowed;
+  }
+}
+
+.forgot-password {
+  color: #75ba9d;
+  font-family: 'Outfit', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #a6acab;
+    text-decoration: underline;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 1024px) {
+  .page-container {
+    flex-direction: column;
+  }
+  
+  .brand-side {
+    padding: 40px 20px;
+  }
+  
+  .brand-content .brand-name {
+    font-size: 60px;
+  }
+  
+  .login-card {
+    padding: 40px;
+  }
+}
