@@ -8,7 +8,7 @@
     </div>
   
     <div class="walls-container">
-      <div *ngFor="let wallpaper of wallpapers.controls; let i = index" class="wall-card">
+      <div *ngFor="let wallpaper of wallpapers.controls; let i = index" class="wall-card" [formGroup]="getWallpaperGroup(i)">
         <div class="wall-header">
           <span class="wall-number">Wall  {{ i + 1 }}</span>
           <div class="wall-actions">
@@ -65,7 +65,7 @@
       <div class="total-content">
         <span class="total-label">Section Total Wallpaper B</span>
         <div class="total-input-wrapper">
-          <input type="number" formControlName="sectionTotal" placeholder="0.00" readonly>
+          <input type="text" formControlName="sectionTotal" placeholder="0.00" readonly>
         </div>
         <div class="row-count">
           <span>Total Rows: {{ wallpaperForm.get('totalRows')?.value }}</span>

@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { ToastrService } from "ngx-toastr";
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, Observable } from "rxjs";
 import { Wallpaper } from "../models/wallpaper";
 import { WallpaperSerivce } from "../Service/Wallpaper/Wallpaper.service";
 @Injectable({
@@ -24,8 +24,6 @@ export class WallpaperProvider{
         wallpapers.forEach(wallpaper => {
             this.WallpaperSerivce.addWallpaper(wallpaper).subscribe((data) => {
                 wallpaper.wallpaperId = data["created_id"];
-                wallpaper.createdOn = wallpaper.createdOn || new Date();
-                wallpaper.lastModifiedDate = new Date();
                 this.wallpaperList.wallpaper.push(wallpaper);
                 this._wallpaper.next([...this.wallpaperList.wallpaper]);
                 this.toaster.success("Wallpaper Confirmed Successfully", "Confirmation");
@@ -42,7 +40,6 @@ export class WallpaperProvider{
     updateWallpaper(wallpapers: Wallpaper[]) {
         wallpapers.forEach(wallpaper => {
             this.WallpaperSerivce.updateWallpaper(wallpaper).subscribe(() => {
-                wallpaper.lastModifiedDate = new Date();
                 const index = this.wallpaperList.wallpaper.findIndex(n => n.wallpaperId === wallpaper.wallpaperId);
                 if (index !== -1) {
                     this.wallpaperList.wallpaper[index] = wallpaper;
@@ -52,14 +49,7 @@ export class WallpaperProvider{
             });
         });
     }
-// deleteInternalPainting(internalPainting:InternalPainting):void{
-//     this.InternalPaintingService.deleteInternalPainting(internalPainting.internalPaintingId).subscribe(
-//         (deleteInternalPainting)=>{
-//             this.listInternalPainting();
-//         },
-//         (error)=>{
-//             this.toaster.error("Failed to delete internalpainting","Error");
-//         }
-//         )
-//     }
+    getWallpaperByCustomerId(customerId:number,p0:{deleted:number;}):Observable<Wallpaper[]>{
+        return this.WallpaperSerivce.getWallpaperByCustomerId(customerId);
+    }
 }

@@ -66,12 +66,10 @@ export class RequirementComponent implements OnInit {
   }
   private fetchExistingInternalPaintingData() {
     if (this.customerId !== null) {
-        // Fetch internal painting data with a condition for deleted = 0
         this.internalPaintingProvider.getInternalPaintingByCustomerId(this.customerId, { deleted: 0 }).subscribe(
             (internalPaintingData) => {
                 if (internalPaintingData && internalPaintingData.length > 0) {
                     const latestInternalPainting = internalPaintingData[0];
-                    
                     this.requirementForm.patchValue({
                         carpetArea: latestInternalPainting.carpetArea,
                         ceilingType: latestInternalPainting.ceilingType,
@@ -180,6 +178,9 @@ export class RequirementComponent implements OnInit {
     this.requirementForm.get('ceilingType')?.valueChanges.subscribe(() => {
       this.calculateCeilingPrice();
     });
+    this.requirementForm.get('noofWall')?.valueChanges.subscribe(() => {
+      this.calculateDarkWallPrice();
+  });
   }
 
   private calculatePrices() {
@@ -214,17 +215,31 @@ export class RequirementComponent implements OnInit {
 
     this.calculateSectionTotal();
   }
+  private calculateDarkWallPrice() {
+    const numberOfWalls = Number(this.requirementForm.get('noofWall')?.value) || 0;
+    const darkWallRate = 2000; // Price per dark wall
 
-  private calculateSectionTotal() {
-    const wallPrice = Number(this.requirementForm.get('wallPrice')?.value) || 0;
-    const ceilingPrice = Number(this.requirementForm.get('ceilingPrice')?.value) || 0;
-    
-    const total = wallPrice + ceilingPrice;
-    
+    const darkPrice = numberOfWalls * darkWallRate;
+
     this.requirementForm.patchValue({
-      sectionTotalPost_tax: total.toFixed(2)
+        darkPrice: darkPrice.toFixed(2)
     }, { emitEvent: false });
-  }
-  
+
+    this.calculateSectionTotal(); // Update the section total if necessary
+}
+
+private calculateSectionTotal() {
+  const wallPrice = Number(this.requirementForm.get('wallPrice')?.value) || 0;
+  const ceilingPrice = Number(this.requirementForm.get('ceilingPrice')?.value) || 0;
+  const darkPrice = Number(this.requirementForm.get('darkPrice')?.value) || 0; // Get dark wall price
+
+  const totalPreTax = wallPrice + ceilingPrice + darkPrice; // Include dark price in total
+
+  this.requirementForm.patchValue({
+      sectionTotalPre_tax: totalPreTax.toFixed(2), // Update pre-tax total
+      sectionTotalPost_tax: (totalPreTax * 1.18).toFixed(2) // Assuming a tax rate of 18%
+  }, { emitEvent: false });
+}
+
 
 }

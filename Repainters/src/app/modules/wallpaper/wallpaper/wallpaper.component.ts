@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Wallpaper } from 'src/app/Shared/models/wallpaper';
@@ -9,9 +9,8 @@ import { WallpaperProvider } from 'src/app/Shared/Provider/WallpaperProvider';
   templateUrl: './wallpaper.component.html',
   styleUrls: ['./wallpaper.component.css']
 })
-export class WallpaperComponent {
+export class WallpaperComponent implements OnInit {
   wallpaperForm: FormGroup;
-  @Input()currentWallpaper:Wallpaper=new Wallpaper;
   customerId: number | null = null;
   productTypes = ['Budget', 'Premium', 'Luxury', 'Custom'];
   pricerates: { [key: string]: number } = {
@@ -31,70 +30,59 @@ export class WallpaperComponent {
       wallpaperTotal: [0],
       totalRows: [0]
     });
-    this.addNewWallpaper();
   }
 
   ngOnInit(): void {
-    this.setupListeners();
     this.extractCustomerId();
-  }
-  private extractCustomerId() {
-    // Extract customer ID from route
-    this.route.parent?.paramMap.subscribe(params => {
-      const customerIdParam = params.get('customerId');
-      this.customerId = customerIdParam ? parseInt(customerIdParam, 10) : null;
-      console.log('Parent Route Customer ID:', this.customerId);
-    });
-    this.route.paramMap.subscribe(params=>{
-      const customerIdParam=params.get('customerId');
-      if(customerIdParam){
-        this.customerId=parseInt(customerIdParam,10);
-        console.log('Current Route Customer Id:',this.customerId);
-      }
-    });
-    if(this.currentWallpaper && this.currentWallpaper.customerId)
-    {
-      this.customerId=this.currentWallpaper.customerId;
-      console.log('Current Wallpaper Customer Id:',this.customerId);
-    }
-  }
-  get wallpapers(): FormArray {
-    return this.wallpaperForm.get('wallpapers') as FormArray;
+    this.setupDataRetrieval();
   }
 
-  getWallpaperGroup(index: number): FormGroup {
-    return this.wallpapers.at(index) as FormGroup;
-  }
-  rollsLimitValidator(control: AbstractControl): ValidationErrors | null {
-    const value = control.value;
-    return value > 20 ? { rollsLimitExceeded: true } : null;
-  }
-  onConfirmWallpaper() {
-    if (!this.customerId) {
-      console.error('Customer ID is required');
-      return;
-    }
-    const wallpapers = this.wallpapers.controls.map((group, index) => {
-      return {
-        customerId: this.customerId,
-        productType: group.get('productType')?.value,
-        productCode: group.get('productCode')?.value,
-        noOfRolls: group.get('noOfRolls')?.value,
-        price: group.get('price')?.value,
-        remarks: group.get('remarks')?.value,
-        sectionTotal: this.wallpaperForm.get('sectionTotal')?.value.toString()
-      } as Wallpaper;
+  private extractCustomerId() {
+    // Consolidate customer ID extraction
+    this.route.paramMap.subscribe(params => {
+      const customerIdParam = params.get('customerId');
+      this.customerId = customerIdParam ? parseInt(customerIdParam, 10) : null;
+      
+      if (this.customerId) {
+        this.retrieveWallpaperData(this.customerId);
+      }
     });
-    this.wallpaperProvider.addWallpaper(wallpapers);
   }
-  addNewWallpaper(): void {
+
+  private setupDataRetrieval() {
+    this.route.parent?.paramMap.subscribe(params => {
+      const customerIdParam = params.get('customerId');
+      const parentCustomerId = customerIdParam ? parseInt(customerIdParam, 10) : null;
+      
+      if (parentCustomerId && parentCustomerId !== this.customerId) {
+        this.customerId = parentCustomerId;
+        this.retrieveWallpaperData(this.customerId);
+      }
+    });
+  }
+
+  private retrieveWallpaperData(customerId: number) {
+    this.wallpaperProvider.getWallpaperByCustomerId(customerId, { deleted: 0 })
+      .subscribe(wallpapers => {
+        this.clearWallpapers();
+        wallpapers.forEach(wallpaper => this.addWallpaperFromData(wallpaper));
+      });
+  }
+
+  private clearWallpapers() {
+    while (this.wallpapers.length !== 0) {
+      this.wallpapers.removeAt(0);
+    }
+  }
+
+  private addWallpaperFromData(wallpaper: Wallpaper) {
     const wallpaperGroup = this.fb.group({
-      productType: ['', Validators.required],
-      productCode: ['', Validators.required],
-      noOfRolls: [0, [Validators.required, Validators.min(1), this.rollsLimitValidator.bind(this)]],
-      price: [0, Validators.required],
-      remarks:['',Validators.required],
-      sectionTotal:['',Validators.required]
+      productType: [wallpaper.productType, Validators.required],
+      productCode: [wallpaper.productCode, Validators.required],
+      noOfRolls: [wallpaper.noOfRolls, [Validators.required, Validators.min(1), this.rollsLimitValidator]],
+      price: [wallpaper.price, Validators.required],
+      remarks: [wallpaper.remarks, Validators.required],
+      sectionTotal: [wallpaper.sectionTotal, Validators.required],
     });
 
     this.wallpapers.push(wallpaperGroup);
@@ -106,34 +94,104 @@ export class WallpaperComponent {
     this.updateRowCount();
   }
 
-  private setupListeners(): void {
-    this.wallpaperForm.valueChanges.subscribe(() => {
-      this.calculateTotal();
-    });
+  get wallpapers(): FormArray {
+    return this.wallpaperForm.get('wallpapers') as FormArray;
+  }
+  
+  getWallpaperGroup(index: number): FormGroup {
+    return this.wallpapers.at(index) as FormGroup;
+  }
+  
+
+  rollsLimitValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    return value > 20 ? { rollsLimitExceeded: true } : null;
   }
 
-  private calculatePrices(): void {
-    this.wallpapers.controls.forEach((group) => {
-      const productType = group.get('productType')?.value;
-      const numRolls = group.get('noOfRolls')?.value;
-      const wallpaperRate = this.pricerates[productType] || 0;
-
-      const wallpaperPrice = (numRolls || 0) * wallpaperRate;
-      group.get('price')?.setValue(wallpaperPrice, { emitEvent: false });
+  addNewWallpaper(): void {
+    const wallpaperGroup = this.fb.group({
+      productType: ['', Validators.required],
+      productCode: ['', Validators.required],
+      noOfRolls: [0, [Validators.required, Validators.min(1), this.rollsLimitValidator]],
+      price: [0, Validators.required],
+      remarks: ['', Validators.required],
+      sectionTotal: ['', Validators.required],
     });
 
-    this.calculateTotal();
-  }
+    this.wallpapers.push(wallpaperGroup);
 
-  private calculateTotal(): void {
-    const total = this.wallpapers.controls.reduce((sum, group) => {
-      const wallpaperPrice = group.get('price')?.value || 0;
-      return sum + Number(wallpaperPrice);
-    }, 0);
+    wallpaperGroup.valueChanges.subscribe(() => {
+      this.calculatePrices();
+    });
 
-    this.wallpaperForm.get('sectionTotal')?.setValue(total, { emitEvent: false });
     this.updateRowCount();
   }
+
+  onConfirmWallpaper() {
+    if (!this.customerId) {
+      console.error('Customer ID is required');
+      return;
+    }
+
+    const wallpapers = this.wallpapers.controls.map((group) => {
+      const wallpaper: Wallpaper = {
+        customerId: this.customerId!,
+        productType: group.get('productType')?.value,
+        productCode: group.get('productCode')?.value,
+        noOfRolls: group.get('noOfRolls')?.value,
+        price: group.get('price')?.value,
+        remarks: group.get('remarks')?.value,
+        sectionTotal: group.get('sectionTotal')?.value.toString(),
+        deleted: false,
+        createdBy: this.customerId!, 
+        createdOn: new Date(), 
+        lastModifiedDate: new Date(), 
+        lastModifiedBy: this.customerId! 
+      };
+
+      return wallpaper;
+    });
+
+    // Determine whether to add or update based on wallpaperId
+    const wallpapersToAdd = wallpapers.filter(w => !w.wallpaperId);
+    const wallpapersToUpdate = wallpapers.filter(w => w.wallpaperId);
+
+    if (wallpapersToAdd.length > 0) {
+      this.wallpaperProvider.addWallpaper(wallpapersToAdd);
+    }
+
+    if (wallpapersToUpdate.length > 0) {
+      this.wallpaperProvider.updateWallpaper(wallpapersToUpdate);
+    }
+  }
+  private calculatePrices(): void {
+    let overallTotalPrice = 0; // Initialize overall total price
+
+    this.wallpapers.controls.forEach((group) => {
+        const productType = group.get('productType')?.value;
+        const numRolls = group.get('noOfRolls')?.value || 0;
+        const wallpaperRate = this.pricerates[productType] || 0;
+
+        // Calculate individual wallpaper price
+        const wallpaperPrice = numRolls * wallpaperRate;
+
+        // Set individual price
+        group.get('price')?.setValue(wallpaperPrice, { emitEvent: false });
+
+        // Set section total for this specific wallpaper
+        const sectionTotal = wallpaperPrice.toFixed(2);
+        group.get('sectionTotal')?.setValue(sectionTotal, { emitEvent: false });
+
+        // Add to overall total price
+        overallTotalPrice += wallpaperPrice;
+    });
+
+    // Set the overall wallpaper total
+    this.wallpaperForm.get('wallpaperTotal')?.setValue(overallTotalPrice.toFixed(2), { emitEvent: false });
+
+    // Update row count
+    this.updateRowCount();
+}
 
   private updateRowCount(): void {
     const rowCount = this.wallpapers.length;
@@ -142,6 +200,6 @@ export class WallpaperComponent {
 
   removeWallpaper(index: number): void {
     this.wallpapers.removeAt(index);
-    this.calculateTotal();
+    this.calculatePrices();
   }
 }

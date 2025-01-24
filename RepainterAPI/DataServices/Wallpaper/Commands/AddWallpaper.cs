@@ -31,6 +31,7 @@ namespace DataServices.Wallpaper.Commands
                     ProductType = request.WallpaperModel.ProductType,
                     ProductCode = request.WallpaperModel.ProductCode,
                     NoOfRolls = request.WallpaperModel.NoOfRolls,
+                    Price=request.WallpaperModel.Price,
                     Remarks = request.WallpaperModel.Remarks,
                     SectionTotal = request.WallpaperModel.SectionTotal,
                     Deleted = request.WallpaperModel.Deleted,

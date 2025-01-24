@@ -107,8 +107,8 @@ export class ViewComponent implements OnInit {
   toggleNoteVisibility(columnName: string) {
     this.showNoteTab[columnName] = !this.showNoteTab[columnName];
   }
+  // In view.component.ts
   ngOnInit() {
-    // Fetch customer data and load quotation data on initialization
     this.route.params.subscribe(params => {
       const customerId = params['customerId'];
       
@@ -119,12 +119,13 @@ export class ViewComponent implements OnInit {
         
         if (customer) {
           this.customerName = customer.name;
-          console.log('Customer found in state:', customer);
         } else {
+          // Ensure the customer list is loaded before attempting to fetch by ID
+          this.customerProvider.listCustomer();
+          
           this.customerProvider.getCustomerById(this.customerId).subscribe(
             (customer) => {
-              this.customerName = customer.name;
-              console.log('Customer fetched from API:', customer);
+              this.customerName = customer.name || 'Unknown Customer';
             },
             (error) => {
               this.customerName = 'Unknown Customer';
@@ -132,16 +133,9 @@ export class ViewComponent implements OnInit {
             }
           );
         }
-
-        // Load quotation data for the specific customer
-        this.loadQuotationData(this.customerId);
-        
-        // Reset the modification flag when data is loaded
-        this.isFormModified = false;
       }
     });
   }
-
   loadQuotationData(customerId: number) {
     console.log('Loading quotation data for customer:', customerId);
     

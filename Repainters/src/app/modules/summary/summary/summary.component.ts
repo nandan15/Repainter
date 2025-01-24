@@ -44,7 +44,7 @@ export class SummaryComponent {
   calculateTotals() {
     this.discountValue = (this.preTaxTotal * (this.showRow['SummaryDiscount'] ? 8 : 0)) / 100;
     this.preTaxPostDiscount = this.preTaxTotal - this.discountValue;
-    this.gstAmount = this.preTaxPostDiscount * 0.18; // 18% GST
+    this.gstAmount = this.preTaxPostDiscount * 0.18; 
     this.grandTotal = this.preTaxPostDiscount + this.gstAmount;
   }
   @HostListener('window:keydown', ['$event'])
@@ -63,13 +63,11 @@ export class SummaryComponent {
     }
   }
   onDateSelect(event: any): void {
-    this.selectedDate = event.value; // Store the selected date
-    console.log('Selected Date:', this.selectedDate); // Debugging line to check selected date
+    this.selectedDate = event.value; 
+    console.log('Selected Date:', this.selectedDate);
   }
-
-  // Called when the date picker is closed
   onDateClose(): void {
-    console.log('Date picker closed'); // Debugging line to check if picker closes
+    console.log('Date picker closed'); 
   }
   toggleColumnVisibility(columnName: string) {
     this.showColumn[columnName] = !this.showColumn[columnName];
@@ -103,48 +101,33 @@ toggleToVendorVisibility(rowName:string){
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        // Handle the send quote action
         console.log('Quote sent:', result);
       }
     });
   }
   exportToPDF() {
     const pdf = new jsPDF('p', 'mm', 'a4');
-    
-    // Modern header with gradient effect
     pdf.setFillColor(117, 186, 157);
     pdf.rect(0, 0, 210, 60, 'F');
-    
-    // Add subtle accent line
     pdf.setFillColor(255, 255, 255, 0.1);
     pdf.rect(0, 45, 210, 2, 'F');
-    
-    // Company branding
     pdf.setTextColor(255, 255, 255);
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(32);
     pdf.text('Espresso', 20, 30);
-    
-    // Quote label with modern positioning
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(14);
     pdf.text('QUOTATION', 20, 45);
-    
-    // Quote details with clean layout
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'normal');
     const quoteDate = new Date().toLocaleDateString();
     const quoteNumber = `QT-${Math.floor(Math.random() * 10000)}`;
     pdf.text(`Date: ${quoteDate}  |  Quote #: ${quoteNumber}`, 140, 45);
-
-    // Customer Details Section with modern card design
     pdf.setDrawColor(240, 240, 240);
     pdf.setFillColor(250, 250, 250);
     pdf.setLineWidth(0.5);
     pdf.roundedRect(15, 75, 180, 80, 4, 4, 'FD');
-    
-    // Section title with accent
     pdf.setFillColor(117, 186, 157);
     pdf.rect(15, 75, 5, 80, 'F');
     
@@ -152,8 +135,6 @@ toggleToVendorVisibility(rowName:string){
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(12);
     pdf.text('Customer Information', 25, 88);
-    
-    // Customer details in two columns
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(10);
     const customerDetails = [
@@ -184,15 +165,10 @@ toggleToVendorVisibility(rowName:string){
         rightColY += 25;
       }
     });
-
-    // Terms section with modern card design
     pdf.setFillColor(250, 250, 250);
     pdf.roundedRect(15, 170, 180, 50, 4, 4, 'FD');
-    
-    // Terms accent
     pdf.setFillColor(117, 186, 157);
     pdf.rect(15, 170, 5, 50, 'F');
-    
     pdf.setTextColor(60, 60, 60);
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(11);
@@ -212,19 +188,13 @@ toggleToVendorVisibility(rowName:string){
       pdf.text(term, 25, termsY);
       termsY += 7;
     });
-
-    // Add new page for quotation details
     pdf.addPage();
-
-    // Subtle header for second page
     pdf.setFillColor(117, 186, 157);
     pdf.rect(0, 0, 210, 30, 'F');
     pdf.setTextColor(255, 255, 255);
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(14);
     pdf.text('Quotation Details', 20, 20);
-
-    // Capture and add table content
     const tableContent = document.createElement('div');
     tableContent.innerHTML = `
       <div style="padding: 20px;">
