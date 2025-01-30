@@ -8,8 +8,8 @@ import { ViewComponent } from "../sidebar/view/view.component";
 const dashboardRoutes: Routes = [
     {path: '', component: DashboardViewComponent,children: [
 {path: 'dashboard',component: DashboardComponent,children: [
-{path: '',component: ViewComponent 
-                    }
+{path: '',component: ViewComponent ,
+                    },
                 ]
             }
         ]

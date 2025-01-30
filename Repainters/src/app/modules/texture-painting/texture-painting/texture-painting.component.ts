@@ -39,36 +39,76 @@ export class TexturePaintingComponent implements OnInit {
     'Custom': 2500
   };
 
-  constructor(private fb: FormBuilder, private cdRef: ChangeDetectorRef, private route: ActivatedRoute, private texturePaintingProvider: TexturePaintingProvider) {
+  constructor(
+    private fb: FormBuilder,
+    private cdRef: ChangeDetectorRef,
+    private route: ActivatedRoute,
+    private texturePaintingProvider: TexturePaintingProvider
+  ) {
     this.textureForm = this.fb.group({
-      texturePaintings: this.fb.array([]), 
+      texturePaintings: this.fb.array([]),
       sectionTotal: new FormControl<number>(0),
       totalRows: new FormControl<number>(0)
     });
   }
 
   ngOnInit() {
-    this.addNewWall(); 
+    this.addNewWall();
     this.extractCustomerId();
+    if (this.customerId) {
+      this.fetchTexturePaintingData();
+    }
+  }
+
+  private fetchTexturePaintingData() {
+    if (this.customerId !== null) {
+      this.texturePaintingProvider.getTexturePaintingByCustomerId(this.customerId, { delete: 0 }).subscribe(
+        (texturePaintingData) => {
+          if (texturePaintingData && texturePaintingData.length > 0) {
+            // Clear existing walls before adding new ones
+            this.texturePaintings.clear();
+            texturePaintingData.forEach(texturePainting => {
+              const wallGroup = this.createWallFormGroup();
+              wallGroup.patchValue({
+                area: Number(texturePainting.area), // Convert string to number here
+                type: texturePainting.type,
+                productCode: texturePainting.productCode,
+                price: texturePainting.price,
+                remarks: texturePainting.remarks
+              });
+              this.texturePaintings.push(wallGroup);
+            });
+            this.updateSectionTotal();
+          }
+        },
+        (error) => {
+          console.error('Error fetching texturing painting data:', error);
+        }
+      );
+    }
   }
 
   private extractCustomerId() {
+    this.route.parent?.paramMap.subscribe(params => {
+      const customerIdParam = params.get('customerId');
+      this.customerId = customerIdParam ? parseInt(customerIdParam, 10) : null;
+      console.log('Parent Route Customer ID:', this.customerId);
+    });
     this.route.paramMap.subscribe(params => {
       const customerIdParam = params.get('customerId');
       if (customerIdParam) {
         this.customerId = parseInt(customerIdParam, 10);
-      }
-      console.log('Current Route Customer Id:', this.customerId);
-      
-      if (this.currenttexturepainting && this.currenttexturepainting.customerId) {
-        this.customerId = this.currenttexturepainting.customerId;
-        console.log('Current Texture Painting Customer Id:', this.customerId);
+        console.log('Current Route Customer ID:', this.customerId);
       }
     });
+    if (this.currenttexturepainting && this.currenttexturepainting.customerId) {
+      this.customerId = this.currenttexturepainting.customerId;
+      console.log('Current Texture Painting Customer ID:', this.customerId);
+    }
   }
 
   get texturePaintings(): FormArray {
-    return this.textureForm.get('texturePaintings') as FormArray; // Ensure getter matches form control name
+    return this.textureForm.get('texturePaintings') as FormArray;
   }
 
   getWallFormGroup(control: AbstractControl): FormGroup {
@@ -83,7 +123,7 @@ export class TexturePaintingComponent implements OnInit {
     return this.fb.group<WallForm>({
       area: new FormControl<number | null>(100, [Validators.required, Validators.min(100)]),
       type: new FormControl<string | null>(null),
-      productCode:new FormControl<string | null>(null),
+      productCode: new FormControl<string | null>(null),
       price: new FormControl<number | null>(0),
       remarks: new FormControl<string | null>('')
     });
@@ -106,8 +146,8 @@ export class TexturePaintingComponent implements OnInit {
       return sum + (Number(wall.get('price')?.value) || 0);
     }, 0);
 
-    this.textureForm.patchValue({ 
-      sectionTotal: total 
+    this.textureForm.patchValue({
+      sectionTotal: total
     }, { emitEvent: false });
 
     this.cdRef.detectChanges();
@@ -118,27 +158,30 @@ export class TexturePaintingComponent implements OnInit {
       console.error('Customer Id is required');
       return;
     }
-    
+  
+    // Find the last (newly added) wall in the form array
+    const lastAddedWall = this.texturePaintings.controls[this.texturePaintings.length - 1];
+  
+    // Only save the last added wall
     const texturePaintings = this.texturePaintings.controls.map(group => ({
       customerId: this.customerId,
-      area: group.get('area')?.value,
+      area: group.get('area')?.value.toString(), // Convert area to string
       type: group.get('type')?.value,
       productCode: group.get('productCode')?.value,
       price: group.get('price')?.value,
       remarks: group.get('remarks')?.value,
       sectionTotal: this.textureForm.get('sectionTotal')?.value.toString()
-    } as TexturePainting));
+  } as TexturePainting));
 
-    this.texturePaintingProvider.addTexturePainting(texturePaintings);
-  }
-
+  this.texturePaintingProvider.addTexturePainting(texturePaintings);
+}
   addNewWall() {
     const newWall = this.createWallFormGroup();
-    
+
     newWall.get('area')?.valueChanges.subscribe(() => this.updatePrice(newWall));
     newWall.get('type')?.valueChanges.subscribe(() => this.updatePrice(newWall));
-    
-    this.texturePaintings.push(newWall); // Ensure correct push to the form array
+
+    this.texturePaintings.push(newWall);
     this.updateTotalRows();
   }
 
@@ -149,15 +192,15 @@ export class TexturePaintingComponent implements OnInit {
   }
 
   private updateTotalRows() {
-     // Update total rows in the form
-     this.textureForm.patchValue({ 
-       totalRows: this.texturePaintings.length 
-     }, { emitEvent: false });
-   }
+    // Update total rows in the form
+    this.textureForm.patchValue({
+      totalRows: this.texturePaintings.length
+    }, { emitEvent: false });
+  }
 
-   isWallAreaValid(wall: AbstractControl): boolean {
-     const wallGroup = wall as FormGroup;
-     const areaControl = wallGroup.get('area');
-     return areaControl ? !areaControl.errors : false;
-   }
+  isWallAreaValid(wall: AbstractControl): boolean {
+    const wallGroup = wall as FormGroup;
+    const areaControl = wallGroup.get('area');
+    return areaControl ? !areaControl.errors : false;
+  }
 }

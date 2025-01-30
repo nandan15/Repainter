@@ -26,4 +26,9 @@ export class CustomerService {
     public deleteCustomer(id: number): Observable<ResponseObj> {
         return this.httpClient.delete<ResponseObj>(`${this.customerMethod}/${id}`);
     }
+    public uploadImage(customerId: number, image: File, type: 'floorPlan' | 'sitePlan'): Observable<ResponseObj> {
+        const formData = new FormData();
+        formData.append('file', image); // Use 'file' as the key (match it with the backend)
+        return this.httpClient.post<ResponseObj>(`${this.customerMethod}/upload-image/${customerId}/${type}`, formData);
+      }
 }

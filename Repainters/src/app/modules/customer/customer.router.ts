@@ -9,6 +9,7 @@ const customerRoutes: Routes = [
   {path: '',component: CustomerComponent,children: [
       {path: 'view',component: CustomerViewComponent, children: [
       { path: '', component: ViewComponent }
+      
         ]
       }
     ]

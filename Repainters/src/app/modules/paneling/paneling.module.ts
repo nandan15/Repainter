@@ -5,7 +5,8 @@ import { ViewComponent } from './view/view.component';
 import { panelingrouter } from './paneling-router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import{MatRadioModule} from '@angular/material/radio';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,9 @@ import { MatIconModule } from '@angular/material/icon';
     CommonModule,
     panelingrouter,
     ReactiveFormsModule,
-    MatIconModule
+    MatIconModule,
+    MatCheckboxModule,
+   MatRadioModule 
   ],
   exports:[
     PanelingComponent

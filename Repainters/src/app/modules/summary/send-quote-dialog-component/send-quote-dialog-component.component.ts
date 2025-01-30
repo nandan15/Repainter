@@ -7,7 +7,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
   styleUrls: ['./send-quote-dialog-component.component.css']
 })
 export class SendQuoteDialogComponentComponent {
-  activeTab: 'email' | 'whatsapp' = 'email';
+  activeTab: 'email' | 'whatsapp' | 'download' = 'email'; // Added 'download' option
   emailForm = {
     to: '',
     subject: 'Quote from Espresso',
@@ -16,6 +16,7 @@ export class SendQuoteDialogComponentComponent {
   whatsappForm = {
     number: ''
   };
+  sendAndDownload = false; // Checkbox state
 
   constructor(
     public dialogRef: MatDialogRef<SendQuoteDialogComponentComponent>,
@@ -37,10 +38,20 @@ export class SendQuoteDialogComponentComponent {
   }
 
   onSend() {
-    if (this.activeTab === 'email') {
-      this.dialogRef.close({ type: 'email', ...this.emailForm });
-    } else {
-      this.dialogRef.close({ type: 'whatsapp', ...this.whatsappForm });
+    const sendData = this.activeTab === 'email' 
+      ? { type: 'email', ...this.emailForm }
+      : { type: 'whatsapp', ...this.whatsappForm };
+
+    if (this.sendAndDownload) {
+      // Logic for downloading the quote
+      this.downloadQuote();
     }
+
+    this.dialogRef.close(sendData);
+  }
+
+  private downloadQuote() {
+    // Implement your download logic here
+    console.log("Downloading quote...");
   }
 }

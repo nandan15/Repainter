@@ -24,4 +24,7 @@ export class TexturePaintingSerivce{
     public deleteTexturePainting(texturePaintingId:number):Observable<ResponseObj>{
         return this.httpClient.delete<ResponseObj>(`${this.texturePaintingMethod}/delete/${texturePaintingId}`);
     }
+    public getTexturePaintingByCustomerId(customerId:number):Observable<TexturePainting[]>{
+        return this.httpClient.get<TexturePainting[]>(`${this.texturePaintingMethod}/customer/${customerId}`)
+    }
 }

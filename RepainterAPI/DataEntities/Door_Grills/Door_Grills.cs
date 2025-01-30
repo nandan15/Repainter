@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace DataEntities.Door_Grills
 {
-    internal class Door_Grills
+    public class Door_Grills
     {
+
     }
 }

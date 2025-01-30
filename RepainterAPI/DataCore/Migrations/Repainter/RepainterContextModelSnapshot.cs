@@ -257,6 +257,36 @@ namespace DataCore.Migrations.Repainter
                     b.ToTable("ScPackage");
                 });
 
+            modelBuilder.Entity("DataEntities.PackageData.PackageData", b =>
+                {
+                    b.Property<string>("PackageId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Price")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PackageId");
+
+                    b.ToTable("packageData");
+                });
+
             modelBuilder.Entity("DataEntities.TexturePainting.TexturePainting", b =>
                 {
                     b.Property<int>("TexturePaintingId")
@@ -314,6 +344,65 @@ namespace DataCore.Migrations.Repainter
                     b.HasKey("TexturePaintingId");
 
                     b.ToTable("ScTexturePainting");
+                });
+
+            modelBuilder.Entity("DataEntities.WallPaneling.Paneling", b =>
+                {
+                    b.Property<int>("PanelingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PanelingId"), 1L, 1);
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("GeneratedId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LastModifiedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastModifiedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PanelingTabId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Remarks")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("SectionTotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PanelingId");
+
+                    b.ToTable("Panelings");
                 });
 
             modelBuilder.Entity("DataEntities.Wallpaper.Wallpaper", b =>

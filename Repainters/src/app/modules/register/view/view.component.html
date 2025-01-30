@@ -1,0 +1,88 @@
+<div class="registration-container">
+    <div class="design-section">
+      <div class="circle-container">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+        <div class="circle circle-3"></div>
+      </div>
+      <div class="brand-content">
+        <h1 class="brand-title">Espresso</h1>
+      </div>
+    </div>
+    
+    <div class="form-section">
+      <div class="form-container">
+        <h2>Create Account</h2>
+        
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+          <div class="form-field">
+            <div class="input-group">
+              <input type="text" id="username" formControlName="username" required>
+              <label for="username">Username</label>
+              <div class="input-highlight"></div>
+            </div>
+            <div class="error" *ngIf="registerForm.get('username')?.touched && registerForm.get('username')?.invalid">
+              <span *ngIf="registerForm.get('username')?.errors?.['required']">Username is required</span>
+            </div>
+          </div>
+  
+          <div class="form-field">
+            <div class="input-group">
+              <input type="email" id="email" formControlName="email" required>
+              <label for="email">Email</label>
+              <div class="input-highlight"></div>
+            </div>
+            <div class="error" *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid">
+              <span *ngIf="registerForm.get('email')?.errors?.['required']">Email is required</span>
+              <span *ngIf="registerForm.get('email')?.errors?.['email']">Invalid email format</span>
+            </div>
+          </div>
+  
+          <div class="form-field">
+            <div class="input-group">
+              <input type="password" id="password" formControlName="password" required>
+              <label for="password">Password</label>
+              <div class="input-highlight"></div>
+            </div>
+            <div class="error" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid">
+              <span *ngIf="registerForm.get('password')?.errors?.['required']">Password is required</span>
+              <span *ngIf="registerForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters</span>
+            </div>
+          </div>
+  
+          <div class="form-field">
+            <div class="input-group">
+              <input type="password" id="confirmPassword" formControlName="confirmPassword" required>
+              <label for="confirmPassword">Confirm Password</label>
+              <div class="input-highlight"></div>
+            </div>
+            <div class="error" *ngIf="registerForm.get('confirmPassword')?.touched && 
+                 (registerForm.get('confirmPassword')?.invalid || registerForm.errors?.['mismatch'])">
+              <span *ngIf="registerForm.get('confirmPassword')?.errors?.['required']">Confirm password is required</span>
+              <span *ngIf="registerForm.errors?.['mismatch']">Passwords do not match</span>
+            </div>
+          </div>
+  
+          <div class="form-field">
+            <div class="select-group">
+              <select id="role" formControlName="role" required>
+                <option value="" disabled selected>Select your role</option>
+                <option *ngFor="let role of roles" [value]="role">{{role}}</option>
+              </select>
+              <div class="select-highlight"></div>
+            </div>
+            <div class="error" *ngIf="registerForm.get('role')?.touched && registerForm.get('role')?.invalid">
+              <span *ngIf="registerForm.get('role')?.errors?.['required']">Role is required</span>
+            </div>
+          </div>
+  
+          <button type="submit" [disabled]="registerForm.invalid" class="submit-btn">
+            <span>Register</span>
+            <div class="btn-overlay"></div>
+          </button>
+  
+          <p class="login-link">Already have an account? <a routerLink="/login/view">Login here</a></p>
+        </form>
+      </div>
+    </div>
+  </div>

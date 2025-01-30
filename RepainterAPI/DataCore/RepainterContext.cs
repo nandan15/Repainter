@@ -11,6 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using DbContext = Microsoft.EntityFrameworkCore.DbContext;
 using DataEntities.TexturePainting;
 using DataEntities.Package;
+using DataEntities.WallPaneling;
+using DataEntities.PackageData;
 
 namespace DataCore
 {
@@ -22,5 +24,7 @@ namespace DataCore
         public Microsoft.EntityFrameworkCore.DbSet<Wallpaper> ScWallpaper { get;set; }
         public Microsoft.EntityFrameworkCore.DbSet<TexturePainting> ScTexturePainting { get; set; }
         public Microsoft.EntityFrameworkCore.DbSet<Package> ScPackage { get; set; }
+        public Microsoft.EntityFrameworkCore.DbSet<Paneling> Panelings { get; set; }
+        public Microsoft.EntityFrameworkCore.DbSet<PackageData> packageData { get; set; }
     }
 }

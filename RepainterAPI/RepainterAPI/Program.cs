@@ -15,11 +15,36 @@ using DataServices.Enquiry.Queries;
 using DataModels.Enquiry;
 using DataServices.Authentication;
 using DataServices.InternalPainting.Queries;
-using DataServices.Repository.InternalPainting; 
+using DataServices.Repository.InternalPainting;
+using DataServices.Repository.TexturePainting;
+using DataServices.Repository.WallPaneling;
+using DataServices.Repository;
+using Microsoft.AspNetCore.Http.Features;
+
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
-builder.Services.AddDbContext<ApplicationDbContext>(options =>options.UseSqlServer(configuration["ConnectionString:EspressoDB"], d => d.MigrationsAssembly("DataCore")));
-builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+
+// Increase payload size limit
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 100 * 1024 * 1024; // 100MB
+});
+
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.Limits.MaxRequestBodySize = 100 * 1024 * 1024; // 100MB
+});
+
+// Database Context
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(configuration["ConnectionString:EspressoDB"], d => d.MigrationsAssembly("DataCore")));
+
+// Identity Configuration
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+// Authentication Configuration
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -39,19 +64,41 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
     };
 });
-builder.Services.AddDbContext<RepainterContext>(opts =>opts.UseSqlServer(configuration["ConnectionString:EspressoDB"],d => d.MigrationsAssembly("DataCore")));
+
+// Repainter Context
+builder.Services.AddDbContext<RepainterContext>(opts =>
+    opts.UseSqlServer(configuration["ConnectionString:EspressoDB"], d => d.MigrationsAssembly("DataCore")));
+
+// CORS Configuration
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("UI", builder =>builder.WithOrigins(configuration["CorsOriginAllowed"].Split(",")) .AllowAnyHeader().AllowAnyMethod());
+    options.AddPolicy("UI", builder =>
+        builder.WithOrigins(configuration["CorsOriginAllowed"].Split(","))
+               .AllowAnyHeader()
+               .AllowAnyMethod());
 });
 
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetEnquiryHandler).GetTypeInfo().Assembly));
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetInternalPaintingByCustomerIdHandler).Assembly));
+// MediatR Configuration
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(GetEnquiryHandler).GetTypeInfo().Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(GetInternalPaintingByCustomerIdHandler).Assembly);
+});
+
+// AutoMapper Configuration
 builder.Services.AddAutoMapper(typeof(EnquiryModel).Assembly);
+
+// Dependency Injection
 builder.Services.AddScoped<IUnitOfWork, RepainterUnitOfWork>();
 builder.Services.AddScoped<ICurrentUser, Currentuser>();
 builder.Services.AddScoped<IInternalPaintingRepository, InternalPaintingRepository>();
+builder.Services.AddScoped<ITexturePaintingRepository, TexturePaintingRepository>();
+builder.Services.AddScoped<IPanelingRepository, WallPanelingRepository>();
+
+// Controllers
 builder.Services.AddControllers();
+
+// Swagger Configuration
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -66,15 +113,20 @@ builder.Services.AddSwaggerGen(c =>
     });
     c.OperationFilter<AuthorizationHeaderParameterOperationFilter>();
 });
+
 var app = builder.Build();
+
+// Middleware Pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 app.UseHttpsRedirection();
 app.UseCors("UI");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
 app.Run();

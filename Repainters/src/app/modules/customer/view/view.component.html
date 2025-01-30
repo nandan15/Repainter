@@ -1,53 +1,140 @@
 <div class="customer-container">
-    <div class="header">
-      <button class="add-customer-btn" routerLink="/enquiry/view">
-        ＋ Add New Customer
-      </button>
-    </div>
-    <div class="sidebar" [class.collapsed]="isSidebarCollapsed">
-      <app-view></app-view>
-    </div>
-    <div class="content-wrapper" [class.expanded]="isSidebarCollapsed">
-      <div class="left-panel">
-    <div class="search-box">
-      <input type="text" placeholder="Search customers..." class="search-input"(keyup.enter)="searchCustomers($event)"[(ngModel)]="searchTerm">
-      <span class="search-icon" (click)="searchCustomers($event)">🔍</span>
+  <div class="header">
+    <button class="add-customer-btn" routerLink="/enquiry/view">
+      ＋ Add New Customer
+    </button>
+  </div>
+  <div class="sidebar" [class.collapsed]="isSidebarCollapsed">
+    <app-view></app-view>
+  </div>
+  <div class="content-wrapper" [class.expanded]="isSidebarCollapsed">
+    <div class="left-panel">
+      <div class="search-box">
+        <input type="text" placeholder="Search customers..." 
+               class="search-input" 
+               (keyup.enter)="searchCustomers($event)"
+               [(ngModel)]="searchTerm">
+        <span class="search-icon" (click)="searchCustomers($event)">🔍</span>
       </div>
-      </div>
-      <div class="right-panel" style="width: 800px;">
-        <div class="customer-details" *ngIf="selectedCustomer">
-          <div class="detail-field">
-            <label>Customer Title:</label>
-           <input type="text" [(ngModel)]="selectedCustomer.title"(blur)="updateCustomer()" />
-          </div>
-          <div class="detail-field">
-            <label>Customer Name:</label>
-            <input type="text" [(ngModel)]="selectedCustomer.name"(blur)="updateCustomer()">
-          </div>
-  
-          <div class="detail-field">
-            <label>Customer Address:</label>
-            <textarea [(ngModel)]="selectedCustomer.city"(blur)="updateCustomer()"></textarea>
-          </div>
-  
-          <div class="detail-field">
-            <label>Phone Number:</label>
-            <input type="tel" [(ngModel)]="selectedCustomer.phoneNumber"(blur)="updateCustomer()">
-          </div>
-          <div class="detail-field">
-            <label>Project Name:</label>
-            <input type="tel" [(ngModel)]="selectedCustomer.projectName"(blur)="updateCustomer()">
-          </div>
-          <div class="detail-field">
-            <label>Configuration:</label>
-            <input type="tel" [(ngModel)]="selectedCustomer.configurtion"(blur)="updateCustomer()">
-          </div>
-          <div class="action-icons" style="cursor: pointer;">
+      <button mat-flat-button style="height: 50px;margin-left: 10px;" 
+              class="list-customer-btn" 
+              (click)="openCustomerList()">List Customer</button>
+    </div>          
+    <div class="right-panel" style="width: 800px;">
+      <div class="customer-details" *ngIf="selectedCustomer">
+        <!-- Customer Information Fields -->
+        <div class="detail-field">
+          <label>Customer Title:</label>
+          <input type="text" [(ngModel)]="selectedCustomer.title" (blur)="updateCustomer()" />
+        </div>
+        <div class="detail-field">
+          <label>Customer Name:</label>
+          <input type="text" [(ngModel)]="selectedCustomer.name" (blur)="updateCustomer()">
+        </div>
+        <div class="detail-field">
+          <label>Customer Address:</label>
+          <textarea [(ngModel)]="selectedCustomer.city" (blur)="updateCustomer()"></textarea>
+        </div>
+        <div class="detail-field">
+          <label>Phone Number:</label>
+          <input type="tel" [(ngModel)]="selectedCustomer.phoneNumber" (blur)="updateCustomer()">
+        </div>
+        <div class="detail-field">
+          <label>Project Name:</label>
+          <input type="text" [(ngModel)]="selectedCustomer.projectName" (blur)="updateCustomer()">
+        </div>
+        <div class="detail-field">
+          <label>Project Type:</label>
+          <input type="text" [(ngModel)]="selectedCustomer.projectType" (blur)="updateCustomer()">
+        </div>
+        <div class="detail-field">
+          <label>Configuration:</label>
+          <input type="text" [(ngModel)]="selectedCustomer.configurtion" (blur)="updateCustomer()">
+        </div>
+
+        <!-- Action Icons -->
+        <div class="action-buttons">
+          <div class="action-icons">
             <span class="icon" title="View" (click)="viewCustomer(selectedCustomer)">👁</span>
             <span class="icon" title="Next" (click)="navigateToQuotationBuilder(selectedCustomer)">➡</span>
             <span class="icon" title="Delete" (click)="deleteCustomer(selectedCustomer)">🗑</span>
           </div>
         </div>
+
+        <!-- Image Sections -->
+        <div class="images-container">
+          <!-- Floor Plan Section -->
+          <div class="image-section">
+            <div class="section-header">
+              <h3>Floor Plan</h3>
+              <label class="upload-button">
+                <span class="upload-icon">📄 Upload Floor Plan</span>
+                <input type="file" 
+                       (change)="onFileSelected($event, 'floorPlan')" 
+                       accept="image/*" 
+                       style="display: none;">
+              </label>
+            </div>
+            <div class="image-preview">
+              <div *ngIf="selectedCustomer.floorPlan && selectedCustomer.floorPlan.length > 0" class="image-grid">
+                <div *ngFor="let plan of getImageArray(selectedCustomer.floorPlan)" class="image-item">
+                  <img [src]="plan" (click)="openImagePreview(plan)" alt="Floor Plan">
+                </div>
+              </div>
+              <div *ngIf="!selectedCustomer.floorPlan || selectedCustomer.floorPlan.length === 0" class="no-image">
+                No floor plan images uploaded
+              </div>
+            </div>
+          </div>
+          
+          <!-- Site Plan Section -->
+          <div class="image-section">
+            <div class="section-header">
+              <h3>Site Plan</h3>
+              <label class="upload-button">
+                <span class="upload-icon">🗺️ Upload Site Plan</span>
+                <input type="file" 
+                       (change)="onFileSelected($event, 'sitePlan')" 
+                       accept="image/*" 
+                       style="display: none;">
+              </label>
+            </div>
+            <div class="image-preview">
+              <div *ngIf="selectedCustomer.sitePlan && selectedCustomer.sitePlan.length > 0" class="image-grid">
+                <div *ngFor="let plan of getImageArray(selectedCustomer.sitePlan)" class="image-item">
+                  <img [src]="plan" (click)="openImagePreview(plan)" alt="Site Plan">
+                </div>
+              </div>
+              <div *ngIf="!selectedCustomer.sitePlan || selectedCustomer.sitePlan.length === 0" class="no-image">
+                No site plan images uploaded
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Image Preview Modal -->
+        <div *ngIf="previewImage" class="image-preview-modal">
+          <img [src]="previewImage" alt="Preview" />
+          <a [href]="previewImage" download="image.png">Download Image</a>
+          <button (click)="closeImagePreview()">Close</button>
+        </div>
+        
+        <!-- Image Preview Modal -->
+        <div *ngIf="previewImage" class="image-preview-modal">
+          <img [src]="previewImage" alt="Preview" />
+          <a [href]="previewImage" download="downloaded-image.jpg" class="download-button">Download</a>
+          <button (click)="closeImagePreview()">Close</button>
+        </div>
+        
       </div>
     </div>
   </div>
+</div>
+
+<!-- Image Preview Modal -->
+<div class="image-preview-modal" *ngIf="previewImage" (click)="closeImagePreview()">
+  <span class="close-button" (click)="closeImagePreview()">×</span>
+  <img [src]="previewImage" alt="Preview">
+</div>
+
+<app-customer-modal (customerSelected)="selectCustomer($event)"></app-customer-modal>

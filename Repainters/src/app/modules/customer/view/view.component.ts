@@ -1,7 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild,AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Customer } from 'src/app/Shared/models/customer';
 import { CustomerProvider } from 'src/app/Shared/Provider/CustomerProvider';
+import { CustomerService } from 'src/app/Shared/Service/Customer/customer.service';
+import { CustomerModalComponent } from '../customer-modal/customer-modal.component';
+import { ToastrService } from 'ngx-toastr';
+import { ResponseObj } from 'src/app/Shared/models/login';
 
 
 @Component({
@@ -10,6 +14,13 @@ import { CustomerProvider } from 'src/app/Shared/Provider/CustomerProvider';
   styleUrls: ['./view.component.css']
 })
 export class CustomerViewComponent implements OnInit {
+  @ViewChild(CustomerModalComponent) 
+  customerListModal!: CustomerModalComponent;
+  @ViewChild('floorPlanInput') floorPlanInput!: any;
+  @ViewChild('sitePlanInput') sitePlanInput!: any;
+  previewImage: string | null = null;
+
+  @Input() currentCustomer: Customer = new Customer;
   isSidebarCollapsed = false;
   customers: Customer[] = [];
   selectedCustomer: Customer | null = null;
@@ -19,7 +30,8 @@ export class CustomerViewComponent implements OnInit {
   pageSize: number = 10;
   searchTerm: string = '';
 
-  constructor(private customerProvider: CustomerProvider,private router: Router) {}
+  constructor(private customerProvider: CustomerProvider,
+    private customerService: CustomerService,private router: Router, private toastr: ToastrService) {}
 
   ngOnInit(): void {
     this.customerProvider.customer.subscribe(customers => {
@@ -31,7 +43,12 @@ export class CustomerViewComponent implements OnInit {
     });
     this.customerProvider.listCustomer();
   }
-
+  ngAfterViewInit() {
+    // This ensures ViewChild is properly initialized
+    setTimeout(() => {
+      console.log('Modal component:', this.customerListModal); // Debug log
+    });
+  }
   toggleSidebar() {
     this.isSidebarCollapsed = !this.isSidebarCollapsed;
   }
@@ -85,7 +102,13 @@ export class CustomerViewComponent implements OnInit {
       this.selectCustomer(this.customers[currentIndex + 1]);
     }
   }
-
+ openCustomerList() {
+    if (this.customerListModal) {
+      this.customerListModal.showModal();
+    } else {
+      console.error('Modal component not initialized');
+    }
+  }
   deleteCustomer(customer: Customer): void {
     if (confirm('Are you sure you want to delete this customer?')) {
       this.customerProvider.deleteCustomer(customer);
@@ -96,7 +119,7 @@ export class CustomerViewComponent implements OnInit {
     const newCustomer: Customer = {
       id: 0,
       enquiryId: 0,
-      title:'',
+      title: '',
       name: '',
       emailId: '',
       phoneNumber: '',
@@ -108,12 +131,70 @@ export class CustomerViewComponent implements OnInit {
       carpetArea: '',
       projectLocation: '',
       city: '',
-      floorPlan: '',
-      sitePlan: ''
+      floorPlan: [],
+      sitePlan: []
     };
-    this.customerProvider.addCustomer(newCustomer);
+    this.customerService.addCustomer(newCustomer);
   }
 
+  getImageArray(images: string | string[]): string[] {
+    if (!images) return [];
+    if (typeof images === 'string') {
+      try {
+        return JSON.parse(images);
+      } catch {
+        return [images];
+      }
+    }
+    return images;
+  }
+
+  onFileSelected(event: any, type: 'floorPlan' | 'sitePlan'): void {
+    const file = event.target.files[0];
+    if (file && this.selectedCustomer) {
+      this.customerService.uploadImage(this.selectedCustomer.id, file, type).subscribe(
+        (response: any) => {
+          this.toastr.success(`${type === 'floorPlan' ? 'Floor plan' : 'Site plan'} uploaded successfully`);
+          this.refreshCustomerData();
+        },
+        (error: any) => {
+          this.toastr.error(`Failed to upload ${type === 'floorPlan' ? 'floor plan' : 'site plan'}`);
+          console.error('Upload error:', error);
+        }
+      );
+    }
+  }
+
+  downloadImage(imageUrl: string): void {
+    const link = document.createElement('a');
+    link.href = imageUrl;
+    link.download = imageUrl.split('/').pop() || 'image';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  openImagePreview(imageUrl: string): void {
+    this.previewImage = imageUrl;
+  }
+
+  closeImagePreview(): void {
+    this.previewImage = null;
+  }
+
+  refreshCustomerData(): void {
+    if (this.selectedCustomer) {
+      this.customerService.getCustomerById(this.selectedCustomer.id).subscribe(
+        (customer: Customer) => {
+          this.selectedCustomer = customer;
+        },
+        (error: any) => {
+          this.toastr.error('Failed to refresh customer data');
+          console.error('Error refreshing customer data:', error);
+        }
+      );
+    }
+  }
   updateCustomer(): void {
     if (this.selectedCustomer) {
       this.customerProvider.updateCustomer(this.selectedCustomer);
@@ -140,4 +221,5 @@ export class CustomerViewComponent implements OnInit {
       console.error('No customer selected or invalid customer ID');
     }
   }  
+  
 }

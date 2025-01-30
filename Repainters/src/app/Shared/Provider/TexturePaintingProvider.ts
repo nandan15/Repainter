@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { ToastrService } from "ngx-toastr";
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, Observable } from "rxjs";
 import { TexturePainting } from "../models/texturepainting";
 import { TexturePaintingSerivce } from "../Service/TexturePainting/TexturePainting.service";
 
@@ -40,7 +40,7 @@ export class TexturePaintingProvider {
     listTexturePainting() {
         this.texturePaintingService.listTexturePainting().subscribe((data) => {
             this.texturePaintingList.texturePainting = data as TexturePainting[];
-            this._texturePainting.next([...this.texturePaintingList.texturePainting]);
+            this._texturePainting.next(Object.assign({},this.texturePaintingList).texturePainting);
         });
     }
 
@@ -55,4 +55,8 @@ export class TexturePaintingProvider {
             this.toaster.success("Internal Painting Updated Successfully", "Confirmation");
         });
     }
+    getTexturePaintingByCustomerId(customerId:number,p0:{delete
+        :number;}):Observable<TexturePainting[]>{
+            return this.texturePaintingService.getTexturePaintingByCustomerId(customerId);
+        }
 }

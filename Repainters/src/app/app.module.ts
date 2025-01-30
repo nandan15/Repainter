@@ -12,6 +12,7 @@ import { LoginModule } from './modules/login/login.module';
 import { RouterModule } from '@angular/router';
 import { ToastrModule } from 'ngx-toastr';
 import { MatIconModule } from '@angular/material/icon';
+import { CustomerModalComponent } from './modules/customer/customer-modal/customer-modal.component';
 
 @NgModule({
   declarations: [

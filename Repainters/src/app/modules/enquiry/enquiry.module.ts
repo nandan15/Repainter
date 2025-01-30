@@ -3,9 +3,8 @@ import { CommonModule } from '@angular/common';
 import { EnquiryComponent } from './enquiry/enquiry.component';
 import { ViewComponent } from './view/view.component';
 import { enquiryrouter } from './enquiry.router';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { GoogleMapsModule } from '@angular/google-maps';
-
 @NgModule({
   declarations: [
     EnquiryComponent,
@@ -15,7 +14,8 @@ import { GoogleMapsModule } from '@angular/google-maps';
     CommonModule,
     enquiryrouter,
     ReactiveFormsModule,
-    GoogleMapsModule
+    GoogleMapsModule,
+    FormsModule
   ],
   exports:[
     ViewComponent

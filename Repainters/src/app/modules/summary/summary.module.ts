@@ -13,6 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { SendQuoteDialogComponentComponent } from './send-quote-dialog-component/send-quote-dialog-component.component';
 import { MatDialogModule } from '@angular/material/dialog';
+import{MatCheckboxModule} from'@angular/material/checkbox';
 @NgModule({
   declarations: [
     SummaryComponent,
@@ -30,7 +31,8 @@ import { MatDialogModule } from '@angular/material/dialog';
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatDialogModule
+    MatDialogModule,
+    MatCheckboxModule
   ],
   exports:[
     SummaryComponent,

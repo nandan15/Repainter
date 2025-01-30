@@ -23,7 +23,8 @@ const routes: Routes = [
   {path:  'summary',loadChildren:()=>import("./modules/summary/summary.module").then(m=>m.SummaryModule)},
   {path:'procurement',loadChildren:()=>import("./modules/procurement/procurement.module").then(m=>m.ProcurementModule)},
   {path:'video',loadChildren:()=>import("./modules/video/video.module").then(m=>m.VideoModule)},
-  {path:'testimonials',loadChildren:()=>import("./modules/testimonials/testimonials.module").then(m=>m.TestimonialsModule)}
+  {path:'testimonials',loadChildren:()=>import("./modules/testimonials/testimonials.module").then(m=>m.TestimonialsModule)},
+  {path:'register',loadChildren:()=>import("./modules/register/register.module").then(m=>m.RegisterModule)}
 ];
 
 @NgModule({

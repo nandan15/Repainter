@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
 using DataServices.Enquiry.Commands;
+using DataModels.ImageUpload;
 namespace RepainterAPI.Controllers.v1.Enquiry
 {
     [Route("v{apiversion}/enquiry")]
@@ -52,6 +53,32 @@ namespace RepainterAPI.Controllers.v1.Enquiry
                 enquirymodel = model
             });
             return Ok(enquriy);
+        }
+        ///<summary>
+        ///update the enquiry floor and site 
+        /// </summary>
+        /// <returns></returns>
+        /// 
+        [HttpPost("upload-image/{customerId}/{type}")]
+        [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(InternalErrorViewModel), (int)HttpStatusCode.InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Enquiry" })]
+        public async Task<IActionResult> UpdateImages(int id, [FromBody] ImageUpdateModel model)
+        {
+            try
+            {
+                var enquiry = await _mediator.Send(new UpdateEnquiryImages
+                {
+                    Id = id,
+                    Type = model.Type,
+                    Images = model.Images
+                });
+                return Ok(enquiry);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new InternalErrorViewModel { Message = ex.Message });
+            }
         }
     }
 }

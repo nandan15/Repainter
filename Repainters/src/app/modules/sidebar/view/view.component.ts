@@ -59,7 +59,7 @@ export class ViewComponent {
     { icon: PieChart, label: 'Reports', link: '/reports', requiresAuth: true },
     { icon: BaggageClaim, label: 'Procurement', link: '/procurement/procurement', requiresAuth: true },
     { icon: Truck, label: 'GRN', link: '/grn', requiresAuth: true },
-    { icon: Settings, label: 'Settings', link: '/settings', requiresAuth: true }
+    { icon: Settings, label: 'Settings', link: '/register/view', requiresAuth: true }
   ];
 
   bottomMenuItems = [

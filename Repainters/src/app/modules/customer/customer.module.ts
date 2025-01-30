@@ -3,14 +3,20 @@ import { CommonModule } from '@angular/common';
 import { CustomerComponent } from './customer/customer.component';
 import { CustomerViewComponent } from './view/view.component';
 import { CustomerRouter } from './customer.router';
-import { FormsModule } from '@angular/forms'; 
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'; 
 import { SidebarModule } from '../sidebar/sidebar.module';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+
+import { UploadDialogComponent } from './upload-dialog/upload-dialog.component';
+import { MatDialogModule } from '@angular/material/dialog';
+import { CustomerModalComponent } from './customer-modal/customer-modal.component';
 @NgModule({
   declarations: [
     CustomerComponent,
-    CustomerViewComponent
+    CustomerViewComponent,
+    UploadDialogComponent,
+    CustomerModalComponent
   ],
   imports: [
     CommonModule,
@@ -18,7 +24,9 @@ import { MatButtonModule } from '@angular/material/button';
     FormsModule,
     SidebarModule,
     MatIconModule,
-    MatButtonModule
-  ]
+    MatButtonModule,
+    ReactiveFormsModule,
+    MatDialogModule
+  ],
 })
 export class CustomerModule { }

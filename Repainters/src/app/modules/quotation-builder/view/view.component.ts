@@ -1,8 +1,11 @@
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { MatTabGroup } from '@angular/material/tabs';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CustomerProvider } from 'src/app/Shared/Provider/CustomerProvider';
+import { Customer } from 'src/app/Shared/models/customer';
+import { Location } from '@angular/common';
+import { NavigationService } from 'src/app/Shared/Service/Navigation.service';
 
 @Component({
   selector: 'app-view',
@@ -17,10 +20,9 @@ export class ViewComponent implements OnInit {
   quotationForm: FormGroup;
   activeTabIndex: number = 0;
   isFormModified: boolean = false;
+  currentCustomer: Customer | null = null;
+  showPackageTab: boolean = false;
 
-  
-  readonly SUMMARY_TAB_INDEX = 9;
-  readonly NOTE_TAB_INDEX = 10;
   showSummaryTab: { [columnName: string]: boolean } = {
     Summary: true,
   };
@@ -28,19 +30,20 @@ export class ViewComponent implements OnInit {
     Note: true,
   };
 
-  @HostListener('window:keydown', ['$event'])
-  handleKeyDown(event: KeyboardEvent) {
-    if (event.key.toLowerCase() === 'd' && event.shiftKey) {
-      event.preventDefault();
-      this.navigateToTab(this.SUMMARY_TAB_INDEX);
-    } else if (event.key.toLowerCase() === 'n' && event.shiftKey) {
-      event.preventDefault();
-      this.navigateToTab(this.NOTE_TAB_INDEX);
-    }
-  }
-  get packageFormArray(): FormArray {
-    return this.quotationForm.get('package') as FormArray;
-  }
+  private readonly ALL_TABS = [
+    'package',
+    'internalPainting',
+    'wallpaper',
+    'texturePainting',
+    'paneling',
+    'curtains',
+    'furniture',
+    'services',
+    'doorGrills',
+    'summary',
+    'note'
+  ];
+
   tabModifications: { [key: string]: boolean } = {
     ['package']: false,
     ['internalPainting']: false,
@@ -54,31 +57,52 @@ export class ViewComponent implements OnInit {
     ['summary']: false,
     ['note']: false
   };
-  onPackageModified() {
-    this.isFormModified = true;
-    this.tabModifications['package'] = true;
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    if (event.key.toLowerCase() === 'd' && event.shiftKey) {
+      event.preventDefault();
+      const summaryIndex = this.getTabIndex('summary');
+      if (summaryIndex !== -1) {
+        this.navigateToTab(summaryIndex);
+      }
+    } else if (event.key.toLowerCase() === 'n' && event.shiftKey) {
+      event.preventDefault();
+      const noteIndex = this.getTabIndex('note');
+      if (noteIndex !== -1) {
+        this.navigateToTab(noteIndex);
+      }
+    }
+  }
+  
+  getTabIndex(tabName: string): number {
+    let index = 0;
+    for (const tab of this.ALL_TABS) {
+      if (tab === tabName) {
+        return index;
+      }
+      if (this.isTabVisible(tab)) {
+        index++;
+      }
+    }
+    return -1;
   }
 
-  // Fixed onTabModified method
-  onTabModified(tabName: string) {
-    this.isFormModified = true;
-    this.tabModifications[tabName] = true;
+  // Determine if a tab should be visible
+  isTabVisible(tabName: string): boolean {
+    if (tabName === 'package') {
+      return this.showPackageTab;
+    }
+    return true;
   }
-  navigateToTab(index: number) {
-    this.activeTabIndex = index;
-    setTimeout(() => {
-      this.tabGroup.selectedIndex = index;
-      this.tabGroup._tabs.forEach(tab => {
-        if (tab.position === index) {
-          tab.isActive = true;
-        }
-      });
-    });
-  }
+
   constructor(
     private route: ActivatedRoute,
     private customerProvider: CustomerProvider,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private location: Location,
+    private router:Router,
+    private navigationService: NavigationService
   ) {
     this.quotationForm = this.formBuilder.group({
       package: this.formBuilder.array([]),
@@ -95,19 +119,11 @@ export class ViewComponent implements OnInit {
     });
 
     this.quotationForm.valueChanges.subscribe(() => {
-      this.isFormModified = true; // Mark as modified when any field changes
+      this.isFormModified = true;
     });
+    this.customerId = this.route.snapshot.params['customerId'];
   }
-  onTabChange(event: any) {
-    this.activeTabIndex = event.index;
-  }
-  toggleSummaryVisibility(columnName: string) {
-    this.showSummaryTab[columnName] = !this.showSummaryTab[columnName];
-  }
-  toggleNoteVisibility(columnName: string) {
-    this.showNoteTab[columnName] = !this.showNoteTab[columnName];
-  }
-  // In view.component.ts
+
   ngOnInit() {
     this.route.params.subscribe(params => {
       const customerId = params['customerId'];
@@ -119,13 +135,16 @@ export class ViewComponent implements OnInit {
         
         if (customer) {
           this.customerName = customer.name;
+          this.currentCustomer = customer;
+          this.showPackageTab = customer.projectType === 'Apartment';
         } else {
-          // Ensure the customer list is loaded before attempting to fetch by ID
           this.customerProvider.listCustomer();
           
           this.customerProvider.getCustomerById(this.customerId).subscribe(
             (customer) => {
               this.customerName = customer.name || 'Unknown Customer';
+              this.currentCustomer = customer;
+              this.showPackageTab = customer.projectType === 'Apartment';
             },
             (error) => {
               this.customerName = 'Unknown Customer';
@@ -136,35 +155,71 @@ export class ViewComponent implements OnInit {
       }
     });
   }
-  loadQuotationData(customerId: number) {
-    console.log('Loading quotation data for customer:', customerId);
-    
-    // Reset modification flag when loading data
-    this.isFormModified = false;
 
-    // Load actual data logic here...
+  navigateToTab(index: number) {
+    this.activeTabIndex = index;
+    setTimeout(() => {
+      this.tabGroup.selectedIndex = index;
+      this.tabGroup._tabs.forEach(tab => {
+        if (tab.position === index) {
+          tab.isActive = true;
+        }
+      });
+    });
   }
+
+ 
+  onTabChange(event: any) {
+    this.activeTabIndex = event.index;
+  }
+
+  onPackageModified() {
+    this.isFormModified = true;
+    this.tabModifications['package'] = true;
+  }
+
+  onTabModified(tabName: string) {
+    this.isFormModified = true;
+    this.tabModifications[tabName] = true;
+  }
+
+  toggleSummaryVisibility(columnName: string) {
+    this.showSummaryTab[columnName] = !this.showSummaryTab[columnName];
+  }
+
+  toggleNoteVisibility(columnName: string) {
+    this.showNoteTab[columnName] = !this.showNoteTab[columnName];
+  }
+  navigateToDashboard() {
+    if (this.customerId !== null) {
+        this.navigationService.setCustomerId(this.customerId.toString());
+        this.router.navigate(['/dashboard/dashboard']);
+    } else {
+        console.error('Customer ID is null');
+        // Handle the error case as needed
+    }
+}
 
   generateScopeDoc() {
     console.log('Generating Scope Document...');
-    // Reset all modification flags
     Object.keys(this.tabModifications).forEach(key => {
       this.tabModifications[key] = false;
     });
     this.isFormModified = false;
   }
+
   getTabLabel(baseLabel: string, tabName: string): { label: string, modified: boolean } {
     return {
       label: baseLabel,
       modified: this.tabModifications[tabName]
     };
   }
+
   get package(): FormArray {
-    return this.quotationForm.get('package') as FormArray; // Ensure it's not null here
+    return this.quotationForm.get('package') as FormArray;
   }
   
   handleFormChange() {
-    // Set modified state when any child component changes
-    this.isFormModified = true; 
+    this.isFormModified = true;
   }
 }

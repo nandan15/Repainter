@@ -49,7 +49,7 @@ namespace DataServices.TexturePainting.Commands
                 }
                 else
                 {
-                    throw new InvalidCastException("Unable to casr added texturepainting to the texturepainting entity");
+                    throw new InvalidCastException("Unable to cas added texturepainting to the texturepainting entity");
                 }
             }
             catch (Exception ex)

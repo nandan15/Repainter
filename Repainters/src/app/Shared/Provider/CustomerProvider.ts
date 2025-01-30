@@ -89,4 +89,15 @@ export class CustomerProvider{
     getCustomerByIdFromState(id: number): Customer | undefined {
         return this.customerList.customer.find(customer => customer.id === id);
     }
+    uploadImage(customerId: number, image: File, type: 'floorPlan' | 'sitePlan'): void {
+      this.CustomerService.uploadImage(customerId, image, type).subscribe(
+        (response) => {
+          this.toaster.success('Image uploaded successfully', 'Success');
+          this.listCustomer();
+        },
+        (error) => {
+          this.toaster.error('Failed to upload image', 'Error');
+        }
+      );
+    }
 }

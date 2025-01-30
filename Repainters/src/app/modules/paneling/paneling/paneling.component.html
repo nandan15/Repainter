@@ -1,92 +1,119 @@
-<!-- paneling.component.html -->
 <div class="main-container">
-    <div class="form-card">
-      <!-- Header Section -->
-      <div class="header">
-        <h2 class="title">E. Paneling</h2>
-      </div>
-      
-      <div class="add-window-btn">
-        <button type="button" class="action-button add-btn" (click)="addWall()">
-          <span class="button-text">Add New Wall</span>
-        </button>
-      </div>
-  
-      <form [formGroup]="panelingForm">
-        <div class="walls-container" formArrayName="walls">
-          <div *ngFor="let wall of wallsArray.controls; let i = index" 
-               [formGroupName]="i" 
-               class="wall-card">
-            <div class="wall-header">
-              <span class="wall-number">Wall {{i + 1}}</span>
-              <button type="button" 
-                      class="action-button remove-btn"
-                      (click)="removeWall(i)"
-                      *ngIf="wallsArray.length > 1">
-                <span class="btn btn-warning">Remove</span>
-              </button>
+  <div class="form-card">
+    <!-- Header Section -->
+    <div class="header">
+      <h2 class="title">E. Paneling</h2>
+    </div>
+
+    <div class="add-window-btn">
+      <button type="button" class="action-button add-btn" (click)="addWall()">
+        <span class="button-text">Add New Wall</span>
+      </button>
+    </div>
+
+    <form [formGroup]="panelingForm">
+      <div class="walls-container" formArrayName="walls">
+        <div *ngFor="let wall of wallsArray.controls; let i = index"
+             [formGroupName]="i"
+             class="wall-card">
+          <div class="wall-header">
+            <span class="wall-number">Wall {{i + 1}}</span>
+            <button type="button"
+                    class="action-button remove-btn"
+                    (click)="removeWall(i)"
+                    *ngIf="wallsArray.length > 1">
+              <span class="btn btn-warning">Remove</span>
+            </button>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Product Code</label>
+              <div class="input-wrapper">
+                <input type="text"
+                       formControlName="productCode"
+                       placeholder="Code">
+              </div>
             </div>
-  
-            <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label">Product Code</label>
-                <div class="input-wrapper">
-                  <input type="text" 
-                         formControlName="productCode" 
-                         placeholder="Code">
-                </div>
+
+            <div class="form-group">
+              <label class="form-label">Type</label>
+              <div class="input-wrapper">
+                <input type="text"
+                       formControlName="type"
+                       placeholder="Type" readonly>
               </div>
-  
-              <div class="form-group">
-                <label class="form-label">Product</label>
-                <div class="input-wrapper">
-                  <input type="text" 
-                         formControlName="product" 
-                         placeholder="Product">
-                </div>
-              </div>
-  
-              <div class="form-group">
-                <label class="form-label">Room</label>
-                <div class="input-wrapper">
-                  <input type="text" 
-                         formControlName="room" 
-                         placeholder="Room">
-                </div>
-              </div>
-  
-              <div class="form-group">
-                <label class="form-label">Description</label>
-                <div class="input-wrapper">
-                  <input type="text" 
-                         formControlName="description" 
-                         placeholder="Description">
-                </div>
-              </div>
-  
-              <div class="form-group">
-                <label class="form-label">Remarks</label>
-                <div class="input-wrapper">
-                  <input type="text" 
-                         formControlName="remarks" 
-                         placeholder="Enter Remarks">
-                </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Price</label>
+              <div class="input-wrapper">
+                <input type="number"
+                       formControlName="price"
+                       placeholder="Price" readonly>
               </div>
             </div>
           </div>
-        </div>
-  
-        <!-- Total Section -->
-        <div class="total-section">
-          <div class="total-content">
-            <span class="total-label">Section Total Paneling D</span>
-            <div class="total-input-wrapper">
-              <input type="number" 
-                     formControlName="sectionTotal" 
-                     placeholder="Total">
+
+          <div class="cove" style="display: flex;">  
+            <label class="form-label">Lighting</label>
+            <div class="form-group" style="margin-top: 20px;">
+              <mat-radio-group formControlName="lighting" (change)="updateLightingPrice(i)">
+                <mat-radio-button value="2Side">2 Side Cove Light</mat-radio-button>
+                <mat-radio-button value="1Side">1 Side Cove Light</mat-radio-button>
+              </mat-radio-group>
+            </div>
+
+            <div class="form-group" style="margin-left: 40px;">
+              <label class="form-label">Lighting Price</label> <!-- Changed label -->
+              <div class="input-wrapper">
+                <input type="number"
+                       formControlName="lightingPrice" 
+                       placeholder="Lighting Price" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Description</label>
+            <div class="input-wrapper">
+              <textarea 
+                formControlName="description"
+                rows="4"
+                placeholder="Description"
+                class="description-textarea" readonly></textarea>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Remarks</label>
+            <div class="input-wrapper">
+              <input type="text"
+                     formControlName="remarks"
+                     placeholder="Enter Remarks">
             </div>
           </div>
         </div>
-      </form>
+      </div>
+
+      <!-- Total Section -->
+      <div class="total-section">
+        <div class="total-content">
+          <span class="total-label">Section Total Paneling D</span>
+          <div class="total-input-wrapper">
+            <input type="number"
+                   formControlName="sectionTotal"
+                   placeholder="Total">
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <!-- Confirm Section -->
+    <div class="confirm-section">
+      <button class="confirm-btn" (click)="OnConfirmPaneling()">
+        Confirm Texture Painting
+      </button>
     </div>
   </div>
+</div>

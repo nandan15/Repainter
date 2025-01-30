@@ -1,115 +1,123 @@
+<!-- package.component.html -->
 <div class="back" style="margin-bottom: 10px;padding: 10px;">
-<img src="/assets/left.png" width="45" height="45"style="background-size: cover; cursor: pointer;float:right"routerLink="/quotation-builder/view"/>
+  <img src="/assets/left.png" width="45" height="45" style="background-size: cover; cursor: pointer;" routerLink="/quotation-builder/view"/>
 </div>
+
 <div class="page-container">
-    <div class="form-card">
-      <div class="card-header">
-        <div class="header-content">
-          <h1>A. Package</h1>
-          <button class="add-furniture-btn" (click)="addPackage()">
-            <span class="plus-icon">+</span>
-            <span>Add New Package</span>
-          </button>
-        </div>
+  <div class="form-card">
+    <div class="card-header">
+      <div class="header-content">
+        <h1>A. Package</h1>
+        <button class="add-furniture-btn" (click)="addPackage()">
+          <span class="plus-icon">+</span>
+          <span>Add New Package</span>
+        </button>
       </div>
-  
-      <div class="main-form">
-        <div class="section-card">
-            <form [formGroup]="PackageForm">
-             
-                <div formArrayName="package">
-                  <div *ngFor="let item of package.controls; let i = index" [formGroupName]="i" class="paint-block">
-                    <div class="block-header">
-                      <div class="header-wrapper">
-                        <div class="type-selector">
-                          <label class="selector-label">Select Package</label>
-                          <select formControlName="packageType" class="custom-dropdown" required>
-                            <option value="" disabled>Choose type</option>
-                            <option *ngFor="let type of furnitureTypes" [value]="type">{{type}}</option>
-                          </select>
-                        </div>
-                        </div>
-                        <div class="block-number">Furniture {{ i + 1 }}</div>
-                      <button *ngIf="package.length > 1" class="remove-btn" (click)="removePackage(i)">
-                        <i class="fas fa-trash"></i> Remove
-                      </button>
-                    </div>
-                <div class="input-grid">
-                    <div class="premium-group">
-                      <label>Product Code</label>
-                      <div class="premium-input">
-                        <input type="text" formControlName="productCode" placeholder="Product Code">
-                        <div class="input-line"></div>
-                      </div>
-                    </div>
-                  
-                    <!-- Type -->
-                    <div class="premium-group">
-                      <label>Type</label>
-                      <div class="custom-select">
-                        <select formControlName="type" required>
-                          <option value="" disabled>Select type</option>
-                          <option *ngFor="let type of packageTypes" [value]="type">{{type}}</option>
-                        </select>
-                      </div>
-                    </div>
-                  
-                    <!-- Amount -->
-                    <div class="premium-group">
-                      <label>Amount</label>
-                      <div class="premium-input">
-                        <input type="number" formControlName="amount" placeholder="Amount" readonly>
-                        <div class="input-line"></div>
-                      </div>
-                    </div>
+    </div>
+
+    <div class="main-form">
+      <div class="section-card">
+        <form [formGroup]="PackageForm">
+          <div formArrayName="package">
+            <div *ngFor="let item of package.controls; let i = index" [formGroupName]="i" class="paint-block">
+              <div class="block-header">
+                <div class="header-wrapper">
+                  <div class="type-selector">
+                    <label class="selector-label">Select Package</label>
+                    <select formControlName="packageType" class="custom-dropdown" required>
+                      <option value="" disabled>Choose type</option>
+                      <option *ngFor="let type of furnitureTypes" [value]="type">{{type}}</option>
+                    </select>
                   </div>
-                  
-                  <!-- Description Section Header -->
-                  <div class="description-header">
-                    <label>Description</label>
+                </div>
+                <div class="block-number">Furniture {{ i + 1 }}</div>
+                <button *ngIf="package.length > 1" class="remove-btn" (click)="removePackage(i)">
+                  <i class="fas fa-trash"></i> Remove
+                </button>
+              </div>
+
+              <div class="input-grid">
+                <div class="premium-group">
+                  <label>Product Code</label>
+                  <div class="premium-input">
+                    <input type="text" formControlName="productCode" placeholder="Product Code" readonly>
+                    <div class="input-line"></div>
                   </div>
-                  
-                  <!-- Description and Conditions Columns -->
-                  <div class="description-container">
-                    <div class="description-section">
-                      <textarea id="specification" formControlName="specification" placeholder="Specification" readonly></textarea>
-                    </div>
-                    <div class="conditions-section">
-                      <textarea id="conditions" formControlName="conditions" placeholder="Conditions" readonly></textarea>
-                    </div>
+                </div>
+
+                <div class="premium-group">
+                  <label>Type</label>
+                  <div class="custom-select">
+                    <select formControlName="type" required>
+                      <option value="" disabled>Select type</option>
+                      <option *ngFor="let type of packageTypes" [value]="type">{{type}}</option>
+                    </select>
                   </div>
-                  
-                                 
-  
-                  <div class="premium-group">
-                    <label>Remarks</label>
-                    <div class="premium-input">
-                      <input type="text" formControlName="remarks" placeholder="Enter Remarks">
-                    </div>
+                </div>
+                <div class="premium-group">
+                  <label>Select Code</label>
+                  <div class="custom-select">
+                    <select formControlName="selectCode" required>
+                      <option value="" disabled>Select code</option>
+                      <option *ngFor="let code of packageCodes" [value]="code">{{code}}</option>
+                    </select>
                   </div>
-                  <div class="input-grid">
-                    <div class="premium-group">
-                      <label>Section Total Pre-Tax</label>
-                      <div class="premium-input">
-                        <input type="number" formControlName="sectionTotalPretax" placeholder="Pre-Tax Value" required readonly>
-                        <div class="input-line"></div>
-                      </div>
-                    </div>
-                    <div class="premium-group">
-                      <label>Section Total Post-Tax</label>
-                      <div class="premium-input">
-                        <input type="number" formControlName="sectionTotalPosttax" placeholder="Post-Tax value" required readonly>
-                        <div class="input-line"></div>
-                      </div>
-                    </div>
-                    </div>
+                </div>
+                <div class="premium-group">
+                  <label>Amount</label>
+                  <div class="premium-input">
+                    <input type="number" formControlName="price" placeholder="Amount" readonly>
+                    <div class="input-line"></div>
+                  </div>
                 </div>
               </div>
-            <div class="confirm-btn">
-                <button type="submit" class="packageBtn" id="packageConfirm" (click)="confirmPackage()">Confirm</button>
+
+              <div class="description-header">
+                <label>Description</label>
+              </div>
+
+              <div class="description-container">
+               
+                <div class="conditions-section">
+                  <textarea formControlName="content" placeholder="Conditions" readonly></textarea>
+                </div>
+                <div class="description-section">
+                  <textarea formControlName="description" placeholder="Description" readonly></textarea>
+                </div>
+                
+              </div>
+
+              <div class="premium-group">
+                <label>Remarks</label>
+                <div class="premium-input">
+                  <input type="text" formControlName="remarks" placeholder="Enter Remarks">
+                </div>
+              </div>
+
+              <div class="input-grid">
+                <div class="premium-group">
+                  <label>Section Total Pre-Tax</label>
+                  <div class="premium-input">
+                    <input type="number" formControlName="sectionTotalPretax" placeholder="Pre-Tax Value" required readonly>
+                    <div class="input-line"></div>
+                  </div>
+                </div>
+                <div class="premium-group">
+                  <label>Section Total Post-Tax</label>
+                  <div class="premium-input">
+                    <input type="number" formControlName="sectionTotalPosttax" placeholder="Post-Tax value" required readonly>
+                    <div class="input-line"></div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </form>
-        </div>
+          </div>
+
+          <div class="confirm-btn">
+            <button type="submit" class="packageBtn" id="packageConfirm" (click)="confirmPackage()">Confirm</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
+</div>

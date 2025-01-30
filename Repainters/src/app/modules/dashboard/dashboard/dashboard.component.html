@@ -1,83 +1,97 @@
-<!-- dashboard.component.html -->
-<div class="layout-container" style="background-image: url('/assets/espressobackground.jpg');background-size:cover; background-image: url('/assets/espressobackground.jpg');
-background-size: cover;
-background-repeat: no-repeat; 
-background-position: center;
-height: 100%; 
-width: 100%; ">
+<div class="layout-container">
   <div class="sidebar" [ngClass]="{'expanded': isSidebarExpanded}">
-    <app-view (sidebarToggled)="onSidebarToggle($event)"></app-view>
+      <app-view (sidebarToggled)="onSidebarToggle($event)"></app-view>
   </div>
 
   <div class="main-content" [ngClass]="{'sidebar-expanded': isSidebarExpanded}">
-    <header class="header">
-      <div class="header-left">
-        <img src="/assets/logo.png" alt="Logo"/>
-      </div>
-      <div class="header-right">
-        <button class="notification-btn">
-          <i class="fas fa-bell"></i>
-          <span class="notification-badge">3</span>
-        </button>
-        <div class="user-profile">
-          <img src="assets/avatar.jpg" alt="User">
-          <span>John Doe</span>
-        </div>
-      </div>
-    </header>
-    <div class="dashboard-container">
-      <div class="page-header">
-        <h1>Dashboard Overview</h1>
-        <button class="btn-primary">
-          <i class="fas fa-plus"></i>
-          New Project
-        </button>
-      </div>
+      <header class="header">
+          <div class="header-left">
+              <img src="/assets/logo.png" alt="Logo"/>
+          </div>
+          <div class="header-right">
+              <button class="notification-btn">
+                  <i class="fas fa-bell"></i>
+                  <span class="notification-badge">3</span>
+              </button>
+              <div class="user-profile">
+                  <img src="assets/avatar.jpg" alt="User">
+                  <span>John Doe</span>
+              </div>
+          </div>
+      </header>
 
-      <div class="stats-grid">
-        <div class="stat-card" *ngFor="let card of cardData" style="background: rgb(36, 34, 34);;">
-          <div class="card-icon">
-            <i [class]="'fas fa-' + card.icon"></i>
+      <div class="dashboard-container">
+          <div class="page-header">
+              <h1>Espresso, Home Improvement Speacialists</h1>
+              <button class="btn-primary" (click)="goBackToQuote()">
+                Back to Quote
+              </button>
           </div>
-          <div class="card-content">
-            <h3>{{card.title}}</h3>
-            <div class="card-value">{{card.value}}</div>
-            <div class="card-trend" [ngClass]="{'positive': card.trend.includes('+'), 
-                                              'negative': card.trend.includes('-')}">
-              <i [class]="card.trend.includes('+') ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
-              {{card.trend}}
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div class="dashboard-grid">
-        <section class="chart-section">
-          <div class="section-header">
-            <h2>Revenue Overview</h2>
-            <div class="chart-controls">
-              <select class="time-select">
-                <option>Last 7 days</option>
-                <option>Last 30 days</option>
-                <option>Last 90 days</option>
-              </select>
-            </div>
-          </div>
-          <div class="chart-container">
-            <!-- Chart component goes here -->
-          </div>
-        </section>
+          <div class="content-section">
+              <h2>Vibgyor. A legacy of excellence built over 50 years.</h2>
+              <div class="stats-container">
+                  <div class="stat-card">
+                      <div class="stat-icon">
+                          <i class="fas fa-check-circle"></i>
+                      </div>
+                      <div class="stat-content">
+                          <div class="stat-number">400+</div>
+                          <div class="stat-description">Completed Projects</div>
+                      </div>
+                  </div>
 
-        <section class="recent-activity">
-          <div class="section-header">
-            <h2>Recent Activity</h2>
-            <button class="btn-text">View All</button>
+                  <div class="stat-card">
+                      <div class="stat-icon">
+                          <i class="fas fa-comments"></i>
+                      </div>
+                      <div class="stat-content">
+                          <div class="stat-number">Direct Interaction</div>
+                          <div class="stat-description">No Middlemen or Subcontractors</div>
+                      </div>
+                  </div>
+
+                  <div class="stat-card">
+                      <div class="stat-icon">
+                          <i class="fas fa-paint-brush"></i>
+                      </div>
+                      <div class="stat-content">
+                          <div class="stat-number">600+</div>
+                          <div class="stat-description">Expert Painters</div>
+                      </div>
+                  </div>
+
+                  <div class="stat-card">
+                      <div class="stat-icon">
+                          <i class="fas fa-thumbs-up"></i>
+                      </div>
+                      <div class="stat-content">
+                          <div class="stat-number">100%</div>
+                          <div class="stat-description">Proven Track Record</div>
+                      </div>
+                  </div>
+
+                  <div class="stat-card">
+                      <div class="stat-icon">
+                          <i class="fas fa-clock"></i>
+                      </div>
+                      <div class="stat-content">
+                          <div class="stat-number">On Time!</div>
+                          <div class="stat-description">All Projects Handed Over On Time!</div>
+                      </div>
+                  </div>
+
+                  <div class="stat-card">
+                      <div class="stat-icon">
+                          <i class="fas fa-star"></i>
+                      </div>
+                      <div class="stat-content">
+                          <div class="stat-number">Best In Class</div>
+                          <div class="stat-description">Quality Assurance Products</div>
+                      </div>
+                  </div>
+              </div>
           </div>
-          <div class="activity-list">
-            <!-- Activity list component goes here -->
-          </div>
-        </section>
       </div>
-    </div>
   </div>
 </div>

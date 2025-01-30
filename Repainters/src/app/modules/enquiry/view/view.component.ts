@@ -18,7 +18,7 @@ export class ViewComponent implements OnInit {
   enquiryForm: FormGroup;
   title:string[]=['Mr','Ms','Ms & Mr','M/S'];
   projectTypes: string[] = ['Apartment', 'Villa', 'Independent House'];
-  configurations: string[] = ['1BHK', '2BHK', '2.5BHK', '3BHK', '4BHK'];
+  configurations: string[] = ['1BHK', '2BHK', '2.5BHK', '3BHK', '4BHK','4BHK +'];
   selectedLocation: string = '';
   selectedFloorPlan: File | null = null;
   selectedSitePlan: File | null = null;

@@ -132,6 +132,134 @@
     font-size: 1.2rem;
     user-select: none;
   }
+  .custom-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  }
+  
+  .custom-table thead tr {
+    background: linear-gradient(135deg, #75ba9d, #b5ac9c);
+  }
+  
+  .custom-table th {
+    padding: 1.2rem 1rem;
+    color: white;
+    font-weight: 500;
+   
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid rgba(181, 172, 156, 0.2);
+  }
+  
+  .custom-table td {
+    padding: 1rem;
+    color: #4f4a4a;
+    font-size: 0.95rem;
+    border-bottom: 1px solid rgba(181, 172, 156, 0.2);
+    transition: background-color 0.3s ease;
+  }
+  
+  .custom-table tbody tr:hover {
+    background-color: rgba(117, 186, 157, 0.05);
+  }
+  
+  .custom-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .text-right {
+    text-align: right;
+  }
+  
+  /* Input within tables */
+  .custom-table input[type="number"] {
+    width: 100px;
+    padding: 0.5rem;
+    border: 1px solid #75ba9d;
+    border-radius: 6px;
+    text-align: right;
+    font-size: 0.9rem;
+  }
+  
+  /* Payment Terms Section */
+  .payment-terms-section {
+    margin-top: 2rem;
+    background: #f8f9fa;
+    border-radius: 16px;
+    padding: 2rem;
+    border: 1px solid rgba(181, 172, 156, 0.2);
+  }
+  .payment-terms-section {
+    margin-top: 2rem;
+    background: #f8f9fa;
+    border-radius: 16px;
+    padding: 2rem;
+    border: 1px solid rgba(181, 172, 156, 0.2);
+  }
+  
+  .payment-terms-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  }
+  
+  .payment-terms-table thead tr {
+    background: linear-gradient(135deg, #75ba9d, #b5ac9c);
+  }
+  
+  .payment-terms-table th {
+    padding: 1.2rem 1rem;
+    color: white;
+    font-weight: 500;
+    text-align: left;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+  }
+  
+  .payment-terms-table td {
+    padding: 1rem;
+    color: #4f4a4a;
+    font-size: 0.95rem;
+    border-bottom: 1px solid rgba(181, 172, 156, 0.2);
+  }
+  
+  .payment-terms-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .payment-terms-table tbody tr:hover {
+    background-color: rgba(117, 186, 157, 0.05);
+  }
+  .section-title {
+    font-size: 1.4rem;
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding: 10px 10px 10px 10px;
+    margin-left: 10px;
+  }
+  
+  .section-title::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 70%;
+    background: #75ba9d;
+    border-radius: 2px;
+  }
   
   /* Form Grid */
   .form-grid {

@@ -1,122 +1,173 @@
 <div class="main-container">
-    <!-- Header Section -->
-    <div class="header">
-        <h1 class="title">Quotation Summary</h1>
-        <div class="date-picker-container">
-          <div class="date-picker-container">
-            <!-- Button to open the date picker -->
-            <button mat-raised-button (click)="picker.open()" style="background-color:rgb(133, 60, 60); color: white; padding: 8px 16px;">
-             Commencement Work
-            </button>
-            <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate" (dateChange)="onDateSelect($event)">
-            <mat-datepicker #picker></mat-datepicker>
-            <div *ngIf="selectedDate" class="selected-date" style="color: chocolate;">
-              Selected Date: {{ selectedDate | date:'mediumDate' }}
-            </div>
-          </div>
-          
-          
-          
-    <button mat-raised-button color="primary" (click)="openSendQuoteDialog()" class="send-quote-btn">
-      Send Quote
-    </button>
-        </div>    
-        <img src="/assets/share.png" width="25" height="25" style="cursor: pointer;" (click)="exportToPDF()"/>
+  <!-- Header Section -->
+  <div class="header">
+    <h1 class="title">Quotation Summary</h1>
+    <div class="date-picker-container">
+      <button mat-raised-button (click)="picker.open()" style="background-color:rgb(133, 60, 60); color: white; padding: 8px 16px;">
+         Work Start Date
+      </button>
+      <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate" (dateChange)="onDateSelect($event)">
+      <mat-datepicker #picker></mat-datepicker>
+      <div *ngIf="selectedDate" class="selected-date" style="color: chocolate;">
+        Selected Date: {{ selectedDate | date:'mediumDate' }}
       </div>
-  
-    <!-- Table Section -->
-    <div class="wall-card">
-        <div class="form-grid" style="padding: 0;">
-          <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr style="background: linear-gradient(135deg, #75ba9d, #b5ac9c);">
-                <th style="padding: 1rem; text-align: left; border: 1px solid rgba(181, 172, 156, 0.2); color: white;">SI NO</th>
-                <th style="padding: 1rem; text-align: left; border: 1px solid rgba(181, 172, 156, 0.2); color: white;">Section Name</th>
-                <th style="padding: 1rem; text-align: left; border: 1px solid rgba(181, 172, 156, 0.2); color: white;">Section ID</th>
-                <th style="padding: 1rem; text-align: right; border: 1px solid rgba(181, 172, 156, 0.2); color: white;">Pre-Tax Total</th>
-                <th style="padding: 1rem; text-align: right; border: 1px solid rgba(181, 172, 156, 0.2); color: white;" [hidden]="!showColumn['discount']">Discount</th>
-                <th style="padding: 1rem; text-align: right; border: 1px solid rgba(181, 172, 156, 0.2); color: white;" [hidden]="!showColumn['discount']">Total Value After Discount</th>
-              </tr>
-            </thead>
-            <tbody style="background-color: rgb(103, 96, 96);">
-              <tr *ngFor="let item of [{id: 1, name: 'Package', section: 'A', total: 1000}, 
-                                     {id: 2, name: 'Internal Painting', section: 'B', total: 2000}, 
-                                     {id: 3, name: 'Wallpaper', section: 'C', total: 3000}]">
-                <td style="padding: 1rem; border: 1px solid rgba(181, 172, 156, 0.2); color: #374151;">{{item.id}}</td>
-                <td style="padding: 1rem; border: 1px solid rgba(181, 172, 156, 0.2); color: #374151;">{{item.name}}</td>
-                <td style="padding: 1rem; border: 1px solid rgba(181, 172, 156, 0.2); color: #374151;">{{item.section}}</td>
-                <td style="padding: 1rem; text-align: right; border: 1px solid rgba(181, 172, 156, 0.2); color: #374151;">
-                  {{item.total | number:'1.2-2'}}
-                </td>
-                <td style="padding: 1rem; text-align: right; border: 1px solid rgba(181, 172, 156, 0.2);" *ngIf="showColumn['discount']">
-                  <input type="number" style="border: 1px solid #75ba9d;" [(ngModel)]="discount" (blur)="validateDiscount()">
-                  <span *ngIf="discount > 10" style="color: red;">Discount cannot exceed 10%</span>
-                </td>
-                <td style="padding: 1rem; text-align: right; border: 1px solid rgba(181, 172, 156, 0.2); color: #374151;" *ngIf="showColumn['discount']">
-                  {{item.total * (1 - discount/100) | number:'1.2-2'}}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <button mat-raised-button color="primary" (click)="openSendQuoteDialog()" class="send-quote-btn">
+        Send Quote
+      </button>
+    </div>    
+    <img src="/assets/share.png" width="25" height="25" style="cursor: pointer;" (click)="exportToPDF()"/>
+  </div>
+
+  <!-- Package & Furniture Table -->
+  <div class="wall-card">
+    <h3 class="section-title">Package & Furniture</h3>
+    <div class="form-grid">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>SI NO</th>
+            <th>Section Name</th>
+            <th>Section ID</th>
+            <th>Pre-Tax Total</th>
+            <th *ngIf="showColumn['discount']">Discount</th>
+            <th *ngIf="showColumn['discount']">Total Value After Discount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of packageItems">
+            <td>{{item.id}}</td>
+            <td>{{item.name}}</td>
+            <td>{{item.section}}</td>
+            <td class="text-right">{{item.total | number:'1.2-2'}}</td>
+            <td *ngIf="showColumn['discount']" class="text-right">
+              <input type="number" [(ngModel)]="discount" (blur)="validateDiscount()">
+            </td>
+            <td *ngIf="showColumn['discount']" class="text-right">
+              {{item.total * (1 - discount/100) | number:'1.2-2'}}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Additional Items Table -->
+  <div class="wall-card mt-4">
+    <h3 class="section-title">Additional Items</h3>
+    <div class="form-grid">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>SI NO</th>
+            <th>Section Name</th>
+            <th>Section ID</th>
+            <th>Pre-Tax Total</th>
+            <th *ngIf="showColumn['discount']">Discount</th>
+            <th *ngIf="showColumn['discount']">Total Value After Discount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of additionalItems">
+            <td>{{item.id}}</td>
+            <td>{{item.name}}</td>
+            <td>{{item.section}}</td>
+            <td class="text-right">{{item.total | number:'1.2-2'}}</td>
+            <td *ngIf="showColumn['discount']" class="text-right">
+              <input type="number" [(ngModel)]="discount" (blur)="validateDiscount()">
+            </td>
+            <td *ngIf="showColumn['discount']" class="text-right">
+              {{item.total * (1 - discount/100) | number:'1.2-2'}}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Summary Section -->
+  <div class="total-section">
+    <h3 class="section-title">SUMMARY</h3>
+    <div class="total-content">
+      <div class="summary-row">
+        <span class="total-label">Pre-tax Total</span>
+        <div class="total-input-wrapper">
+          <input type="text" [value]="preTaxTotal | number:'1.2-2'" readonly>
         </div>
       </div>
-    
-      <!-- Summary Section -->
-      <!-- Summary Section -->
-<div class="total-section">SUMMARY
-  <div class="total-content" style="flex-direction: column; gap: 1rem; padding: 2rem;">
-    <div style="display: flex; justify-content:end; width: 100%;gap:10px; align-items: center;">
-      <span class="total-label">Pre-tax Total</span>
-      <div class="total-input-wrapper">
-        <input type="text" [value]="preTaxTotal | number:'1.2-2'" readonly>
-      </div>
-    </div>
-    
-    <div style="display: flex; justify-content: end; width: 100%;gap:10px; align-items: center;" 
-         *ngIf="showRow['SummaryDiscount']">
-      <span class="total-label">Discount (8%)</span>
-      <div class="total-input-wrapper">
-        <input type="text" [value]="discountValue | number:'1.2-2'" readonly>
-      </div>
-    </div>
 
-    <div style="display: flex; justify-content: end; width: 100%;gap:10px; align-items: center;" 
-         *ngIf="showRow['SummaryDiscount']">
-      <span class="total-label">Discount Value</span>
-      <div class="total-input-wrapper">
-        <input type="text" [value]="discountValue | number:'1.2-2'" readonly>
+      <div class="summary-row" *ngIf="showRow['SummaryToVendor']">
+        <span class="total-label">To Vendor</span>
+        <div class="total-input-wrapper">
+          <input type="text" [value]="toVendorAmount | number:'1.2-2'" readonly>
+        </div>
       </div>
-    </div>
 
-    <div style="display: flex; justify-content: end; width: 100%;gap:10px; align-items: center;" 
-         *ngIf="showRow['SummaryDiscount']">
-      <span class="total-label">Pre Tax(Post Discount)</span>
-      <div class="total-input-wrapper">
-        <input type="text" [value]="preTaxPostDiscount | number:'1.2-2'" readonly>
+      <div class="summary-row" *ngIf="showRow['SummaryDiscount']">
+        <span class="total-label">Discount (8%)</span>
+        <div class="total-input-wrapper">
+          <input type="text" [value]="discountValue | number:'1.2-2'" readonly>
+        </div>
       </div>
-    </div>
-    
-    <div style="display: flex; justify-content: end; width: 100%;gap:10px; align-items: center;">
-      <span class="total-label">GST @ 18%</span>
-      <div class="total-input-wrapper">
-        <input type="text" [value]="gstAmount | number:'1.2-2'" readonly>
-      </div>
-    </div>
 
-    <div style="display: flex; justify-content: end; width: 100%;gap:10px; align-items: center; margin-top: 1rem; border-top: 2px solid rgba(255, 255, 255, 0.2); padding-top: 1rem;">
-      <span class="total-label" style="font-size: 1.2rem;">Grand Total (including Tax)</span>
-      <div class="total-input-wrapper">
-        <input type="text" [value]="grandTotal | number:'1.2-2'" readonly style="font-size: 1.2rem; font-weight: 600;">
+      <div class="summary-row" *ngIf="showRow['SummaryDiscount']">
+        <span class="total-label">Pre Tax(Post Discount)</span>
+        <div class="total-input-wrapper">
+          <input type="text" [value]="preTaxPostDiscount | number:'1.2-2'" readonly>
+        </div>
+      </div>
+
+      <div class="summary-row">
+        <span class="total-label">GST @ 18%</span>
+        <div class="total-input-wrapper">
+          <input type="text" [value]="gstAmount | number:'1.2-2'" readonly>
+        </div>
+      </div>
+
+      <div class="summary-row grand-total">
+        <span class="total-label">Grand Total (including Tax)</span>
+        <div class="total-input-wrapper">
+          <input type="text" [value]="grandTotal | number:'1.2-2'" readonly>
+        </div>
       </div>
     </div>
   </div>
-</div>
-    
-      <!-- Remarks Section -->
-      <div class="form-group">
-        <label class="form-label" style="color: #374151; font-size: 15px; padding: 20px 0 0 0;">Remarks</label>
-        <div class="input-wrapper">
-          <input type="text" formControlName="Remarks" placeholder="Enter Remarks">
-        </div>
-      </div>
+
+  <!-- Payment Terms Table -->
+  <div class="payment-terms-section">
+    <h3 class="section-title">Payment Terms</h3>
+    <table class="payment-terms-table">
+      <thead>
+        <tr>
+          <th>Stage</th>
+          <th>Condition</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Order Confirmation</td>
+          <td>25% On Total Value</td>
+          <td class="text-right">₹ {{orderConfirmationAmount | number:'1.2-2'}} (25% of total)</td>
+        </tr>
+        <tr>
+          <td>Design Confirmation</td>
+          <td>50% on Painting & 75% on Rest</td>
+          <td class="text-right">₹ {{designConfirmationAmount | number:'1.2-2'}}</td>
+        </tr>
+        <tr>
+          <td>(2 Days Before) Project Handing Over</td>
+          <td>25% on Painting</td>
+          <td class="text-right">₹ {{projectStartAmount | number:'1.2-2'}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Remarks Section -->
+  <div class="form-group">
+    <label class="form-label">Remarks</label>
+    <div class="input-wrapper">
+      <input type="text" formControlName="Remarks" placeholder="Enter Remarks">
     </div>
+  </div>
+</div>

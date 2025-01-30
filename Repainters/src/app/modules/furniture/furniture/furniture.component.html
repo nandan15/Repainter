@@ -1,4 +1,3 @@
-<!-- furniture.component.html -->
 <div class="page-container">
   <div class="form-card">
     <div class="card-header">
@@ -6,7 +5,7 @@
         <h1>G. Furniture</h1>
         <button class="add-furniture-btn" (click)="addFurniture()">
           <span class="plus-icon">+</span>
-          <span>Add New Wallpaper</span>
+          <span>Add New Furniture</span>
         </button>
       </div>
     </div>
@@ -22,46 +21,60 @@
                   <i class="fas fa-trash"></i> Remove
                 </button>
               </div>
-              
-              <div class="input-grid">
+
+              <!-- First row -->
+              <div class="input-grid-top">
                 <div class="premium-group">
                   <label>Product Code</label>
                   <div class="premium-input">
-                    <input type="text" formControlName="productCode" placeholder="Product Code">
+                    <input type="text" formControlName="productCode" placeholder="Enter Product Code">
                     <div class="input-line"></div>
                   </div>
                 </div>
-                
+
                 <div class="premium-group">
-                  <label>Type</label>
-                  <div class="custom-select">
-                    <select formControlName="type">
-                      <option value="">Select type</option>
-                      <option *ngFor="let type of packageType" [value]="type">{{type}}</option>
-                    </select>
+                  <label>Name</label>
+                  <div class="premium-input">
+                    <input type="text" formControlName="name" readonly>
+                    <div class="input-line"></div>
                   </div>
                 </div>
-                
+
                 <div class="premium-group">
                   <label>Price</label>
                   <div class="premium-input">
-                    <input type="number" formControlName="price" placeholder="Price">
+                    <input type="number" formControlName="price" readonly>
                     <div class="input-line"></div>
                   </div>
                 </div>
-                
+              </div>
+
+              <!-- Product name display -->
+              <div *ngIf="item.get('name')?.value" class="product-name-display">
+                {{ item.get('name')?.value }}
+              </div>
+
+              <!-- Description and Remarks -->
+              <div class="input-grid-bottom">
                 <div class="premium-group">
                   <label>Description</label>
-                  <div class="premium-input">
-                    <input type="text" formControlName="description" placeholder="Description">
-                    <div class="input-line"></div>
+                  <div class="premium-input description-container">
+                    <div class="description-content" *ngIf="item.get('description')?.value">
+                      <ng-container *ngFor="let section of formatDescription(item.get('description')?.value)">
+                        <div [ngClass]="{'dimension': section.startsWith('Dimension:'), 'about': section.startsWith('About:')}">
+                          {{ section }}
+                        </div>
+                      </ng-container>
+                    </div>
+                    <textarea *ngIf="!item.get('description')?.value" formControlName="description" readonly></textarea>
                   </div>
                 </div>
 
                 <div class="premium-group">
                   <label>Remarks</label>
                   <div class="premium-input">
-                    <input type="text" formControlName="remarks" placeholder="Enter Remarks">
+                    <textarea formControlName="remarks" placeholder="Enter Remarks" rows="4"></textarea>
+                    <div class="input-line"></div>
                   </div>
                 </div>
               </div>

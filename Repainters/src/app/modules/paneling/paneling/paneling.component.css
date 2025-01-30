@@ -162,11 +162,36 @@
 /* Form Grid */
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
   padding: 1.5rem;
 }
 
+
+.full-width {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form-group.full-width {
+  width: 80%;
+  text-align: center;
+}
+
+.description-textarea {
+  width: 70rem;
+  padding: 0.8rem 1rem;
+  border: 2px solid rgba(181, 172, 156, 0.2);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.description-textarea::placeholder {
+  text-align: center;
+}
 .form-group {
   display: flex;
   flex-direction: column;
@@ -245,7 +270,18 @@
 .action-button:hover mat-icon {
   color: #b71c1c; /* Darker hover color */
 }
-
+.confirm-btn{
+  width: 200px;
+  height: 50px;
+  color: black;
+  border-radius: 10%;
+  background-color: #0e412c;
+  cursor: pointer;
+  margin-left: 20px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 10px;
+}
 mat-icon {
   font-size: 24px;
 }
