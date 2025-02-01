@@ -117,16 +117,26 @@ builder.Services.AddSwaggerGen(c =>
 var app = builder.Build();
 
 // Middleware Pipeline
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI();
+app.Use(async (context, next) =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    await next();
+
+    if (context.Response.StatusCode == 404 && !Path.HasExtension(context.Request.Path.Value))
+    {
+        context.Request.Path = "/";
+        await next();
+    }
+});
+
 
 app.UseHttpsRedirection();
 app.UseCors("UI");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.Run();
