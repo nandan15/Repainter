@@ -13,9 +13,16 @@
                   <i class="fas fa-bell"></i>
                   <span class="notification-badge">3</span>
               </button>
-              <div class="user-profile">
-                  <img src="assets/avatar.jpg" alt="User">
-                  <span>John Doe</span>
+              <div class="user-profile" [ngClass]="{'show-dropdown': showDropdown}">
+                <div class="profile-trigger" (click)="toggleDropdown()">
+                  <img src="assets/avatar.jpg">
+                  <span>{{username}}</span>
+                </div>
+                <div class="dropdown-menu" *ngIf="showDropdown">
+                  <ul>
+                    <li (click)="logout()">Logout</li>
+                  </ul>
+                </div>
               </div>
           </div>
       </header>

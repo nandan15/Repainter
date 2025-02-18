@@ -1,6 +1,6 @@
 export class Customer {
   id!: number;
-  enquiryId!: number;
+  enquiryId!: string;
   title!: string;
   name!: string;
   phoneNumber!: string;
@@ -13,6 +13,21 @@ export class Customer {
   carpetArea!: string;
   projectLocation!: string;
   city!: string;
-  floorPlan: string[] = [];
-  sitePlan: string[] = [];
+  floorPlan!: string[];
+  sitePlan!: string[];
+}
+export interface CustomerImagesModel {
+  success: boolean;
+  data: CustomerImageData[];
+  message?: string;
+}
+
+export interface CustomerImageData {
+  customerId: number;
+  floorPlanImages: string[];
+  sitePlanImages: string[];
+}
+
+export interface InternalErrorViewModel {
+  message: string;
 }

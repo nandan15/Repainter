@@ -1,5 +1,3 @@
-/* Main Container Styles */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 * {
   box-sizing: border-box;
@@ -162,6 +160,7 @@
     font-size: 0.95rem;
     border-bottom: 1px solid rgba(181, 172, 156, 0.2);
     transition: background-color 0.3s ease;
+    text-align: right;
   }
   
   .custom-table tbody tr:hover {
@@ -173,7 +172,7 @@
   }
   
   .text-right {
-    text-align: right;
+    text-align: center;
   }
   
   /* Input within tables */
@@ -185,7 +184,26 @@
     text-align: right;
     font-size: 0.9rem;
   }
+  .error-input {
+    border: 1px solid #dc3545;
+    background-color: #fff8f8;
+  }
   
+  .error-message {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  
+  .total-input-wrapper {
+    position: relative;
+  }
+  
+  .total-input-wrapper .error-message {
+    position: absolute;
+    bottom: -20px;
+    right: 0;
+  }
   /* Payment Terms Section */
   .payment-terms-section {
     margin-top: 2rem;
@@ -248,7 +266,33 @@
     padding: 10px 10px 10px 10px;
     margin-left: 10px;
   }
+  .floating-book-btn {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 1000;
+    background-color: rgb(117, 186, 157) !important;
+    color: white !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   
+  .floating-book-btn i {
+    font-size: 24px;
+  }
+  
+  .floating-book-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  }
   .section-title::before {
     content: '';
     position: absolute;

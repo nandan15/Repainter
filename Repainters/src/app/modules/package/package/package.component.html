@@ -1,6 +1,7 @@
-<!-- package.component.html -->
 <div class="back" style="margin-bottom: 10px;padding: 10px;">
-  <img src="/assets/left.png" width="45" height="45" style="background-size: cover; cursor: pointer;" routerLink="/quotation-builder/view"/>
+  <img src="/assets/left.png" width="45" height="45" 
+       style="background-size: cover; cursor: pointer;" 
+       (click)="navigateBack()">
 </div>
 
 <div class="page-container">
@@ -59,7 +60,10 @@
                   <div class="custom-select">
                     <select formControlName="selectCode" required>
                       <option value="" disabled>Select code</option>
-                      <option *ngFor="let code of packageCodes" [value]="code">{{code}}</option>
+                      <option *ngFor="let code of getAvailableCodes(item.get('packageType')?.value, item.get('type')?.value)" 
+                              [value]="code">
+                        {{code}}
+                      </option>
                     </select>
                   </div>
                 </div>
@@ -82,7 +86,7 @@
                   <textarea formControlName="content" placeholder="Conditions" readonly></textarea>
                 </div>
                 <div class="description-section">
-                  <textarea formControlName="description" placeholder="Description" readonly></textarea>
+                  <div  [innerHTML]="item.get('description')?.value" class="description-content" readonly></div>
                 </div>
                 
               </div>

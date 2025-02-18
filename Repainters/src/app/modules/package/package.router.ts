@@ -1,16 +1,23 @@
-import { RouterModule,Routes } from "@angular/router";
+import { RouterModule, Routes } from "@angular/router";
 import { ViewComponent } from "./view/view.component";
 import { NgModule } from "@angular/core";
 import { PackageComponent } from "./package/package.component";
 import { DashboardComponent } from "./dashboard/dashboard.component";
-const packageRoutes:Routes=[
-    {path:'',component:ViewComponent,children:[
-        {path:'package',component:PackageComponent},
-        {path:'dashboard',component:DashboardComponent}
-    ]},
+
+const packageRoutes: Routes = [
+  {
+    path: '',
+    component: ViewComponent,
+    children: [
+      { path: 'package/:customerId', component: PackageComponent },
+      { path: 'dashboard/:customerId', component: DashboardComponent }, // Added customerId parameter
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+    ]
+  },
 ];
+
 @NgModule({
-    imports:[RouterModule.forChild(packageRoutes)],
-    exports:[RouterModule],
+  imports: [RouterModule.forChild(packageRoutes)],
+  exports: [RouterModule],
 })
-export class packagerouter{}
+export class packagerouter {}

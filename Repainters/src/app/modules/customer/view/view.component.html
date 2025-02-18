@@ -21,8 +21,24 @@
               (click)="openCustomerList()">List Customer</button>
     </div>          
     <div class="right-panel" style="width: 800px;">
-      <div class="customer-details" *ngIf="selectedCustomer">
-        <!-- Customer Information Fields -->
+      <div *ngIf="!customers || customers.length === 0" class="no-records-message">
+        <div class="message-container">
+          <p>No customer records found. Please create a new customer.</p>
+          <button class="create-customer-btn" routerLink="/enquiry/view">
+            Create New Customer
+          </button>
+        </div>
+      </div>
+      <div *ngIf="customers.length > 0 && filteredCustomers.length === 0" class="no-records-message">
+        <div class="message-container">
+          <p>No customers found matching your search criteria: "{{searchTerm}}"</p>
+          <button class="clear-search-btn" (click)="clearSearch()">
+            Clear Search
+          </button>
+        </div>
+      </div>
+
+      <div class="customer-details" *ngIf="selectedCustomer && filteredCustomers.length > 0">
         <div class="detail-field">
           <label>Customer Title:</label>
           <input type="text" [(ngModel)]="selectedCustomer.title" (blur)="updateCustomer()" />
@@ -61,80 +77,97 @@
           </div>
         </div>
 
-        <!-- Image Sections -->
         <div class="images-container">
           <!-- Floor Plan Section -->
           <div class="image-section">
             <div class="section-header">
               <h3>Floor Plan</h3>
-              <label class="upload-button">
-                <span class="upload-icon">📄 Upload Floor Plan</span>
-                <input type="file" 
-                       (change)="onFileSelected($event, 'floorPlan')" 
-                       accept="image/*" 
-                       style="display: none;">
+              <label class="upload-button" [class.disabled]="uploadingFloorPlan">
+                <span class="upload-icon">
+                  <ng-container *ngIf="!uploadingFloorPlan">
+                    📄 Upload Floor Plan
+                  </ng-container>
+                  <ng-container *ngIf="uploadingFloorPlan">
+                    Uploading...
+                  </ng-container>
+                </span>
+                <input 
+                  #floorPlanInput
+                  type="file"
+                  (change)="onFileSelected($event, 'floorPlan')" 
+                  accept="image/jpeg,image/png,image/jpg"
+                  [disabled]="uploadingFloorPlan"
+                  multiple
+                  style="display: none;">
               </label>
             </div>
             <div class="image-preview">
-              <div *ngIf="selectedCustomer.floorPlan && selectedCustomer.floorPlan.length > 0" class="image-grid">
+              <div *ngIf="selectedCustomer?.floorPlan?.length" class="image-grid">
                 <div *ngFor="let plan of getImageArray(selectedCustomer.floorPlan)" class="image-item">
-                  <img [src]="plan" (click)="openImagePreview(plan)" alt="Floor Plan">
+                  <img [src]="plan" 
+                       (click)="openImagePreview(plan)" 
+                       alt="Floor Plan"
+                       [ngClass]="{'loading': uploadingFloorPlan}">
+                  <div class="image-overlay">
+                    <button class="preview-btn" (click)="openImagePreview(plan)">👁</button>
+                    <button class="download-btn" (click)="downloadImage(plan)">⬇</button>
+                  </div>
                 </div>
               </div>
-              <div *ngIf="!selectedCustomer.floorPlan || selectedCustomer.floorPlan.length === 0" class="no-image">
+              <div *ngIf="!selectedCustomer?.floorPlan?.length" class="no-image">
                 No floor plan images uploaded
               </div>
             </div>
           </div>
           
-          <!-- Site Plan Section -->
           <div class="image-section">
             <div class="section-header">
               <h3>Site Plan</h3>
-              <label class="upload-button">
-                <span class="upload-icon">🗺️ Upload Site Plan</span>
-                <input type="file" 
-                       (change)="onFileSelected($event, 'sitePlan')" 
-                       accept="image/*" 
-                       style="display: none;">
+              <label class="upload-button" [class.disabled]="uploadingSitePlan">
+                <span class="upload-icon">
+                  <ng-container *ngIf="!uploadingSitePlan">
+                    📄 Upload Site Plan
+                  </ng-container>
+                  <ng-container *ngIf="uploadingSitePlan">
+                    Uploading...
+                  </ng-container>
+                </span>
+                <input 
+                  #sitePlanInput
+                  type="file"
+                  (change)="onFileSelected($event, 'sitePlan')" 
+                  accept="image/jpeg,image/png,image/jpg"
+                  [disabled]="uploadingSitePlan"
+                  multiple
+                  style="display: none;">
               </label>
             </div>
             <div class="image-preview">
-              <div *ngIf="selectedCustomer.sitePlan && selectedCustomer.sitePlan.length > 0" class="image-grid">
+              <div *ngIf="selectedCustomer?.sitePlan?.length" class="image-grid">
                 <div *ngFor="let plan of getImageArray(selectedCustomer.sitePlan)" class="image-item">
-                  <img [src]="plan" (click)="openImagePreview(plan)" alt="Site Plan">
+                  <img [src]="plan" 
+                       (click)="openImagePreview(plan)" 
+                       alt="Site Plan"
+                       [ngClass]="{'loading': uploadingSitePlan}">
+                  <div class="image-overlay">
+                    <button class="preview-btn" (click)="openImagePreview(plan)">👁</button>
+                    <button class="download-btn" (click)="downloadImage(plan)">⬇</button>
+                  </div>
                 </div>
               </div>
-              <div *ngIf="!selectedCustomer.sitePlan || selectedCustomer.sitePlan.length === 0" class="no-image">
+              <div *ngIf="!selectedCustomer?.sitePlan?.length" class="no-image">
                 No site plan images uploaded
               </div>
             </div>
           </div>
-        </div>
-        
-        <!-- Image Preview Modal -->
-        <div *ngIf="previewImage" class="image-preview-modal">
-          <img [src]="previewImage" alt="Preview" />
-          <a [href]="previewImage" download="image.png">Download Image</a>
-          <button (click)="closeImagePreview()">Close</button>
-        </div>
-        
-        <!-- Image Preview Modal -->
-        <div *ngIf="previewImage" class="image-preview-modal">
-          <img [src]="previewImage" alt="Preview" />
-          <a [href]="previewImage" download="downloaded-image.jpg" class="download-button">Download</a>
-          <button (click)="closeImagePreview()">Close</button>
-        </div>
-        
-      </div>
+        </div>        
     </div>
   </div>
 </div>
 
-<!-- Image Preview Modal -->
 <div class="image-preview-modal" *ngIf="previewImage" (click)="closeImagePreview()">
   <span class="close-button" (click)="closeImagePreview()">×</span>
   <img [src]="previewImage" alt="Preview">
+  <a [href]="previewImage" download class="download-button">Download</a>
 </div>
-
 <app-customer-modal (customerSelected)="selectCustomer($event)"></app-customer-modal>

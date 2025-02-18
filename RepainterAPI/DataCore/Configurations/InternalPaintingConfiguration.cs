@@ -14,8 +14,10 @@ namespace DataCore.Configurations
         public void Configure(EntityTypeBuilder<InternalPainting> entity)
         {
             entity.HasKey(I => I.IntenalPaintingId).HasName("PK_InternalPainting");
-            entity.ToTable("ScInternalPainting");
+            entity.ToTable("InternalPainting");
             entity.Property(I => I.CarpetArea);
+            entity.Property(I => I.ProductCode);
+            entity.Property(I => I.Color);
             entity.Property(I => I.CeilingType);
             entity.Property(I => I.CeilingPrice);
             entity.Property(I => I.WallType);

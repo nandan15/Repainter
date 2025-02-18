@@ -11,10 +11,30 @@
           <form [formGroup]="requirementForm">
             <div class="carpet-area-section">
               <div class="section-highlight">
-                <label class="highlight-label">Carpet Area (In Sft)</label>
-                <div class="premium-input">
-                  <input type="number" formControlName="carpetArea" placeholder="Enter carpet area">
-                  <div class="input-line"></div>
+                <div class="input-grid" [ngStyle]="{'grid-template-columns': 'repeat(3, 1fr)'}">
+                  <div class="premium-group">
+                    <label class="highlight-label">Carpet Area (In Sft)</label>
+                    <div class="premium-input">
+                      <input type="number" formControlName="carpetArea" placeholder="Enter carpet area">
+                      <div class="input-line"></div>
+                    </div>
+                  </div>
+                  
+                  <div class="premium-group">
+                    <label class="highlight-label">Product Code</label>
+                    <div class="premium-input">
+                      <input type="text" formControlName="productCode" placeholder="Enter product code">
+                      <div class="input-line"></div>
+                    </div>
+                  </div>
+                  
+                  <div class="premium-group">
+                    <label class="highlight-label">Color</label>
+                    <div class="premium-input">
+                      <input type="text" formControlName="color" placeholder="Enter color" readonly>
+                      <div class="input-line"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

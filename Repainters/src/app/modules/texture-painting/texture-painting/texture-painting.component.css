@@ -1,5 +1,3 @@
-/* Main Container Styles */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 * {
   box-sizing: border-box;
@@ -259,7 +257,18 @@
   .total-input-wrapper .input-prefix {
     color: white;
   }
-  
+  .confirm-btn
+  {
+    width: fit-content;
+    height: 50px;
+    color: black;
+    border-radius: 10%;
+    background-color: #0e412c;
+    cursor: pointer;
+    margin-left: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
   /* Animation */
   @keyframes fadeSlideIn {
     from {

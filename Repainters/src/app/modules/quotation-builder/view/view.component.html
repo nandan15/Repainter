@@ -1,10 +1,7 @@
 <div class="quotation-builder-container">
   <div class="header">
     <h2>Quotation Builder - Customer Name: {{ customerName }}</h2>
-    <button mat-raised-button [ngStyle]="{'background-color': isFormModified ? 'red' : 'green'}"(click)="generateScopeDoc()">
-    
-    Generate Scope Doc
- </button>
+   
  <button mat-raised-button (click)="navigateToDashboard()">
   Back to Dashboard
 </button>
@@ -77,17 +74,16 @@
           <app-door-grills formGroupName="doorGrills"></app-door-grills>
         </ng-template>
       </mat-tab>
-
+      <mat-tab label="Additional">
+        <ng-template matTabContent><app-additionals formGroupName="additional"></app-additionals></ng-template>
+      </mat-tab> 
       <mat-tab label="Summary">
-        <ng-template matTabContent><app-summary></app-summary></ng-template>
+        <ng-template matTabContent><app-summary formControlName="summary"></app-summary></ng-template>
       </mat-tab>
-
       <mat-tab label="Note">
         <ng-template matTabContent><app-note formGroupName="note"></app-note></ng-template>
       </mat-tab>
     </mat-tab-group>
-
-    <!-- Generate Scope Doc Button -->
-   
+  
   </form>
 </div>

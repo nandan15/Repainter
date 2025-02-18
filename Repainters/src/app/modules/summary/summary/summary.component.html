@@ -1,59 +1,70 @@
 <div class="main-container">
-  <!-- Header Section -->
   <div class="header">
     <h1 class="title">Quotation Summary</h1>
     <div class="date-picker-container">
-      <button mat-raised-button (click)="picker.open()" style="background-color:rgb(133, 60, 60); color: white; padding: 8px 16px;">
-         Work Start Date
+      <button mat-raised-button (click)="picker.open()"style="background-color: rgb(133, 60, 60); color: white; padding: 8px 16px">
+        Work Start Date
       </button>
-      <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate" (dateChange)="onDateSelect($event)">
+      <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate" (dateChange)="onDateSelect($event)" />
       <mat-datepicker #picker></mat-datepicker>
-      <div *ngIf="selectedDate" class="selected-date" style="color: chocolate;">
-        Selected Date: {{ selectedDate | date:'mediumDate' }}
+      <div *ngIf="selectedDate" class="selected-date" style="color: chocolate">
+        Selected Date: {{ selectedDate | date: 'mediumDate' }}
       </div>
       <button mat-raised-button color="primary" (click)="openSendQuoteDialog()" class="send-quote-btn">
         Send Quote
       </button>
-    </div>    
-    <img src="/assets/share.png" width="25" height="25" style="cursor: pointer;" (click)="exportToPDF()"/>
+    </div>
+   <div></div>
   </div>
-
-  <!-- Package & Furniture Table -->
   <div class="wall-card">
     <h3 class="section-title">Package & Furniture</h3>
     <div class="form-grid">
-      <table class="custom-table">
-        <thead>
-          <tr>
-            <th>SI NO</th>
-            <th>Section Name</th>
-            <th>Section ID</th>
-            <th>Pre-Tax Total</th>
-            <th *ngIf="showColumn['discount']">Discount</th>
-            <th *ngIf="showColumn['discount']">Total Value After Discount</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of packageItems">
-            <td>{{item.id}}</td>
-            <td>{{item.name}}</td>
-            <td>{{item.section}}</td>
-            <td class="text-right">{{item.total | number:'1.2-2'}}</td>
-            <td *ngIf="showColumn['discount']" class="text-right">
-              <input type="number" [(ngModel)]="discount" (blur)="validateDiscount()">
-            </td>
-            <td *ngIf="showColumn['discount']" class="text-right">
-              {{item.total * (1 - discount/100) | number:'1.2-2'}}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+     <!-- For Package & Custom Options tables -->
+<table class="custom-table">
+  <thead>
+    <tr>
+      <th>SI NO</th>
+      <th>Section Name</th>
+      <th>Section ID</th>
+      <th>Actual Price</th>
+      <th>Discounted Price</th>
+      <th *ngIf="showColumn['discount']">Discount (%)</th>
+      <th *ngIf="showColumn['discount']">Total Value After Discount</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let item of packageItems">
+      <td>{{ item.id }}</td>
+      <td>{{ item.name }}</td>
+      <td>{{ item.section }}</td>
+      <td class="text-right">{{ item.total | number: '1.0-0' }}</td>
+      <td class="text-right">{{ item.total | number: '1.0-0' }}</td>
+      <td *ngIf="showColumn['discount']" class="text-right">
+        <input 
+          type="number" 
+          [(ngModel)]="item.discount" 
+          (blur)="validateDiscount(item)"
+          [class.error-input]="item.discountError"
+          min="0" 
+          max="10"
+          style="width: 70px;"
+          [disabled]="item.discountError ?? false"
+        />
+        <div *ngIf="item.discountError" class="error-message">
+          {{ discountErrorMessage }}
+        </div>
+      </td>
+      
+      <td *ngIf="showColumn['discount']" class="text-right">
+        {{ item.total * (1 - (item.discount || 0) / 100) | number: '1.2-2' }}
+      </td>
+    </tr>
+  </tbody>
+</table>
     </div>
   </div>
-
-  <!-- Additional Items Table -->
   <div class="wall-card mt-4">
-    <h3 class="section-title">Additional Items</h3>
+    <h3 class="section-title">Custom Options</h3>
     <div class="form-grid">
       <table class="custom-table">
         <thead>
@@ -61,78 +72,107 @@
             <th>SI NO</th>
             <th>Section Name</th>
             <th>Section ID</th>
-            <th>Pre-Tax Total</th>
+            <th>Actual Price</th>
+            <th>Discounted Price</th>
             <th *ngIf="showColumn['discount']">Discount</th>
             <th *ngIf="showColumn['discount']">Total Value After Discount</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let item of additionalItems">
-            <td>{{item.id}}</td>
-            <td>{{item.name}}</td>
-            <td>{{item.section}}</td>
-            <td class="text-right">{{item.total | number:'1.2-2'}}</td>
+            <td>{{ item.id }}</td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.section }}</td>
+            <td>{{item.total * 1.25}}</td>
+            <td class="text-right">{{ item.total | number: '1.0-0' }}</td>
             <td *ngIf="showColumn['discount']" class="text-right">
-              <input type="number" [(ngModel)]="discount" (blur)="validateDiscount()">
+              <input 
+                type="number" 
+                [(ngModel)]="item.discount" 
+                (blur)="validateDiscount(item)"
+                [class.error-input]="item.discountError"
+                min="0" 
+                max="10"
+                [disabled]="item.discountError ?? false"
+
+              />
+              <div *ngIf="item.discountError" class="error-message">
+                {{ discountErrorMessage }}
+              </div>
             </td>
             <td *ngIf="showColumn['discount']" class="text-right">
-              {{item.total * (1 - discount/100) | number:'1.2-2'}}
+              {{ item.total * (1 - (item.discount || 0) / 100) | number: '1.0-0' }}
             </td>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
-
-  <!-- Summary Section -->
   <div class="total-section">
     <h3 class="section-title">SUMMARY</h3>
     <div class="total-content">
       <div class="summary-row">
         <span class="total-label">Pre-tax Total</span>
         <div class="total-input-wrapper">
-          <input type="text" [value]="preTaxTotal | number:'1.2-2'" readonly>
+          <input type="text" [value]="preTaxTotal | number: '1.0-0'" readonly />
         </div>
       </div>
 
       <div class="summary-row" *ngIf="showRow['SummaryToVendor']">
         <span class="total-label">To Vendor</span>
         <div class="total-input-wrapper">
-          <input type="text" [value]="toVendorAmount | number:'1.2-2'" readonly>
+          <input 
+            type="number" 
+            [(ngModel)]="toVendorInput" 
+            (keyup.enter)="addToVendorAmount()"
+            placeholder="Enter ToVendor Amount" 
+          />
+          <button mat-icon-button (click)="addToVendorAmount()">
+            <mat-icon>add</mat-icon>
+          </button>
         </div>
       </div>
 
       <div class="summary-row" *ngIf="showRow['SummaryDiscount']">
-        <span class="total-label">Discount (8%)</span>
+        <span class="total-label">Discount</span>
         <div class="total-input-wrapper">
-          <input type="text" [value]="discountValue | number:'1.2-2'" readonly>
+          <input 
+            type="number" 
+            [(ngModel)]="summaryDiscount"
+            (blur)="validateSummaryDiscount()"
+            [class.error-input]="summaryDiscountError"
+            min="0"
+            max="10"
+            [disabled]="summaryDiscountError"
+          />
+          <div *ngIf="summaryDiscountError" class="error-message">
+            {{ discountErrorMessage }}
+          </div>
         </div>
       </div>
 
       <div class="summary-row" *ngIf="showRow['SummaryDiscount']">
-        <span class="total-label">Pre Tax(Post Discount)</span>
+        <span class="total-label">Pre Tax (Post Discount)</span>
         <div class="total-input-wrapper">
-          <input type="text" [value]="preTaxPostDiscount | number:'1.2-2'" readonly>
+          <input type="text" [value]="preTaxPostDiscount | number: '1.0-0'" readonly />
         </div>
       </div>
 
       <div class="summary-row">
         <span class="total-label">GST @ 18%</span>
         <div class="total-input-wrapper">
-          <input type="text" [value]="gstAmount | number:'1.2-2'" readonly>
+          <input type="text" [value]="gstAmount | number: '1.0-0'" readonly />
         </div>
       </div>
 
       <div class="summary-row grand-total">
         <span class="total-label">Grand Total (including Tax)</span>
         <div class="total-input-wrapper">
-          <input type="text" [value]="grandTotal | number:'1.2-2'" readonly>
+          <input type="text" [value]="grandTotal | number: '1.0-0'" readonly />
         </div>
       </div>
     </div>
   </div>
-
-  <!-- Payment Terms Table -->
   <div class="payment-terms-section">
     <h3 class="section-title">Payment Terms</h3>
     <table class="payment-terms-table">
@@ -146,28 +186,38 @@
       <tbody>
         <tr>
           <td>Order Confirmation</td>
-          <td>25% On Total Value</td>
-          <td class="text-right">₹ {{orderConfirmationAmount | number:'1.2-2'}} (25% of total)</td>
+          <td>20% On Total Value</td>
+          <td class="text-right">{{ orderConfirmationAmount }}</td>
         </tr>
         <tr>
           <td>Design Confirmation</td>
-          <td>50% on Painting & 75% on Rest</td>
-          <td class="text-right">₹ {{designConfirmationAmount | number:'1.2-2'}}</td>
+          <td>70% on Total Value</td>
+          <td class="text-right">{{ designConfirmationAmount }}</td>
         </tr>
         <tr>
           <td>(2 Days Before) Project Handing Over</td>
-          <td>25% on Painting</td>
-          <td class="text-right">₹ {{projectStartAmount | number:'1.2-2'}}</td>
+          <td>10% on Total Value</td>
+          <td class="text-right">{{ projectStartAmount  }}</td>
         </tr>
       </tbody>
     </table>
   </div>
-
-  <!-- Remarks Section -->
+  <button mat-raised-button >
+    
+    Generate Scope Doc
+ </button>
   <div class="form-group">
     <label class="form-label">Remarks</label>
     <div class="input-wrapper">
-      <input type="text" formControlName="Remarks" placeholder="Enter Remarks">
+      <input type="text" placeholder="Enter Remarks" />
     </div>
   </div>
+  <button 
+  mat-fab 
+  class="floating-book-btn"
+  (click)="openBooking()"
+  matTooltip="Book an Appointment"
+  aria-label="Book an appointment">
+  <i class="fas fa-calendar-plus"></i>
+</button>
 </div>

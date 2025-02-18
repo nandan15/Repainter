@@ -18,12 +18,12 @@ namespace DataServices.Repository.Enquiry
 
         public async Task<DataEntities.Enquiry.Enquiry> GetByIdAsync(int id)
         {
-            return await _context.ScCustomer.FindAsync(id);
+            return await _context.Customer.FindAsync(id);
         }
 
         public IQueryable<DataEntities.Enquiry.Enquiry> GetAll()
         {
-            return _context.ScCustomer;
+            return _context.Customer;
         }
     }
 

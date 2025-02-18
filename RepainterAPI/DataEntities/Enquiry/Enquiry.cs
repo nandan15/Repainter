@@ -30,5 +30,6 @@ namespace DataEntities.Enquiry
         public int LastModifiedBy { get; set; }
         public DateTime CreatedOn { get; set; }
         public int CreatedBy { get;set; }
+
     }
 }

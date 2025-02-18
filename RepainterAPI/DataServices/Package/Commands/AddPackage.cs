@@ -31,6 +31,7 @@ namespace DataServices.Package.Commands
                         PackageType = request.PackageModel.PackageType,
                         ProductCode = request.PackageModel.ProductCode,
                         Type = request.PackageModel.Type,
+                        SelectedCode=request.PackageModel.SelectedCode,
                         Amount = request.PackageModel.Amount,
                         Specification = request.PackageModel.Specification,
                         Condition = request.PackageModel.Condition,

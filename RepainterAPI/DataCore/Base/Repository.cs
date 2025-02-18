@@ -92,7 +92,11 @@ namespace Shared.Contexts.Base
             _dbSet.Attach(entity);
             return entity;
         }
-
+        public async Task<TEntity> GetByIdAsync(int id)
+        {
+            // Find method is optimized for looking up entities by primary key
+            return await _dbSet.FindAsync(id);
+        }
         public void Delete(TEntity entity)
         {
             _dbSet.Remove(entity);

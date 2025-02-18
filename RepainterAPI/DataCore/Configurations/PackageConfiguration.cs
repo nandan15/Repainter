@@ -14,12 +14,13 @@ namespace DataCore.Configurations
         public void Configure(EntityTypeBuilder<Package> entity)
         {
             entity.HasKey(p => p.PackageId).HasName("PK_Package");
-            entity.ToTable("ScPackage");
+            entity.ToTable("Package");
             entity.Property(p => p.PackageTabId);
             entity.Property(p => p.GeneratedId);
             entity.Property(p => p.ProductCode);
             entity.Property(p=>p.PackageType);
             entity.Property(p => p.Type);
+            entity.Property(p => p.SelectedCode);
             entity.Property(p => p.Amount);
             entity.Property(p => p.Remarks);
             entity.Property(p=>p.SectionTotalPreTax);

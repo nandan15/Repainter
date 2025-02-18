@@ -7,7 +7,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import{MatRadioModule} from '@angular/material/radio';
-
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
 @NgModule({
   declarations: [
     PanelingComponent,
@@ -19,7 +20,9 @@ import{MatRadioModule} from '@angular/material/radio';
     ReactiveFormsModule,
     MatIconModule,
     MatCheckboxModule,
-   MatRadioModule 
+   MatRadioModule ,
+   MatSelectModule,
+   MatFormFieldModule
   ],
   exports:[
     PanelingComponent

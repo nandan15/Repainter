@@ -8,6 +8,7 @@ using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
 using DataServices.Enquiry.Commands;
 using DataModels.ImageUpload;
+using DataServices.Repository.FileUploadStorage;
 namespace RepainterAPI.Controllers.v1.Enquiry
 {
     [Route("v{apiversion}/enquiry")]
@@ -16,10 +17,18 @@ namespace RepainterAPI.Controllers.v1.Enquiry
     public class EnquiryCommandController : ControllerBase
     {
         private readonly IMediator _mediator;
-        public EnquiryCommandController(IMediator mediator)
+        private readonly ILogger<EnquiryCommandController> _logger;
+        private readonly IFileStorageService _fileStorageService;
+        public EnquiryCommandController(
+        IMediator mediator,
+        ILogger<EnquiryCommandController> logger,
+        IFileStorageService fileStorageService)
         {
             _mediator = mediator;
+            _logger = logger;
+            _fileStorageService = fileStorageService;
         }
+
         ///<summary>
         ///create a new enquiry
         /// </summary>
@@ -59,26 +68,61 @@ namespace RepainterAPI.Controllers.v1.Enquiry
         /// </summary>
         /// <returns></returns>
         /// 
-        [HttpPost("upload-image/{customerId}/{type}")]
-        [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+        [HttpPost("upload-image/{id}/{type}")]
+        [Consumes("multipart/form-data")]
+        [ProducesResponseType(typeof(ImageUpdateModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(InternalErrorViewModel), (int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType(typeof(BadRequestObjectResult), (int)HttpStatusCode.BadRequest)]
         [SwaggerOperation(Tags = new[] { "Enquiry" })]
-        public async Task<IActionResult> UpdateImages(int id, [FromBody] ImageUpdateModel model)
+        public async Task<IActionResult> UploadImage(int id, string type, IFormFile file)
         {
             try
             {
-                var enquiry = await _mediator.Send(new UpdateEnquiryImages
+                if (file == null || file.Length == 0)
+                    return BadRequest("No file uploaded");
+
+                if (type != "floor" && type != "site")
+                    return BadRequest("Invalid image type. Must be either 'floor' or 'site'");
+                var fileUrl = await _fileStorageService.UploadFileAsync(file, type);
+                var result = await _mediator.Send(new UpdateEnquiryImages
                 {
                     Id = id,
-                    Type = model.Type,
-                    Images = model.Images
+                    Type = type,
+                    Images = new List<string> { fileUrl }
                 });
-                return Ok(enquiry);
+
+                if (!result)
+                    return NotFound($"Enquiry with ID {id} not found");
+
+                return Ok(new ImageUpdateModel
+                {
+                    Success = true,
+                    FileUrl = fileUrl,
+                    Type = type,
+                    Images = new List<string> { fileUrl }
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new InternalErrorViewModel { Message = ex.Message });
+                _logger.LogError(ex, $"Error uploading image for enquiry {id}");
+                return StatusCode(500, new InternalErrorViewModel { Message = "Error uploading image" });
             }
+        }
+        ///<summary>
+        ///delete customer 
+        /// </summary>
+        [HttpDelete]
+        [Route("delete/{id}")]
+        [ProducesResponseType(typeof(EnquiryModel),(int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(InternalErrorViewModel),(int)HttpStatusCode.InternalServerError)]
+        [SwaggerOperation(Tags = new[] {"Enquiry"})]
+        public async Task<IActionResult> DeleteCustomer(int id)
+        {
+            var customer = await _mediator.Send(new DeleteEnquiry
+            {
+                EnquiryModel = new EnquiryModel { Id = id }
+            });
+            return Ok(customer);
         }
     }
 }

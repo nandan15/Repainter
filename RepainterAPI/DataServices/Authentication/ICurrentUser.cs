@@ -8,7 +8,7 @@ namespace DataServices.Authentication
 {
     public interface ICurrentUser
     {
-        Guid UserId { get;  }
+        int UserId { get;  }
         string Email { get;  }
         string FullName { get; }
     }

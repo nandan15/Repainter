@@ -1,8 +1,8 @@
 export class Wallpaper{
-    wallpaperId?:number;
-    customerId!:number;
+    wallpaperId!:number;
+    customerId!: number;
     productType!:string;
-    productCode!:number;
+    productCode!:string;
     noOfRolls!:number;
     price!:number;
     remarks!:string;

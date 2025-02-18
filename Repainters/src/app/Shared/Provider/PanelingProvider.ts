@@ -1,8 +1,9 @@
 import { Injectable } from "@angular/core";
 import { Toast, ToastrService } from "ngx-toastr";
-import { BehaviorSubject,Observable} from "rxjs";   
+import { BehaviorSubject,forkJoin,Observable} from "rxjs";   
 import { Paneling } from "../models/paneling";
 import { WallPanelingService } from "../Service/Paneling/Paneling.service";
+import Swal from "sweetalert2";
 @Injectable({
     providedIn:'root'
 })
@@ -20,17 +21,57 @@ export class WallPanelingProvider{
             return this._wallPanelings.asObservable();
         }
         constructor(private wallPanelingService:WallPanelingService,private toaster:ToastrService){}
-        addWallPaneling(wallPanelings:Paneling[]){
-            wallPanelings.forEach(wallPanelings=>{
-                this.wallPanelingService.addWallPaneling(wallPanelings).subscribe((data)=>{
-                    wallPanelings.panelingId=data["created_id"];
-                    wallPanelings.createdOn=wallPanelings.createdOn || new Date();
-                    wallPanelings.lastModifiedOn=new Date();
-                    this._wallPaneling.next([...this.wallPanelingList.wallPaneling,wallPanelings]);
-                    this.toaster.success("WallPaneling confirmed successfully","Confirmation");
+        addWallPaneling(wallPanelings: Paneling[]): Observable<any> {
+            const observables = wallPanelings.map(wallPaneling =>
+                this.wallPanelingService.addWallPaneling(wallPaneling)
+            );
+        
+            return new Observable(subscriber => {
+                forkJoin(observables).subscribe({
+                    next: (responses) => {
+                        const updatedWallPanelings = [...this.wallPanelingList.wallPaneling];
+        
+                        responses.forEach((data, index) => {
+                            const paneling = wallPanelings[index];
+                            paneling.panelingId = data["created_id"];
+                            paneling.createdOn = paneling.createdOn || new Date();
+                            paneling.lastModifiedOn = new Date();
+                            
+                            updatedWallPanelings.push(paneling);
+                        });
+        
+                        this.wallPanelingList.wallPaneling = updatedWallPanelings;
+                        this._wallPaneling.next([...updatedWallPanelings]); // Emit new state
+        
+                        this.toaster.success("Wall Paneling Confirmed Successfully", "Confirmation");
+        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'Wall Paneling added successfully',
+                            confirmButtonText: 'OK'
+                        });
+        
+                        subscriber.next(responses);
+                        subscriber.complete();
+                    },
+                    error: (error) => {
+                        console.error("Error adding wall paneling:", error);
+                        this.toaster.error("Failed to add Wall Paneling", "Error");
+        
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'Failed to save Wall Paneling.',
+                            confirmButtonText: 'OK'
+                        });
+        
+                        subscriber.error(error);
+                    }
                 });
             });
         }
+        
         listWallPaneling(){
             this.wallPanelingService.listWallPaneling().subscribe((data)=>{
                 this.wallPanelingList.wallPaneling=data as Paneling[];

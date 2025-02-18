@@ -6,7 +6,6 @@
   </div>
 
   <nav class="nav-menu">
-    <!-- Base Menu Items -->
     <ng-container *ngFor="let item of baseMenuItems">
       <a [routerLink]="item.link" 
          routerLinkActive="active"
@@ -23,8 +22,6 @@
         </span>
       </a>
     </ng-container>
-
-    <!-- Protected Menu Items -->
     <ng-container *ngFor="let item of protectedMenuItems">
       <a [routerLink]="isItemUnlocked(item.label) ? item.link : null" 
          routerLinkActive="active"

@@ -14,46 +14,44 @@
       <div class="section-card">
         <form [formGroup]="furnitureForm">
           <div formArrayName="furniture">
-            <div *ngFor="let item of furniture.controls; let i=index" [formGroupName]="i" class="paint-block">
+            <div *ngFor="let item of furniture.controls; let i = index" [formGroupName]="i" class="paint-block">
               <div class="block-header">
-                <div class="block-number">Furniture {{i + 1}}</div>
+                <div class="block-number">Furniture {{ i + 1 }}</div>
                 <button *ngIf="furniture.length > 1" class="remove-btn" (click)="removeFurniture(i)">
                   <i class="fas fa-trash"></i> Remove
                 </button>
               </div>
-
-              <!-- First row -->
+        
+              <!-- Form fields -->
               <div class="input-grid-top">
                 <div class="premium-group">
                   <label>Product Code</label>
                   <div class="premium-input">
-                    <input type="text" formControlName="productCode" placeholder="Enter Product Code">
+                    <input
+                      type="text"
+                      formControlName="productCode"
+                      placeholder="Enter Product Code"
+                      (input)="updateFurnitureDetails(i, item.get('productCode')?.value)"
+                    />
                     <div class="input-line"></div>
                   </div>
                 </div>
-
                 <div class="premium-group">
                   <label>Name</label>
                   <div class="premium-input">
-                    <input type="text" formControlName="name" readonly>
+                    <input type="text" formControlName="name" readonly />
                     <div class="input-line"></div>
                   </div>
                 </div>
-
                 <div class="premium-group">
                   <label>Price</label>
                   <div class="premium-input">
-                    <input type="number" formControlName="price" readonly>
+                    <input type="number" formControlName="price" readonly />
                     <div class="input-line"></div>
                   </div>
                 </div>
               </div>
-
-              <!-- Product name display -->
-              <div *ngIf="item.get('name')?.value" class="product-name-display">
-                {{ item.get('name')?.value }}
-              </div>
-
+        
               <!-- Description and Remarks -->
               <div class="input-grid-bottom">
                 <div class="premium-group">
@@ -69,7 +67,7 @@
                     <textarea *ngIf="!item.get('description')?.value" formControlName="description" readonly></textarea>
                   </div>
                 </div>
-
+        
                 <div class="premium-group">
                   <label>Remarks</label>
                   <div class="premium-input">
@@ -80,17 +78,21 @@
               </div>
             </div>
           </div>
-
+        
+          <!-- Section Total -->
           <div class="total-block">
             <div class="premium-group total-section">
               <label>Section Total Furniture F</label>
               <div class="premium-input">
-                <input type="number" placeholder="Total" readonly>
+                <input type="number" [value]="furnitureForm.get('sectionTotal')?.value" readonly />
                 <div class="input-line"></div>
               </div>
             </div>
           </div>
         </form>
+        <div class="confirm-btn">
+          <button type="submit" class="furniturebtn" id="furnitureConfirm" (click)="addFurniture()">Confirm</button>
+        </div>
       </div>
     </div>
   </div>

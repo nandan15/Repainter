@@ -17,7 +17,7 @@ namespace DataServices.Repository.TexturePainting
         public async Task<IEnumerable<TexturePaintingModel>> GetByCustomerIdAsync(int customerId)
         {
             return await Task.Run(() =>
-                _context.ScTexturePainting
+                _context.TexturePainting
                 .Where(tp => tp.CustomerId == customerId && !tp.Deleted)
                 .Select(tp => new TexturePaintingModel
                 {

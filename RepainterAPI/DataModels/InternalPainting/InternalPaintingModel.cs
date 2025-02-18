@@ -12,6 +12,8 @@ namespace DataModels.InternalPainting
         public int IntenalPaintingId { get; set; }
         public int CustomerId { get; set; }
         public decimal CarpetArea { get; set; }
+        public string ProductCode { get; set; }
+        public string Color { get;set; }
         public string CeilingType { get; set; }
         public decimal CeilingPrice { get; set; }
         public string CeilingRemarsk { get;set; }

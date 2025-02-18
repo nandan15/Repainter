@@ -1,12 +1,10 @@
-<!-- curtains.component.html -->
 <div class="page-container">
   <form [formGroup]="curtainForm">
-    <!-- Curtains Section -->
     <div class="section-card">
       <div class="card-banner">
         <h2>F. Curtains</h2>
         <button type="button" class="add-window-btn" (click)="addCurtainSet()">
-        + Add New Balcony
+          + Add New Balcony
         </button>
       </div>
 
@@ -21,46 +19,65 @@
 
           <div formArrayName="balconies">
             <div *ngFor="let balcony of getBalconies(curtainSet).controls; let j = index" [formGroupName]="j" class="paint-block">
-              <!-- Curtain Fields -->
               <div formGroupName="curtain" class="input-grid">
                 <div class="premium-group">
                   <label>Curtain Type</label>
                   <div class="custom-select">
-                    <select formControlName="curtainType">
+                    <select formControlName="CurtainType" required>
                       <option value="">Select Type</option>
                       <option *ngFor="let type of curtainTypes" [value]="type">{{type}}</option>
                     </select>
+                    <div class="error-message" *ngIf="balcony.get('curtain.CurtainType')?.errors?.['required'] && 
+                         balcony.get('curtain.CurtainType')?.touched">
+                      Curtain Type is required
+                    </div>
                   </div>
                 </div>
 
                 <div class="premium-group">
                   <label>Fabric Type</label>
                   <div class="custom-select">
-                    <select formControlName="fabricType">
+                    <select formControlName="FabricType" required>
                       <option value="">Select Type</option>
                       <option *ngFor="let type of fabricTypes" [value]="type">{{type}}</option>
                     </select>
+                    <div class="error-message" *ngIf="balcony.get('curtain.FabricType')?.errors?.['required'] && 
+                         balcony.get('curtain.FabricType')?.touched">
+                      Fabric Type is required
+                    </div>
                   </div>
                 </div>
 
                 <div class="premium-group">
                   <label>Product Code</label>
                   <div class="premium-input">
-                    <input type="text" formControlName="productCode">
+                    <input type="text" formControlName="ProductCode" required>
+                    <div class="error-message" *ngIf="balcony.get('curtain.ProductCode')?.errors?.['required'] && 
+                         balcony.get('curtain.ProductCode')?.touched">
+                      Product Code is required
+                    </div>
                   </div>
                 </div>
 
                 <div class="premium-group">
                   <label>Price</label>
                   <div class="premium-input">
-                    <input type="number" formControlName="price">
+                    <input type="number" formControlName="Price" required min="0">
+                    <div class="error-message" *ngIf="balcony.get('curtain.Price')?.errors?.['required'] && 
+                         balcony.get('curtain.Price')?.touched">
+                      Price is required
+                    </div>
                   </div>
                 </div>
 
                 <div class="premium-group">
                   <label>Remarks</label>
                   <div class="premium-input">
-                    <input type="text" formControlName="remarks">
+                    <input type="text" formControlName="CurtainRemarks" required>
+                    <div class="error-message" *ngIf="balcony.get('curtain.CurtainRemarks')?.errors?.['required'] && 
+                         balcony.get('curtain.CurtainRemarks')?.touched">
+                      Remarks are required
+                    </div>
                   </div>
                 </div>
               </div>
@@ -70,31 +87,47 @@
                 <div class="premium-group">
                   <label>Rod Type</label>
                   <div class="custom-select">
-                    <select formControlName="rodType">
+                    <select formControlName="RodType" required>
                       <option value="">Select Type</option>
                       <option *ngFor="let type of rodTypes" [value]="type">{{type}}</option>
                     </select>
+                    <div class="error-message" *ngIf="balcony.get('rod.RodType')?.errors?.['required'] && 
+                         balcony.get('rod.RodType')?.touched">
+                      Rod Type is required
+                    </div>
                   </div>
                 </div>
 
                 <div class="premium-group">
                   <label>Product Code</label>
                   <div class="premium-input">
-                    <input type="text" formControlName="productCode">
+                    <input type="text" formControlName="RodProductCode" required>
+                    <div class="error-message" *ngIf="balcony.get('rod.RodProductCode')?.errors?.['required'] && 
+                         balcony.get('rod.RodProductCode')?.touched">
+                      Product Code is required
+                    </div>
                   </div>
                 </div>
 
                 <div class="premium-group">
                   <label>Price</label>
                   <div class="premium-input">
-                    <input type="number" formControlName="price">
+                    <input type="number" formControlName="RodPrice" required min="0">
+                    <div class="error-message" *ngIf="balcony.get('rod.RodPrice')?.errors?.['required'] && 
+                         balcony.get('rod.RodPrice')?.touched">
+                      Price is required
+                    </div>
                   </div>
                 </div>
 
                 <div class="premium-group">
                   <label>Remarks</label>
                   <div class="premium-input">
-                    <input type="text" formControlName="remarks">
+                    <input type="text" formControlName="RodRemarks" required>
+                    <div class="error-message" *ngIf="balcony.get('rod.RodRemarks')?.errors?.['required'] && 
+                         balcony.get('rod.RodRemarks')?.touched">
+                      Remarks are required
+                    </div>
                   </div>
                 </div>
               </div>
@@ -104,50 +137,64 @@
                 <div class="premium-group">
                   <label>Finial Type</label>
                   <div class="custom-select">
-                    <select formControlName="finialType">
+                    <select formControlName="FinialType" required>
                       <option value="">Select Type</option>
                       <option *ngFor="let type of finialTypes" [value]="type">{{type}}</option>
                     </select>
+                    <div class="error-message" *ngIf="balcony.get('finial.FinialType')?.errors?.['required'] && 
+                         balcony.get('finial.FinialType')?.touched">
+                      Finial Type is required
+                    </div>
                   </div>
                 </div>
 
                 <div class="premium-group">
                   <label>Product Code</label>
                   <div class="premium-input">
-                    <input type="text" formControlName="productCode">
+                    <input type="text" formControlName="FinialProductCode" required>
+                    <div class="error-message" *ngIf="balcony.get('finial.FinialProductCode')?.errors?.['required'] && 
+                         balcony.get('finial.FinialProductCode')?.touched">
+                      Product Code is required
+                    </div>
                   </div>
                 </div>
 
                 <div class="premium-group">
                   <label>Price</label>
                   <div class="premium-input">
-                    <input type="number" formControlName="price">
+                    <input type="number" formControlName="FinialPrice" required min="0">
+                    <div class="error-message" *ngIf="balcony.get('finial.FinialPrice')?.errors?.['required'] && 
+                         balcony.get('finial.FinialPrice')?.touched">
+                      Price is required
+                    </div>
                   </div>
                 </div>
 
                 <div class="premium-group">
                   <label>Remarks</label>
                   <div class="premium-input">
-                    <input type="text" formControlName="remarks">
+                    <input type="text" formControlName="FinialRemarks" required>
+                    <div class="error-message" *ngIf="balcony.get('finial.FinialRemarks')?.errors?.['required'] && 
+                         balcony.get('finial.FinialRemarks')?.touched">
+                      Remarks are required
+                    </div>
                   </div>
                 </div>
-                
               </div>
             </div>
-          
           </div>
         </div>
         <div class="section-total">
           <div class="premium-group">
-            <label class="total-label">Section Total Curtain E</label>
+            <label class="total-label">Section Total Curtain</label>
             <div class="premium-input">
-              <input type="number" formControlName="sectionTotalE" readonly>
+              <input type="text" formControlName="SectionTotalCurtain" readonly>
             </div>
           </div>
         </div>
       </div>
     </div>
-<br>
+
     <!-- Windows Section -->
     <div class="section-card">
       <div class="card-banner">
@@ -157,7 +204,7 @@
         </button>
       </div>
 
-      <div formArrayName="windows">
+      <div formArrayName="windows" *ngIf="windows.length > 0">
         <div *ngFor="let window of windows.controls; let i = index" [formGroupName]="i" class="paint-block">
           <div class="block-header">
             <span class="block-number">Window {{i + 1}}</span>
@@ -166,89 +213,126 @@
             </button>
           </div>
 
+          <!-- Window Curtain Fields -->
           <div formGroupName="curtain" class="input-grid">
             <div class="premium-group">
               <label>Curtain Type</label>
               <div class="custom-select">
-                <select formControlName="curtainType">
+                <select formControlName="WindowCurtainType" required>
                   <option value="">Select Type</option>
                   <option *ngFor="let type of windowTypes" [value]="type">{{type}}</option>
                 </select>
+                <div class="error-message" *ngIf="window.get('curtain.WindowCurtainType')?.errors?.['required'] && 
+                     window.get('curtain.WindowCurtainType')?.touched">
+                  Curtain Type is required
+                </div>
               </div>
             </div>
 
             <div class="premium-group">
               <label>Fabric Type</label>
               <div class="custom-select">
-                <select formControlName="fabricType">
+                <select formControlName="WindowFabricType" required>
                   <option value="">Select Type</option>
                   <option *ngFor="let type of fabricTypes" [value]="type">{{type}}</option>
                 </select>
+                <div class="error-message" *ngIf="window.get('curtain.WindowFabricType')?.errors?.['required'] && 
+                     window.get('curtain.WindowFabricType')?.touched">
+                  Fabric Type is required
+                </div>
               </div>
             </div>
 
             <div class="premium-group">
               <label>Product Code</label>
               <div class="premium-input">
-                <input type="text" formControlName="productCode">
+                <input type="text" formControlName="WindowCurtainProductCode" required>
+                <div class="error-message" *ngIf="window.get('curtain.WindowCurtainProductCode')?.errors?.['required'] && 
+                     window.get('curtain.WindowCurtainProductCode')?.touched">
+                  Product Code is required
+                </div>
               </div>
             </div>
 
             <div class="premium-group">
               <label>Price</label>
               <div class="premium-input">
-                <input type="number" formControlName="price">
+                <input type="number" formControlName="WindowCurtainPrice" required min="0" readonly>
+                <div class="error-message" *ngIf="window.get('curtain.WindowCurtainPrice')?.errors?.['required'] && 
+                     window.get('curtain.WindowCurtainPrice')?.touched">
+                  Price is required
+                </div>
               </div>
             </div>
 
             <div class="premium-group">
               <label>Remarks</label>
               <div class="premium-input">
-                <input type="text" formControlName="remarks">
+                <input type="text" formControlName="WindowCurtainRemarks" required>
+                <div class="error-message" *ngIf="window.get('curtain.WindowCurtainRemarks')?.errors?.['required'] && 
+                     window.get('curtain.WindowCurtainRemarks')?.touched">
+                  Remarks are required
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Rod Fields -->
+          <!-- Window Rod Fields -->
           <div formGroupName="rod" class="input-grid">
             <div class="premium-group">
               <label>Rod Type</label>
               <div class="custom-select">
-                <select formControlName="rodType">
+                <select formControlName="WindowRodType" required>
                   <option value="">Select Type</option>
                   <option *ngFor="let type of rodTypes" [value]="type">{{type}}</option>
                 </select>
+                <div class="error-message" *ngIf="window.get('rod.WindowRodType')?.errors?.['required'] && 
+                     window.get('rod.WindowRodType')?.touched">
+                  Rod Type is required
+                </div>
               </div>
             </div>
 
             <div class="premium-group">
               <label>Product Code</label>
               <div class="premium-input">
-                <input type="text" formControlName="productCode">
+                <input type="text" formControlName="WindowRodProductCode" required>
+                <div class="error-message" *ngIf="window.get('rod.WindowRodProductCode')?.errors?.['required'] && 
+                     window.get('rod.WindowRodProductCode')?.touched">
+                  Product Code is required
+                </div>
               </div>
             </div>
 
             <div class="premium-group">
               <label>Price</label>
               <div class="premium-input">
-                <input type="number" formControlName="price">
+                <input type="number" formControlName="WindowRodPrice" required min="0">
+                <div class="error-message" *ngIf="window.get('rod.WindowRodPrice')?.errors?.['required'] && 
+                     window.get('rod.WindowRodPrice')?.touched">
+                  Price is required
+                </div>
               </div>
             </div>
 
             <div class="premium-group">
               <label>Remarks</label>
               <div class="premium-input">
-                <input type="text" formControlName="remarks">
+                <input type="text" formControlName="WindowRodRemarks" required>
+                <div class="error-message" *ngIf="window.get('rod.WindowRodRemarks')?.errors?.['required'] && 
+                     window.get('rod.WindowRodRemarks')?.touched">
+                  Remarks are required
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Finial Fields -->
+          <!-- Window Finial Fields -->
           <div formGroupName="finial" class="input-grid">
             <div class="premium-group">
               <label>Finial Type</label>
               <div class="custom-select">
-                <select formControlName="finialType">
+                <select formControlName="WindowFinialType" required>
                   <option value="">Select Type</option>
                   <option *ngFor="let type of finialTypes" [value]="type">{{type}}</option>
                 </select>
@@ -258,21 +342,33 @@
             <div class="premium-group">
               <label>Product Code</label>
               <div class="premium-input">
-                <input type="text" formControlName="productCode">
+                <input type="text" formControlName="WindowFinialProductCode" required>
+                <div class="error-message" *ngIf="window.get('rod.WindowFinialProductCode')?.errors?.['required'] && 
+                window.get('rod.WindowFinialProductCode')?.touched">
+             Finial Product code are required
+             </div>
               </div>
             </div>
 
             <div class="premium-group">
               <label>Price</label>
               <div class="premium-input">
-                <input type="number" formControlName="price">
+                <input type="number" formControlName="WindowFinialPrice" required>
+                <div class="error-message" *ngIf="window.get('rod.WindowFinialPrice')?.errors?.['required'] && 
+                window.get('rod.WindowFinialPrice')?.touched">
+             Finial Price are required
+             </div>
               </div>
             </div>
 
             <div class="premium-group">
               <label>Remarks</label>
               <div class="premium-input">
-                <input type="text" formControlName="remarks">
+                <input type="text" formControlName="WindowFinialRemarks" required>
+                <div class="error-message" *ngIf="window.get('rod.WindowFinialRemarks')?.errors?.['required'] && 
+                window.get('rod.WindowFinialRemarks')?.touched">
+             Finial Remarks are required
+             </div>
               </div>
             </div>
             
@@ -280,9 +376,9 @@
         </div>
         <div class="section-total">
           <div class="premium-group">
-            <label class="total-label">Section Total Curtain E</label>
+            <label class="total-label">Section Total Window</label>
             <div class="premium-input">
-              <input type="number" formControlName="sectionTotalE" readonly>
+              <input type="number" formControlName="SectionTotalWindow" readonly>
             </div>
           </div>
         </div>
@@ -290,11 +386,14 @@
     </div>
     <div class="section-total">
       <div class="premium-group">
-        <label class="total-label">Section Total Windows</label>
+        <label class="total-label">Section Total</label>
         <div class="premium-input">
-          <input type="number" formControlName="sectionTotalWindows" readonly>
+          <input type="number" formControlName="SectionTotal" readonly>
         </div>
       </div>
     </div>
   </form>
+  <div class="confirm-btn">
+    <button type="submit" class="furniturebtn" id="furnitureConfirm" (click)="saveCurtains()">Confirm</button>
+  </div>
 </div>

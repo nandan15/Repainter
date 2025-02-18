@@ -6,9 +6,14 @@ export class Paneling
     customerId!:number;
     generatedId!:number;
     panelingTabId!:number;
-    productCode!:string;
     type!:string;
+    paintingType?:string;
+    panelingType!:string;
+    textureType?:string;
+    wallpaperType?:string;
     price!:number;
+    lighting!:string;
+    lightingPrice!:number;
     description!:string;
     remarks!:string;
     sectionTotal!:number;

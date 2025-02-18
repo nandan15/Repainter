@@ -19,6 +19,7 @@ import { PackageModule } from '../package/package.module';
 import { SummaryModule } from "../summary/summary.module";
 import { FormStateService } from 'src/app/Shared/generate/form-state.service';
 import { MatButtonModule } from '@angular/material/button';
+import { AdditionalsModule } from '../additionals/additionals.module';
 
 
 @NgModule({
@@ -44,7 +45,8 @@ import { MatButtonModule } from '@angular/material/button';
     NoteModule,
     PackageModule,
     SummaryModule,
-    MatButtonModule
+    MatButtonModule,
+    AdditionalsModule
 ],
 providers:[
   FormStateService

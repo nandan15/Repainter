@@ -2,6 +2,8 @@ export class InternalPainting {
     internalPaintingId?: number;
     customerId!: number;
     carpetArea!: number;
+    productCode!:string;
+    color!:string;
     ceilingType!: string;
     ceilingPrice!: number;
     ceilingRemarsk!: string;

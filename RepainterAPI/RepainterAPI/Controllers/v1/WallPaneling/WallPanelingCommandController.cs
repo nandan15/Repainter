@@ -1,7 +1,9 @@
 ﻿using DataModels.Exceptions;
+using DataModels.Package;
 using DataModels.TexturePainting;
 using DataModels.WallPaneling;
 using DataModels.Wallpaper;
+using DataServices.Package.Commands;
 using DataServices.TexturePainting.Commands;
 using DataServices.WallPaneling.Commands;
 using DataServices.Wallpaper.Commands;
@@ -35,6 +37,22 @@ namespace RepainterAPI.Controllers.v1.WallPaneling
                 PanelingModel = model
             });
             return Ok(wall_paneling);
+        }
+        ///<summary>
+        ///delete the WallPaneling
+        /// </summary>
+        [HttpDelete]
+        [Route("delete/{id}")]
+        [ProducesResponseType(typeof(WallpaperModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(InternalErrorViewModel), (int)HttpStatusCode.InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "WallPaneling" })]
+        public async Task<IActionResult> DeleteWallPaneling(int id)
+        {
+            var paneling = await _mediator.Send(new DeletePaneling
+            {
+                PanelingModel = new PanelingModel { PanelingId = id }
+            });
+            return Ok(paneling);
         }
     }
 }

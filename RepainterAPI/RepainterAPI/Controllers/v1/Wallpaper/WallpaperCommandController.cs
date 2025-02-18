@@ -1,5 +1,7 @@
 ﻿using DataModels.Exceptions;
+using DataModels.Package;
 using DataModels.Wallpaper;
+using DataServices.Package.Commands;
 using DataServices.Wallpaper.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -51,6 +53,22 @@ namespace RepainterAPI.Controllers.v1.Wallpaper
             var wallpaper = await _mediator.Send(new UpdateWallpaper
             {
                 WallpaperModel = model
+            });
+            return Ok(wallpaper);
+        }
+        ///<summary>
+        ///delete the Wallpaper
+        /// </summary>
+        [HttpDelete]
+        [Route("delete/{id}")]
+        [ProducesResponseType(typeof(WallpaperModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(InternalErrorViewModel), (int)HttpStatusCode.InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Wallpaper" })]
+        public async Task<IActionResult> DeleteWallpaper(int id)
+        {
+            var wallpaper = await _mediator.Send(new DeleteWallpaper
+            {
+                WallpaperModel = new WallpaperModel { WallpaperId = id }
             });
             return Ok(wallpaper);
         }

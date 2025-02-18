@@ -5,13 +5,16 @@ import { trigger, transition, style, animate } from '@angular/animations';
 import { ActivatedRoute } from '@angular/router';
 import { TexturePainting } from 'src/app/Shared/models/texturepainting';
 import { TexturePaintingProvider } from 'src/app/Shared/Provider/TexturePaintingProvider';
+import { ToastrService } from 'ngx-toastr';
 
 interface WallForm {
+  texturePaintingId:FormControl<number | null>;
   area: FormControl<number | null>;
   type: FormControl<string | null>;
   productCode: FormControl<string | null>;
   price: FormControl<number | null>;
   remarks: FormControl<string | null>;
+  isNew: FormControl<boolean>; // Add this to track new entries
 }
 
 @Component({
@@ -31,19 +34,26 @@ export class TexturePaintingComponent implements OnInit {
   textureForm: FormGroup;
   customerId: number | null = null;
   @Input() currenttexturepainting: TexturePainting = new TexturePainting();
-  texturetype = ['Budget', 'Premium', 'Luxury', 'Custom'];
+  texturetype = ['Classic', 'Premium', 'Azzure', 'Custom'];
   pricerates: { [key: string]: number } = {
-    'Budget': 250,
+    'Classic': 250,
     'Premium': 500,
-    'Luxury': 700,
+    'Azzure': 700,
     'Custom': 2500
+  };
+  productCodes: { [key: string]: string[] } = {
+    'Classic': ['TX001', 'TX002', 'TX003', 'TX007', 'TX008', 'TX009', 'TX010', 'TX011', 'TX012', 'TX027', 'TX028', 'TX029', 'TX032', 'TX033', 'TX034', 'TX038', 'TX039', 'TX040', 'TX041', 'TX042', 'TX043', 'TX044'],
+    'Premium': ['TX004', 'TX005', 'TX006', 'TX021', 'TX022', 'TX023', 'TX024', 'TX025', 'TX026', 'TX030', 'TX031'],
+    'Azzure': ['TX013', 'TX014', 'TX015', 'TX016', 'TX017', 'TX018', 'TX019', 'TX020', 'TX035', 'TX036', 'TX037'],
+    'Custom': ['TX999']
   };
 
   constructor(
     private fb: FormBuilder,
     private cdRef: ChangeDetectorRef,
     private route: ActivatedRoute,
-    private texturePaintingProvider: TexturePaintingProvider
+    private texturePaintingProvider: TexturePaintingProvider,
+    private toastr: ToastrService
   ) {
     this.textureForm = this.fb.group({
       texturePaintings: this.fb.array([]),
@@ -53,40 +63,45 @@ export class TexturePaintingComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.addNewWall();
     this.extractCustomerId();
     if (this.customerId) {
       this.fetchTexturePaintingData();
+    } else {
+      this.addNewWall(); // Add first wall if no existing data
     }
   }
 
   private fetchTexturePaintingData() {
     if (this.customerId !== null) {
-      this.texturePaintingProvider.getTexturePaintingByCustomerId(this.customerId, { delete: 0 }).subscribe(
-        (texturePaintingData) => {
-          if (texturePaintingData && texturePaintingData.length > 0) {
-            // Clear existing walls before adding new ones
-            this.texturePaintings.clear();
-            texturePaintingData.forEach(texturePainting => {
-              const wallGroup = this.createWallFormGroup();
-              wallGroup.patchValue({
-                area: Number(texturePainting.area), // Convert string to number here
-                type: texturePainting.type,
-                productCode: texturePainting.productCode,
-                price: texturePainting.price,
-                remarks: texturePainting.remarks
-              });
-              this.texturePaintings.push(wallGroup);
-            });
-            this.updateSectionTotal();
-          }
-        },
-        (error) => {
-          console.error('Error fetching texturing painting data:', error);
-        }
-      );
+        this.texturePaintingProvider.getTexturePaintingByCustomerId(this.customerId, { delete: 0 }).subscribe(
+            (texturePaintingData) => {
+                if (texturePaintingData && texturePaintingData.length > 0) {
+                    this.texturePaintings.clear();
+                    texturePaintingData.forEach(texturePainting => {
+                        const wallGroup = this.createWallFormGroup();
+                        wallGroup.patchValue({
+                            texturePaintingId: texturePainting.texturePaintingId, // Add this line
+                            area: Number(texturePainting.area),
+                            type: texturePainting.type,
+                            productCode: texturePainting.productCode,
+                            price: texturePainting.price,
+                            remarks: texturePainting.remarks,
+                            isNew: false
+                        });
+                        this.texturePaintings.push(wallGroup);
+                    });
+                    this.updateSectionTotal();
+                } else {
+                    this.addNewWall();
+                }
+            },
+            (error: Error) => {
+                console.error('Error fetching texturing painting data:', error);
+                this.toastr.error('Error loading existing texture painting data');
+            }
+        );
     }
-  }
+}
 
   private extractCustomerId() {
     this.route.parent?.paramMap.subscribe(params => {
@@ -120,15 +135,27 @@ export class TexturePaintingComponent implements OnInit {
   }
 
   private createWallFormGroup(): FormGroup<WallForm> {
-    return this.fb.group<WallForm>({
+    const wallGroup = this.fb.group<WallForm>({
+      texturePaintingId: new FormControl<number | null>(null), 
       area: new FormControl<number | null>(100, [Validators.required, Validators.min(100)]),
       type: new FormControl<string | null>(null),
       productCode: new FormControl<string | null>(null),
       price: new FormControl<number | null>(0),
-      remarks: new FormControl<string | null>('')
+      remarks: new FormControl<string | null>(''),
+      isNew: new FormControl<boolean>(true, { nonNullable: true }) // Make it non-nullable
     });
-  }
 
+    wallGroup.get('type')?.valueChanges.subscribe((type) => {
+      const productCodeControl = wallGroup.get('productCode');
+      if (type && this.productCodes[type]) {
+        productCodeControl?.enable();
+      } else {
+        productCodeControl?.disable();
+      }
+    });
+
+    return wallGroup;
+  }
   private updatePrice(wall: FormGroup<WallForm>) {
     const area = Number(wall.get('area')?.value) || 0;
     const type = wall.get('type')?.value;
@@ -155,26 +182,45 @@ export class TexturePaintingComponent implements OnInit {
 
   onConfirmTexturePainting() {
     if (!this.customerId) {
-      console.error('Customer Id is required');
+      this.toastr.error('Customer ID is required');
       return;
     }
-  
-    // Find the last (newly added) wall in the form array
-    const lastAddedWall = this.texturePaintings.controls[this.texturePaintings.length - 1];
-  
-    // Only save the last added wall
-    const texturePaintings = this.texturePaintings.controls.map(group => ({
-      customerId: this.customerId,
-      area: group.get('area')?.value.toString(), // Convert area to string
-      type: group.get('type')?.value,
-      productCode: group.get('productCode')?.value,
-      price: group.get('price')?.value,
-      remarks: group.get('remarks')?.value,
-      sectionTotal: this.textureForm.get('sectionTotal')?.value.toString()
-  } as TexturePainting));
 
-  this.texturePaintingProvider.addTexturePainting(texturePaintings);
-}
+    const userId = localStorage.getItem('UserId');
+    if (!userId) {
+      this.toastr.error('User ID not found. Please try logging in again.');
+      return;
+    }
+
+    // Filter only new entries
+    const newTexturePaintings = this.texturePaintings.controls
+      .filter(control => control.get('isNew')?.value === true)
+      .map(group => ({
+        customerId: this.customerId,
+        area: group.get('area')?.value.toString(),
+        type: group.get('type')?.value,
+        productCode: group.get('productCode')?.value,
+        price: group.get('price')?.value,
+        remarks: group.get('remarks')?.value,
+        sectionTotal: this.textureForm.get('sectionTotal')?.value.toString(),
+        createdBy: parseInt(userId),
+        lastModifiedBy: parseInt(userId)
+      } as TexturePainting));
+
+    if (newTexturePaintings.length === 0) {
+      this.toastr.info('No new texture paintings to save');
+      return;
+    }
+
+    // Call the provider's method and handle the response
+    this.texturePaintingProvider.addTexturePainting(newTexturePaintings);
+    
+    // Mark saved entries as not new
+    this.texturePaintings.controls
+      .filter(control => control.get('isNew')?.value === true)
+      .forEach(control => control.get('isNew')?.setValue(false));
+  }
+
   addNewWall() {
     const newWall = this.createWallFormGroup();
 
@@ -186,11 +232,31 @@ export class TexturePaintingComponent implements OnInit {
   }
 
   removeWall(index: number) {
-    this.texturePaintings.removeAt(index);
-    this.updateSectionTotal();
-    this.updateTotalRows();
-  }
+    const wall = this.texturePaintings.at(index);
+    const texturePaintingId = wall.get('texturePaintingId')?.value;
 
+    if (texturePaintingId) {
+        // If the wall exists in the database
+        const texturePainting = new TexturePainting();
+        texturePainting.texturePaintingId = texturePaintingId;
+        
+        this.texturePaintingProvider.deleteTexturePainting(texturePainting).subscribe(
+            () => {
+                this.texturePaintings.removeAt(index);
+                this.updateSectionTotal();
+                this.updateTotalRows();
+            },
+            (error) => {
+                console.error('Error deleting texture painting:', error);
+            }
+        );
+    } else {
+        // If it's a new wall that hasn't been saved
+        this.texturePaintings.removeAt(index);
+        this.updateSectionTotal();
+        this.updateTotalRows();
+    }
+}
   private updateTotalRows() {
     // Update total rows in the form
     this.textureForm.patchValue({
@@ -202,5 +268,10 @@ export class TexturePaintingComponent implements OnInit {
     const wallGroup = wall as FormGroup;
     const areaControl = wallGroup.get('area');
     return areaControl ? !areaControl.errors : false;
+  }
+
+  // Method to get product codes based on the selected type
+  getProductCodes(type: string | null): string[] {
+    return type ? this.productCodes[type] : [];
   }
 }

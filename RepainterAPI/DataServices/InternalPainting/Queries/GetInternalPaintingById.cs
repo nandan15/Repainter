@@ -35,6 +35,8 @@ namespace DataServices.InternalPainting.Queries
                     IntenalPaintingId = internalPainting.IntenalPaintingId,
                     CustomerId = internalPainting.CustomerId,
                     CarpetArea = internalPainting.CarpetArea,
+                    ProductCode=internalPainting.ProductCode,
+                    Color=internalPainting.Color,
                     CeilingPrice = internalPainting.CeilingPrice,
                     CeilingRemarsk = internalPainting.CeilingRemarks,
                     CeilingType = internalPainting.CeilingType,
