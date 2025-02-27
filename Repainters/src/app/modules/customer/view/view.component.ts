@@ -2,7 +2,7 @@ import { Component, Input, OnInit, ViewChild, AfterViewInit, ElementRef } from '
 import { Router } from '@angular/router';
 import { Customer, CustomerImagesModel } from 'src/app/Shared/models/customer';
 import { CustomerProvider } from 'src/app/Shared/Provider/CustomerProvider';
-import { CustomerService } from 'src/app/Shared/Service/Customer/customer.service';
+import { CustomerService, ImageUploadResponse } from 'src/app/Shared/Service/Customer/customer.service';
 import { CustomerModalComponent } from '../customer-modal/customer-modal.component';
 import { ToastrService } from 'ngx-toastr';
 import { finalize } from 'rxjs';
@@ -43,15 +43,9 @@ export class CustomerViewComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.customerProvider.customer.subscribe(customers => {
       this.customers = customers;
-      this.filteredCustomers = [...customers];
+      this.filteredCustomers = [...customers]; 
       if (this.customers.length > 0 && !this.selectedCustomer) {
         this.selectCustomer(this.customers[0]);
-      }
-    });
-
-    this.customerProvider.currentCustomer$.subscribe(customer => {
-      if (customer) {
-        this.loadCustomerImages();
       }
     });
   }
@@ -113,8 +107,8 @@ export class CustomerViewComponent implements OnInit, AfterViewInit {
 
   selectCustomer(customer: Customer): void {
     this.selectedCustomer = { ...customer };
+    this.loadCustomerImages();
   }
-
   viewCustomer(customer: Customer): void {
     console.log('Viewing customer:', customer);
   }
@@ -141,161 +135,193 @@ export class CustomerViewComponent implements OnInit, AfterViewInit {
   }
 
   addNewCustomer(): void {
+    const userId = localStorage.getItem('UserId');
+    if (!userId) {
+        this.toastr.error('User ID not found, Please try logging in again.');
+        return;
+    }
+
     const newCustomer: Customer = {
-      id: 0,
-      enquiryId: '0',
-      title: '',
-      name: '',
-      emailId: '',
-      phoneNumber: '',
-      alternatePhoneNumber: '',
-      projectName: '',
-      houseNo: '',
-      projectType: '',
-      configurtion: '',
-      carpetArea: '',
-      projectLocation: '',
-      city: '',
-      floorPlan: [],
-      sitePlan: []
+        id: 0,
+        enquiryId: '0',
+        title: '',
+        name: '',
+        emailId: '',
+        phoneNumber: '',
+        alternatePhoneNumber: '',
+        projectName: '',
+        houseNo: '',
+        projectType: '',
+        configurtion: '',
+        carpetArea: '',
+        projectLocation: '',
+        city: '',
+        floorPlan: [],
+        sitePlan: [],
+        deleted: false,
+        lastModified: new Date(),
+        lastModifiedBy: parseInt(userId),
+        createdOn: new Date(),
+        createdBy: parseInt(userId)
     };
-    this.customerService.addCustomer(newCustomer);
-  }
-  getImageUrl(imageUrl: string): string {
-    if (!imageUrl) return '';
-    
-    // If the URL is already absolute (starts with http:// or https://)
-    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-      return imageUrl;
-    }
-    
-    // Remove leading slash if present
-    const cleanUrl = imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl;
-    
-    // Construct full URL using backend base URL
-    return `${this.baseUrl}${cleanUrl}`;
-  }
 
-  getImageArray(images: string | string[] | null): string[] {
-    if (!images) return [];
-    
-    if (typeof images === 'string') {
-        try {
-            // Handle both JSON string arrays and single URLs
-            const parsed = JSON.parse(images);
-            if (Array.isArray(parsed)) {
-                // Filter out any base64 images and clean up URLs
-                return parsed.filter(url => url && !url.startsWith('data:'))
-                           .map(url => url.startsWith('/') ? url : `/${url}`);
-            }
-            return [images];
-        } catch {
-            // If parsing fails, treat as single URL
-            return [images];
-        }
-    }
-    
-    // If already array, clean up URLs
-    return images.filter(url => url && !url.startsWith('data:'))
-                .map(url => url.startsWith('/') ? url : `/${url}`);
-}
+ 
+    const floorPlanFiles: File[] = [/* Add your floor plan files here */];
+    const sitePlanFiles: File[] = [/* Add your site plan files here */];
 
-  onFileSelected(event: Event, type: 'floorPlan' | 'sitePlan'): void {
-    const input = event.target as HTMLInputElement;
-    const files = input.files;
-
-    if (!files || files.length === 0) {
-        this.toastr.error('No file selected');
-        return;
-    }
-
-    if (!this.selectedCustomer) {
-        this.toastr.error('No customer selected');
-        return;
-    }
-
-    const uploadType: 'floor' | 'site' = type === 'floorPlan' ? 'floor' : 'site';
-
-    const filesToUpload = Array.from(files).filter(file => {
-        if (!this.isValidFileType(file)) {
-            this.toastr.error(`Invalid file type for ${file.name}`);
-            return false;
-        }
-        if (!this.isValidFileSize(file)) {
-            this.toastr.error(`File ${file.name} is too large`);
-            return false;
-        }
-        return true;
-    });
-
-    if (filesToUpload.length === 0) {
-        input.value = '';
-        return;
-    }
-
-    this.customerProvider.uploadMultipleImages(this.selectedCustomer.id, filesToUpload, uploadType)
-      .pipe(
-        finalize(() => {
-            input.value = '';
-        })
-      )
-      .subscribe({
-        next: (responses: { success: boolean }[]) => {
-            const successCount = responses.filter(r => r.success).length;
-            if (successCount > 0) {
-                this.toastr.success(`Successfully uploaded ${successCount} images`);
-                this.loadCustomerImages();
-            }
-            if (successCount < filesToUpload.length) {
-                this.toastr.warning(`Failed to upload ${filesToUpload.length - successCount} images`);
+    // Call the addCustomer method with the Customer object and files
+    this.customerProvider.addCustomer(newCustomer, floorPlanFiles, sitePlanFiles).subscribe({
+        next: (response) => {
+            if (response.success) {
+                this.toastr.success('Customer added successfully');
+            
+            } else {
+             
+                this.toastr.error('Failed to add customer');
             }
         },
         error: (error) => {
-            console.error('Upload error:', error);
-            this.toastr.error('Failed to upload images');
+            console.error('Error adding customer:', error);
+            this.toastr.error(error.message || 'Failed to add customer');
         }
-      });
+    });
+}
+
+getImageUrl(imageUrl: string): string {
+  if (!imageUrl) return '';
+  
+  // If it's already a full URL, return it as is
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl;
+  }
+  
+  // Make sure imageUrl doesn't have a leading slash when we combine it with baseUrl
+  const cleanPath = imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl;
+  
+  // Make sure baseUrl ends with a slash
+  const formattedBaseUrl = this.baseUrl.endsWith('/') ? this.baseUrl : `${this.baseUrl}/`;
+  
+  return `${formattedBaseUrl}${cleanPath}`;
+}
+
+
+getImageArray(images: string | string[] | null): string[] {
+  if (!images) return [];
+  if (typeof images === 'string') {
+    if (images.includes(',')) {
+      return images.split(',').map(img => img.trim());
+    }
+    try {
+      const parsed = JSON.parse(images);
+      return Array.isArray(parsed) ? parsed : [images];
+    } catch {
+      return [images];
+    }
+  }
+  
+  // Already an array
+  return images;
+}
+
+
+onFileSelected(event: Event, type: 'floorPlan' | 'sitePlan'): void {
+  const input = event.target as HTMLInputElement;
+  const files = input.files;
+
+  if (!files || files.length === 0) {
+    this.toastr.error('No file selected');
+    return;
   }
 
-  private loadCustomerImages(): void {
-    if (!this.selectedCustomer) return;
-
-    this.customerService.getCustomerImages(this.selectedCustomer.id)
-        .pipe(
-            finalize(() => {
-                this.uploadingFloorPlan = false;
-                this.uploadingSitePlan = false;
-            })
-        )
-        .subscribe({
-            next: (response: CustomerImagesModel) => {
-                if (response.success && this.selectedCustomer) {
-                    const customerImages = response.data.find(
-                        img => img.customerId === this.selectedCustomer!.id
-                    );
-
-                    if (customerImages) {
-                        this.selectedCustomer = {
-                            ...this.selectedCustomer,
-                            floorPlan: customerImages.floorPlanImages,
-                            sitePlan: customerImages.sitePlanImages
-                        };
-
-                        const index = this.customers.findIndex(c => c.id === this.selectedCustomer!.id);
-                        if (index !== -1) {
-                            this.customers[index] = this.selectedCustomer;
-                            this.filteredCustomers = this.applySearch(this.customers);
-                        }
-                    }
-                }
-            },
-            error: (error) => {
-                console.error('Error loading customer images:', error);
-                this.toastr.error('Failed to load customer images');
-            }
-        });
+  if (!this.selectedCustomer) {
+    this.toastr.error('No customer selected');
+    return;
   }
 
+  const uploadType: 'floor' | 'site' = type === 'floorPlan' ? 'floor' : 'site';
+
+  const filesToUpload = Array.from(files).filter(file => {
+    if (!this.isValidFileType(file)) {
+      this.toastr.error(`Invalid file type for ${file.name}`);
+      return false;
+    }
+    if (!this.isValidFileSize(file)) {
+      this.toastr.error(`File ${file.name} is too large`);
+      return false;
+    }
+    return true;
+  });
+
+  if (filesToUpload.length === 0) {
+    input.value = '';
+    return;
+  }
+
+  if (type === 'floorPlan') {
+    this.uploadingFloorPlan = true;
+  } else {
+    this.uploadingSitePlan = true;
+  }
+
+  this.customerProvider.uploadMultipleImages(this.selectedCustomer.id, filesToUpload, uploadType)
+    .pipe(
+      finalize(() => {
+        input.value = '';
+        if (type === 'floorPlan') {
+          this.uploadingFloorPlan = false;
+        } else {
+          this.uploadingSitePlan = false;
+        }
+      })
+    )
+    .subscribe({
+      next: (responses: ImageUploadResponse[]) => {
+        const successCount = responses.filter(r => r.success).length;
+        if (successCount > 0) {
+          this.toastr.success(`Successfully uploaded ${successCount} images`);
+          this.loadCustomerImages();
+        }
+        if (successCount < filesToUpload.length) {
+          this.toastr.warning(`Failed to upload ${filesToUpload.length - successCount} images`);
+        }
+      },
+      error: (error) => {
+        console.error('Upload error:', error);
+        this.toastr.error('Failed to upload images');
+      }
+    });
+}
+private loadCustomerImages(): void {
+  if (!this.selectedCustomer) return;
+
+  this.customerService.getImagesById(this.selectedCustomer.id)
+    .pipe(
+      finalize(() => {
+        this.uploadingFloorPlan = false;
+        this.uploadingSitePlan = false;
+      })
+    )
+    .subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          // Update the selected customer with the fetched images
+          if (this.selectedCustomer) {
+            this.selectedCustomer = {
+              ...this.selectedCustomer,
+              floorPlan: response.data.floorPlan || [],
+              sitePlan: response.data.sitePlan || []
+            };
+          }
+        } else {
+          this.toastr.error(response.message || 'Failed to load customer images');
+        }
+      },
+      error: (error) => {
+        console.error('Error loading customer images:', error);
+        this.toastr.error('Failed to load customer images');
+      }
+    });
+}
   private resetUploadState(type: 'floorPlan' | 'sitePlan'): void {
     if (type === 'floorPlan') {
       this.uploadingFloorPlan = false;
@@ -310,10 +336,14 @@ export class CustomerViewComponent implements OnInit, AfterViewInit {
   }
 
   private isValidFileSize(file: File): boolean {
-    const maxSize = 100 * 1024 * 1024; // 100MB
+    const maxSize = 100 * 1024 * 1024; 
     return file.size <= maxSize;
   }
-
+  refreshImages(): void {
+    if (this.selectedCustomer) {
+      this.loadCustomerImages();
+    }
+  }
   refreshCustomerImages(): void {
     if (!this.selectedCustomer) return;
 
@@ -355,13 +385,12 @@ export class CustomerViewComponent implements OnInit, AfterViewInit {
   }
 
   openImagePreview(imageUrl: string): void {
-    this.previewImage = imageUrl;
+    this.previewImage = this.getImageUrl(imageUrl);
   }
 
   closeImagePreview(): void {
     this.previewImage = null;
   }
-
   refreshCustomerData(): void {
     if (this.selectedCustomer) {
       this.customerService.getCustomerById(this.selectedCustomer.id).subscribe({

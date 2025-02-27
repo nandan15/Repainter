@@ -1,0 +1,71 @@
+<div class="category-view-container">
+  <div *ngIf="isLoading" class="loading-state">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p>Loading...</p>
+  </div>
+  <div *ngIf="error" class="error-state">
+    <i class="fas fa-exclamation-circle"></i>
+    <p>{{error}}</p>
+    <button (click)="loadCategoryDetails()" class="btn-retry">
+      Retry
+    </button>
+  </div>
+  <div *ngIf="!isLoading && !error && category" class="content-container">
+    <div class="search-container">
+      <i class="fas fa-search search-icon"></i>
+      <input 
+        type="text" 
+        [(ngModel)]="searchText" 
+        (ngModelChange)="filterItems()"
+        placeholder="Search files..." 
+        class="search-input"
+      >
+    </div>
+
+    <div class="category-header">
+      <h1>{{category.name}}</h1>
+    </div>
+    <div *ngFor="let folder of folders" class="folder-section">
+      <div class="folder-header">
+        <i class="fas fa-folder"></i>
+        <h2>{{folder.name}}</h2>
+      </div>
+      
+      <div class="files-grid">
+        <div *ngFor="let file of getFilesForFolder(folder.folderId)" class="file-card">
+          <div class="file-icon">
+            <i [class]="'fas ' + getFileTypeIcon(file)"></i>
+          </div>
+          <div class="file-details">
+            <span class="file-name">{{file.name}}</span>
+            <span class="file-type">{{file.fileType}}</span>
+          </div>
+          <div class="file-actions">
+            <button (click)="previewFile(file)" class="btn-preview">
+              <i class="fas fa-eye"></i>
+              Preview
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="folders.length === 0 && files.length === 0" class="empty-state">
+      <i class="fas fa-folder-open"></i>
+      <p>No content in this category</p>
+    </div>
+  </div>
+</div>
+<div class="modal" *ngIf="selectedFile" [class.show]="selectedFile">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>{{selectedFile.name}}</h2>
+      <button (click)="closePreview()" class="btn-close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div [ngSwitch]="getFileType(selectedFile)">
+      </div>
+    </div>
+  </div>
+</div>

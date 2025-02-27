@@ -15,7 +15,7 @@ export class CategoryModel {
     folderId!: number;
     name!: string;
     categoryId!: number;
-    parentFolderId?: number;
+    parentFolderId?: number | null;  // Update this line to allow null
     customerId!: number;
     userId!: number;
     createdBy!: number;
@@ -27,13 +27,14 @@ export class CategoryModel {
     parentFolder?: FolderModel;
     subFolders?: FolderModel[];
     files?: CatalogFileModel[];
-  }
+}
   
   export class CatalogFileModel {
     fileId!: number;
     name!: string;
     fileType!: string;
     filePath!: string;
+    fileSize!:number;
     folderId!: number;
     categoryId!: number;
     customerId!: number;

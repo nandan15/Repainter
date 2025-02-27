@@ -1,1 +1,30 @@
-<p>addproduct works!</p>
+<!-- addproduct.component.html -->
+<div class="modal-header">
+  <h2>Create New Category</h2>
+  <button (click)="closeDialog()" class="close-btn">
+    <i class="fas fa-times"></i>
+  </button>
+</div>
+
+<div class="modal-body">
+  <form (ngSubmit)="onSave()" class="category-form">
+    <div class="form-group">
+      <label for="categoryName">Category Name</label>
+      <input
+        id="categoryName"
+        [(ngModel)]="categoryName"
+        name="categoryName"
+        type="text"
+        placeholder="Enter category name"
+        required
+      />
+    </div>
+
+    <div class="form-actions">
+      <button type="button" (click)="closeDialog()" class="btn-secondary">Cancel</button>
+      <button type="submit" class="btn-primary" [disabled]="isSaving">
+        {{ isSaving ? 'Saving...' : 'Save' }}
+      </button>
+    </div>
+  </form>
+</div>

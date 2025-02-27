@@ -13,8 +13,13 @@ export class Customer {
   carpetArea!: string;
   projectLocation!: string;
   city!: string;
-  floorPlan!: string[];
-  sitePlan!: string[];
+  floorPlan!: string[]; // Array of file paths
+  sitePlan!: string[];  // Array of file paths
+  deleted!: boolean;
+  lastModified!: Date;
+  lastModifiedBy!: number;
+  createdOn!: Date;
+  createdBy!: number;
 }
 export interface CustomerImagesModel {
   success: boolean;

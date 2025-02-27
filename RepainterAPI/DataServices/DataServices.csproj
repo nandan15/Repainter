@@ -31,6 +31,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Folder Include="Enquiry\Queries\" />
+		<Folder Include="FIleStorage\" />
 		<Folder Include="ProductManagement\Command\" />
 		<Folder Include="ProductManagement\Queries\" />
 	</ItemGroup>

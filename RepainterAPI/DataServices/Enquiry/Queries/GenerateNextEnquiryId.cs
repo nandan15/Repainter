@@ -6,7 +6,7 @@ namespace DataServices.Enquiry.Queries
 {
     public class GenerateNextEnquiryId : IRequest<string>
     {
-        
+
     }
     public class GenerateNextEnquiryIdHandler : IRequestHandler<GenerateNextEnquiryId, string>
     {

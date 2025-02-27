@@ -11,6 +11,9 @@ namespace DataServices.CatalogService
     {
         private readonly RepainterContext _context;
         private readonly IWebHostEnvironment _environment;
+        private const int MAX_FILES_PER_FOLDER = 5;
+        private const long PRIORITY_FILE_SIZE_LIMIT = 300 * 1024 * 1024;
+        private const long REGULAR_FILE_SIZE_LIMIT = 30 * 1024 * 1024;
 
         public CatalogService(RepainterContext context, IWebHostEnvironment environment)
         {
@@ -70,7 +73,6 @@ namespace DataServices.CatalogService
             {
                 Name = folder.Name,
                 CategoryId = folder.CategoryId,
-                ParentFolderId = folder.ParentFolderId,
                 CustomerId = folder.CustomerId,
                 UserId = folder.UserId,
                 CreatedBy = folder.CreatedBy,
@@ -83,7 +85,6 @@ namespace DataServices.CatalogService
             folder.FolderId = entity.FolderId;
             return folder;
         }
-
         public async Task<FolderModel> UpdateFolderAsync(FolderModel folder)
         {
             var entity = await _context.Folders.FindAsync(folder.FolderId);
@@ -114,39 +115,104 @@ namespace DataServices.CatalogService
 
         public async Task<CatalogFileModel> UploadFileAsync(CatalogFileModel file, IFormFile uploadedFile)
         {
-            var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
-            if (!Directory.Exists(uploadsFolder))
-                Directory.CreateDirectory(uploadsFolder);
+            // Get all non-deleted files in the folder
+            var filesInFolder = await _context.CatalogFile
+                .Where(f => f.FolderId == file.FolderId && !f.IsDeleted)
+                .OrderBy(f => f.CreatedOn)
+                .ToListAsync();
 
-            var uniqueFileName = $"{Guid.NewGuid()}_{uploadedFile.FileName}";
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+            // Check if this file would be one of the first 5 large files
+            var largeFilesCount = filesInFolder.Count(f => f.FileSize > REGULAR_FILE_SIZE_LIMIT);
+            bool canBeLargeFile = largeFilesCount < 5;
 
+            // Determine the maximum allowed size for this upload
+            long maxAllowedSize;
+            string errorMessage;
+
+            if (canBeLargeFile)
+            {
+                maxAllowedSize = PRIORITY_FILE_SIZE_LIMIT; // 300MB
+                errorMessage = $"File size exceeds the maximum allowed size of {PRIORITY_FILE_SIZE_LIMIT / (1024 * 1024)}MB for priority files.";
+            }
+            else
+            {
+                maxAllowedSize = REGULAR_FILE_SIZE_LIMIT; // 30MB
+                errorMessage = $"Only the first 5 files can be up to 300MB. Additional files must be {REGULAR_FILE_SIZE_LIMIT / (1024 * 1024)}MB or smaller.";
+            }
+
+            // Validate file size
+            if (uploadedFile.Length > maxAllowedSize)
+            {
+                throw new InvalidOperationException(errorMessage);
+            }
+
+            // Create folder structure
+            var categoryName = await GetCategoryNameAsync(file.CategoryId);
+            var folderName = await GetFolderNameAsync(file.FolderId);
+
+            var baseUploadsPath = Path.Combine(_environment.WebRootPath, "uploads");
+            var categoryPath = Path.Combine(baseUploadsPath, categoryName);
+            var folderPath = Path.Combine(categoryPath, folderName);
+
+            // Create directories if they don't exist
+            Directory.CreateDirectory(baseUploadsPath);
+            Directory.CreateDirectory(categoryPath);
+            Directory.CreateDirectory(folderPath);
+
+            // Generate unique filename
+            var uniqueFileName = $"{Guid.NewGuid()}{Path.GetExtension(uploadedFile.FileName)}";
+            var filePath = Path.Combine(folderPath, uniqueFileName);
+
+            // Save file to disk
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await uploadedFile.CopyToAsync(stream);
             }
 
+            // Set relative file path for database
+            file.FilePath = Path.Combine(
+                "uploads",
+                categoryName,
+                folderName,
+                uniqueFileName
+            ).Replace("\\", "/");
+
+            // Create database entry
             var entity = new CatalogFile
             {
                 Name = file.Name,
-                FileType = Path.GetExtension(uploadedFile.FileName),
-                FilePath = uniqueFileName,
+                FileType = file.FileType,
+                FilePath = file.FilePath,
                 FolderId = file.FolderId,
                 CategoryId = file.CategoryId,
                 CustomerId = file.CustomerId,
                 UserId = file.UserId,
                 CreatedBy = file.CreatedBy,
-                CreatedOn = DateTime.UtcNow
+                CreatedOn = DateTime.UtcNow,
+                FileSize = uploadedFile.Length,
+                IsDeleted = false
             };
 
             _context.CatalogFile.Add(entity);
             await _context.SaveChangesAsync();
-
             file.FileId = entity.FileId;
-            file.FilePath = uniqueFileName;
             return file;
         }
+        private async Task<string> GetCategoryNameAsync(int categoryId)
+        {
+            var category = await _context.Categories.FindAsync(categoryId);
+            if (category == null)
+                throw new KeyNotFoundException("Category not found");
+            return category.Name.Replace(" ", "_");
+        }
 
+        private async Task<string> GetFolderNameAsync(int folderId)
+        {
+            var folder = await _context.Folders.FindAsync(folderId);
+            if (folder == null)
+                throw new KeyNotFoundException("Folder not found");
+            return folder.Name.Replace(" ", "_");
+        }
         public async Task<bool> DeleteFileAsync(int fileId, int userId)
         {
             var entity = await _context.CatalogFile
@@ -192,7 +258,6 @@ namespace DataServices.CatalogService
                     FolderId = f.FolderId,
                     Name = f.Name,
                     CategoryId = f.CategoryId,
-                    ParentFolderId = f.ParentFolderId,
                     CustomerId = f.CustomerId,
                     UserId = f.UserId,
                     CreatedBy = f.CreatedBy,
@@ -227,6 +292,26 @@ namespace DataServices.CatalogService
                 })
                 .ToListAsync();
         }
+        public async Task<CategoryModel> CheckCategoryExistsAsync(string categoryName, int customerId)
+        {
+            var category = await _context.Categories
+                .Where(c => c.Name == categoryName && c.CustomerId == customerId && !c.IsDeleted)
+                .Select(c => new CategoryModel
+                {
+                    CategoryId = c.CategoryId,
+                    Name = c.Name,
+                    CustomerId = c.CustomerId,
+                    UserId = c.UserId,
+                    CreatedBy = c.CreatedBy,
+                    CreatedOn = c.CreatedOn,
+                    LastModifiedBy = c.LastModifiedBy,
+                    LastModifiedOn = c.LastModifiedOn
+                })
+                .FirstOrDefaultAsync();
+
+            return category; 
+        }
+
     }
 
 }

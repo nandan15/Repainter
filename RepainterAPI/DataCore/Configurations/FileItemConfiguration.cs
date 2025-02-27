@@ -21,6 +21,7 @@ namespace DataCore.Configurations
             builder.Property(f => f.FilePath)
                 .IsRequired()
                 .HasMaxLength(1000);
+            builder.Property(f => f.FileSize).IsRequired().HasMaxLength(10000);
 
             builder.Property(f => f.FolderId)
                 .IsRequired();

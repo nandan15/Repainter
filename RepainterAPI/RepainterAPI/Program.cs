@@ -33,7 +33,11 @@ using DataServices.WallPaneling.Queries;
 using DataServices.WhatsApp;
 using Microsoft.AspNetCore.Http.Features;
 using Shared.Contexts.Base;
-
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+using DataServices.Repository.CustomerRepository;
+using DataServices.Customer;
+using DataServices.Mappings;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
@@ -52,16 +56,38 @@ app.Run();
 
 void ConfigureServices(WebApplicationBuilder builder)
 {
-    // Form options configuration
-    builder.Services.Configure<FormOptions>(options =>
+    // Configure IIS
+    builder.Services.Configure<IISServerOptions>(options =>
     {
-        options.MultipartBodyLengthLimit = 100 * 1024 * 1024;
+        options.MaxRequestBodySize = 300 * 1024 * 1024; // 300MB
     });
 
-    // Kestrel configuration
+    // Configure Kestrel
     builder.WebHost.ConfigureKestrel(serverOptions =>
     {
-        serverOptions.Limits.MaxRequestBodySize = 100 * 1024 * 1024;
+        serverOptions.Limits.MaxRequestBodySize = 300 * 1024 * 1024; // 300MB
+        serverOptions.Limits.MaxRequestBufferSize = 300 * 1024 * 1024; // 300MB
+        serverOptions.Limits.MinRequestBodyDataRate = null;
+        serverOptions.Limits.MinResponseDataRate = null;
+    });
+
+    // Configure Form Options
+    builder.Services.Configure<FormOptions>(options =>
+    {
+        options.MultipartBodyLengthLimit = 300 * 1024 * 1024; // 300MB
+        options.ValueLengthLimit = 300 * 1024 * 1024; // 300MB
+        options.MemoryBufferThreshold = 300 * 1024 * 1024; // 300MB
+    });
+
+    // Configure Request Size Limits
+    builder.Services.Configure<KestrelServerOptions>(options =>
+    {
+        options.Limits.MaxRequestBodySize = 300 * 1024 * 1024; // 300MB
+    });
+
+    builder.Services.Configure<IISServerOptions>(options =>
+    {
+        options.MaxRequestBodySize = 300 * 1024 * 1024; // 300MB
     });
 
     // Database configuration
@@ -118,6 +144,13 @@ void ConfigureServices(WebApplicationBuilder builder)
         });
     });
 
+    // Register IDistributedCache (Redis)
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = configuration["Redis:Configuration"];
+        options.InstanceName = configuration["Redis:InstanceName"];
+    });
+
     // MediatR and AutoMapper
     builder.Services.AddMediatR(cfg => {
         cfg.RegisterServicesFromAssemblies(
@@ -133,7 +166,8 @@ void ConfigureServices(WebApplicationBuilder builder)
         );
     });
 
-    builder.Services.AddAutoMapper(typeof(EnquiryModel).Assembly);
+    // Add this line to your RegisterServices method
+    builder.Services.AddAutoMapper(typeof(EnquiryModel).Assembly, typeof(EnquiryMappingProfile).Assembly);
 
     // Register services
     RegisterServices(builder.Services);
@@ -156,7 +190,6 @@ void ConfigureServices(WebApplicationBuilder builder)
 
     builder.Services.AddControllers();
 }
-
 void ConfigureMiddleware(WebApplication app)
 {
     if (app.Environment.IsDevelopment())
@@ -168,9 +201,8 @@ void ConfigureMiddleware(WebApplication app)
 
     app.UseHttpsRedirection();
 
-    // Static files configuration
-    app.UseStaticFiles();
-    app.UseStaticFiles(new StaticFileOptions
+    // Static files configuration with increased size limits
+    var staticFileOptions = new StaticFileOptions
     {
         FileProvider = new PhysicalFileProvider(
             Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
@@ -182,7 +214,9 @@ void ConfigureMiddleware(WebApplication app)
                 "Access-Control-Allow-Headers",
                 "Origin, X-Requested-With, Content-Type, Accept");
         }
-    });
+    };
+
+    app.UseStaticFiles(staticFileOptions);
 
     app.UseCors("UI");
     app.UseAuthentication();
@@ -192,11 +226,14 @@ void ConfigureMiddleware(WebApplication app)
 
 void ConfigureUploadDirectories(WebApplication app)
 {
-    var uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "upload");
-    var floorPlanPath = Path.Combine(uploadPath, "floor");
-    var sitePlanPath = Path.Combine(uploadPath, "site");
+    var uploadPaths = new[]
+    {
+        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads"),
+        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "upload", "floor"),
+        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "upload", "site")
+    };
 
-    foreach (var path in new[] { uploadPath, floorPlanPath, sitePlanPath })
+    foreach (var path in uploadPaths)
     {
         if (!Directory.Exists(path))
         {
@@ -207,6 +244,8 @@ void ConfigureUploadDirectories(WebApplication app)
 
 void RegisterServices(IServiceCollection services)
 {
+    services.AddScoped<ICustomerRepository, CustomerRepository>();
+    services.AddScoped<ICustomerService, CustomerService>();
     services.AddScoped<IUnitOfWork, RepainterUnitOfWork>();
     services.AddScoped<ICurrentUser, CurrentUser>();
     services.AddScoped<IInternalPaintingRepository, InternalPaintingRepository>();

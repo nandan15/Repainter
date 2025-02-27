@@ -42,8 +42,7 @@ namespace DataServices.Enquiry.Commands
                     CarpetArea = request.EnquiryModel.CarpetArea,
                     ProjectLocation = request.EnquiryModel.ProjectLocation,
                     City = request.EnquiryModel.City,
-                    FloorPlan = request.EnquiryModel.FloorPlan,
-                    SitePlan = request.EnquiryModel.SitePlan,
+                
                     Deleted = false,
                     CreatedBy = request.EnquiryModel.CreatedBy,
                     CreatedOn = DateTime.UtcNow,

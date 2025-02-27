@@ -2,12 +2,12 @@ import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { MatTabGroup } from '@angular/material/tabs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CustomerProvider } from 'src/app/Shared/Provider/CustomerProvider';
 import { Customer } from 'src/app/Shared/models/customer';
 import { Location } from '@angular/common';
 import { NavigationService } from 'src/app/Shared/Service/Navigation.service';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { CustomerProvider } from 'src/app/Shared/Provider/CustomerProvider';
 @Component({
   selector: 'app-view',
   templateUrl: './view.component.html',
@@ -147,8 +147,6 @@ private initializeForm() {
                 this.loadCustomerData(this.customerId);
             }
         });
-
-    // Subscribe to current customer changes
     this.customerProvider.currentCustomer$
         .pipe(takeUntil(this.destroy$))
         .subscribe(customer => {
@@ -192,7 +190,10 @@ ngOnDestroy() {
     });
   }
 
- 
+  navigateToProduct(){
+    const url=`/product/product`;
+    window.open(url,'_blank');
+ }
   onTabChange(event: any) {
     this.activeTabIndex = event.index;
   }

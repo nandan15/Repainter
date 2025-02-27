@@ -1,10 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { forkJoin, Subject } from 'rxjs';
+import { finalize, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { CatalogService } from 'src/app/Shared/Service/ProductCatalog/ProductCatalog.service';
 import { CatalogFileModel, CategoryModel, DashboardStats, FolderModel } from 'src/app/Shared/models/ProductCatalog';
+import { AddproductComponent } from '../addproduct/addproduct.component';
+import { AddPreviewComponent } from '../add-preview/add-preview.component';
+import { RouterModule } from '@angular/router';
 
 @Component({
     selector: 'app-product',
@@ -17,19 +20,16 @@ export class ProductComponent implements OnInit, OnDestroy {
     isSidebarCollapsed = false;
     isLoading = false;
     error: string | null = null;
-
-    // Navigation and selection
     currentPath: string[] = [];
     selectedItem: CategoryModel | FolderModel | CatalogFileModel | null = null;
     isRenaming = false;
     newItemName = '';
-
-    // Data
     categories: CategoryModel[] = [];
     currentCategory?: CategoryModel;
     currentFolder?: FolderModel;
     currentFolders: FolderModel[] = [];
     currentFiles: CatalogFileModel[] = [];
+    selectedCategory: CategoryModel | null = null;
     dashboardStats: DashboardStats = {
         totalProducts: 0,
         totalCategories: 0,
@@ -45,7 +45,8 @@ export class ProductComponent implements OnInit, OnDestroy {
     constructor(
         private catalogService: CatalogService,
         private snackBar: MatSnackBar,
-        private dialog: MatDialog
+        private dialog: MatDialog,
+        private router:RouterModule
     ) {}
 
     ngOnInit(): void {
@@ -77,49 +78,227 @@ public loadInitialData(): void {
           }
       });
 }
-    getItemIcon(item: CategoryModel | FolderModel | CatalogFileModel): string {
-      if (this.isFolder(item)) {
-          return 'fas fa-folder';
-      } else if (this.isFile(item)) {
-          return this.getFileIcon(item);
-      } else {
-          return 'fas fa-folder-open'; // for categories
-      }
+openCategoryInNewTab(category: CategoryModel): void {
+  const url = `/product/customerview/${category.categoryId}?categoryName=${encodeURIComponent(category.name)}`;
+  const newWindow = window.open(url, '_blank');
+  
+  if (newWindow) {
+    newWindow.document.title = `Repainters - ${category.name}`;
+  }
+}
+getTotalFiles(): number {
+    let total = 0;
+    this.categories.forEach(category => {
+      this.catalogService.getFolders(category.categoryId, this.customerId, this.userId)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(folders => {
+          folders.forEach(folder => {
+            this.catalogService.getFiles(folder.folderId, this.customerId, this.userId)
+              .pipe(takeUntil(this.destroy$))
+              .subscribe(files => {
+                total += files.length;
+              });
+          });
+        });
+    });
+    return total;
+  }
+  getRecentUploads(): number {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    
+    let recentCount = 0;
+    this.categories.forEach(category => {
+      this.catalogService.getFolders(category.categoryId, this.customerId, this.userId)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(folders => {
+          folders.forEach(folder => {
+            this.catalogService.getFiles(folder.folderId, this.customerId, this.userId)
+              .pipe(takeUntil(this.destroy$))
+              .subscribe(files => {
+                recentCount += files.filter(file => 
+                  new Date(file.createdOn) > oneWeekAgo
+                ).length;
+              });
+          });
+        });
+    });
+    return recentCount;
+  }
+  getCategoryFolderCount(category: CategoryModel): number {
+  let folderCount = 0;
+  this.catalogService.getFolders(category.categoryId, this.customerId, this.userId)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(folders => {
+      folderCount = folders.length;
+    });
+  return folderCount;
+}
+
+getCategoryFileCount(category: CategoryModel): number {
+  let fileCount = 0;
+  this.catalogService.getFolders(category.categoryId, this.customerId, this.userId)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(folders => {
+      folders.forEach(folder => {
+        this.catalogService.getFiles(folder.folderId, this.customerId, this.userId)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe(files => {
+            fileCount += files.length;
+          });
+      });
+    });
+  return fileCount;
+}
+
+viewCategoryContents(category: CategoryModel): void {
+    this.selectedCategory = category;
+    this.loadCategoryContents(category.categoryId);
+  }
+  loadCategoryContents(categoryId: number): void {
+    this.isLoading = true;
+    this.error = null;
+    this.catalogService.getFolders(categoryId, this.customerId, this.userId)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.isLoading = false)
+      )
+      .subscribe({
+        next: (folders) => {
+          this.currentFolders = folders;
+          folders.forEach(folder => {
+            this.catalogService.getFiles(folder.folderId, this.customerId, this.userId)
+              .pipe(takeUntil(this.destroy$))
+              .subscribe({
+                next: (files) => {
+                  this.currentFiles = [...this.currentFiles, ...files];
+                },
+                error: (error) => {
+                  this.error = 'Error loading files';
+                  console.error('Error loading files:', error);
+                }
+              });
+          });
+        },
+        error: (error) => {
+          this.error = 'Error loading folders';
+          console.error('Error loading folders:', error);
+        }
+      });
   }
   
-  onItemDoubleClick(item: CategoryModel | FolderModel | CatalogFileModel): void {
-      if (this.isFolder(item)) {
-          this.navigateToFolder(item);
-      }
+  closeModal(): void {
+    this.selectedCategory = null;
+    this.currentFolders = [];
+    this.currentFiles = [];
   }
-    // Navigation methods
+  private updateDashboardStats(): void {
+    this.isLoading = true;
+    let totalProducts = 0;
+    let recentUploads = 0;
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const categoryObservables = this.categories.map(category =>
+      this.catalogService.getFolders(category.categoryId, this.customerId, this.userId).pipe(
+        mergeMap(folders => {
+          const folderObservables = folders.map(folder =>
+            this.catalogService.getFiles(folder.folderId, this.customerId, this.userId)
+          );
+          return forkJoin(folderObservables).pipe(
+            map(folderFiles => {
+              const files = folderFiles.flat();
+              totalProducts += files.length;
+              recentUploads += files.filter(file => 
+                new Date(file.createdOn) > oneWeekAgo
+              ).length;
+              return files;
+            })
+          );
+        })
+      )
+    );
+    forkJoin(categoryObservables)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.isLoading = false)
+      )
+      .subscribe({
+        next: () => {
+          this.dashboardStats = {
+            totalProducts,
+            totalCategories: this.categories.length,
+            recentUploads
+          };
+        },
+        error: (error) => {
+          console.error('Error updating dashboard stats:', error);
+          this.isLoading = false;
+        }
+      });
+  }
+getFileTypeIcon(file: CatalogFileModel | any): string {
+    if (!file || !file.fileType) return 'fa-file';
+    const fileType = file.fileType.toLowerCase();
+    if (fileType.includes('image')) return 'fa-file-image';
+    if (fileType.includes('pdf')) return 'fa-file-pdf';
+    if (fileType.includes('word') || fileType.includes('document')) return 'fa-file-word';
+    if (fileType.includes('excel') || fileType.includes('spreadsheet')) return 'fa-file-excel';
+    if (fileType.includes('zip') || fileType.includes('archive')) return 'fa-file-archive';
+    if (fileType.includes('text')) return 'fa-file-alt';
+    return 'fa-file';
+  }
+  
+   onItemDoubleClick(item: CategoryModel | FolderModel | CatalogFileModel): void {
+    if (this.isFolder(item)) {
+        this.navigateToFolder(item);
+    } else if (this.isCategory(item)) {
+        this.navigateToCategory(item);
+    }
+}
     toggleSidebar(): void {
         this.isSidebarCollapsed = !this.isSidebarCollapsed;
     }
-
-    navigateToFolder(folder: FolderModel): void {
-        this.isLoading = true;
+    navigateToCategory(category: CategoryModel): void {
+        this.currentView = 'files';
+        this.currentCategory = category;
+        this.currentFolder = undefined; 
+        this.currentPath = [category.name];
+        this.loadFolders(category.categoryId);
+      }
+      
+      navigateToFolder(folder: FolderModel): void {
         this.currentFolder = folder;
         this.currentPath.push(folder.name);
-        
         this.loadFiles(folder.folderId);
-    }
+      }
 
-    navigateUp(): void {
+      navigateUp(): void {
         if (this.currentPath.length === 0) return;
-
+      
         this.currentPath.pop();
         this.isLoading = true;
-
+      
         if (this.currentPath.length === 0) {
-            this.currentFolder = undefined;
-            this.loadFolders(this.currentCategory!.categoryId);
+          this.currentCategory = undefined;
+          this.currentFolder = undefined;
+          this.currentFiles = [];
+          this.currentFolders = [];
+          this.loadInitialData();
+        } else if (this.currentCategory && !this.currentFolder) {
+          this.currentFolder = undefined;
+          this.loadFolders(this.currentCategory.categoryId);
         } else if (this.currentFolder?.parentFolderId) {
-            this.loadParentFolder(this.currentFolder.parentFolderId);
+          this.loadParentFolder(this.currentFolder.parentFolderId);
         }
-    }
-
-    // CRUD operations
+      }
+    previewFile(file: CatalogFileModel): void {
+        this.dialog.open(AddPreviewComponent, {
+          data: { file },
+          width: '80vw',
+          maxWidth: '1200px',
+          maxHeight: '90vh'
+        });
+      }
     async createCategory(): Promise<void> {
         const newCategory: CategoryModel = {
             categoryId: 0,
@@ -192,42 +371,39 @@ public loadInitialData(): void {
     }
 
     uploadFile(event: any): void {
-        const file = event.target.files[0];
-        if (!file || !this.currentFolder) {
-            this.showError('Please select a folder and file');
-            return;
-        }
-
-        const newFile: CatalogFileModel = {
-            fileId: 0,
-            name: file.name,
-            fileType: file.type,
-            filePath: '',
-            folderId: this.currentFolder.folderId,
-            categoryId: this.currentCategory!.categoryId,
-            customerId: this.customerId,
-            userId: this.userId,
-            createdBy: this.userId,
-            createdOn: new Date(),
-            isDeleted: false
-        };
-
-        this.isLoading = true;
-        this.catalogService.uploadFile(newFile, file)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe({
-                next: (uploadedFile) => {
-                    this.loadFiles(this.currentFolder!.folderId);
-                    this.isLoading = false;
-                    this.showSuccess('File uploaded');
-                },
-                error: (error) => {
-                    this.isLoading = false;
-                    this.showError('Error uploading file');
-                }
-            });
+      const file = event.target.files[0];
+      if (!file) {
+        this.showError('Please select a file');
+        return;
+      }
+    
+      if (!this.currentFolder?.folderId || !this.currentCategory?.categoryId) {
+        this.showError('Please select a folder first');
+        return;
+      }
+    
+      this.isLoading = true;
+      this.catalogService.uploadFile(file, this.currentFolder.folderId, this.currentCategory.categoryId)
+        .pipe(
+          takeUntil(this.destroy$),
+          finalize(() => {
+            this.isLoading = false;
+            if (event.target) {
+              event.target.value = ''; // Reset file input
+            }
+          })
+        )
+        .subscribe({
+          next: (uploadedFile) => {
+            this.loadFiles(this.currentFolder!.folderId);
+            this.showSuccess('File uploaded successfully');
+          },
+          error: (error) => {
+            console.error('Upload error:', error);
+            this.showError(error.message || 'Error uploading file: Unknown error');
+          }
+        });
     }
-
     deleteItem(item: CategoryModel | FolderModel | CatalogFileModel): void {
         const itemType = this.getItemType(item);
         const confirmDelete = confirm(`Are you sure you want to delete this ${itemType}?`);
@@ -258,7 +434,6 @@ public loadInitialData(): void {
         this.isLoading = true;
 
         if ('fileId' in updatedItem) {
-            // File rename logic would go here
             this.isLoading = false;
         } else if ('folderId' in updatedItem) {
             this.updateFolder(updatedItem as FolderModel);
@@ -266,10 +441,10 @@ public loadInitialData(): void {
             this.updateCategory(updatedItem as CategoryModel);
         }
     }
-
-    // Private helper methods
     private loadFolders(categoryId: number): void {
         this.isLoading = true;
+        this.error = null;
+        
         this.catalogService.getFolders(categoryId, this.customerId, this.userId)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
@@ -279,6 +454,7 @@ public loadInitialData(): void {
                     this.isLoading = false;
                 },
                 error: (error) => {
+                    this.error = error.message;
                     this.isLoading = false;
                     this.showError('Error loading folders');
                 }
@@ -300,9 +476,6 @@ public loadInitialData(): void {
                 }
             });
     }
-
-   // ... continuing from the previous code
-
    private loadParentFolder(parentFolderId: number): void {
     this.isLoading = true;
     this.catalogService.getFolders(this.currentCategory!.categoryId, this.customerId, this.userId)
@@ -410,28 +583,6 @@ private updateCategory(category: CategoryModel): void {
         });
 }
 
-private updateDashboardStats(): void {
-    let recentUploads = 0;
-    const now = new Date();
-    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-    // Count recent uploads across all folders
-    this.categories.forEach(category => {
-        category.folders?.forEach(folder => {
-            folder.files?.forEach(file => {
-                if (new Date(file.createdOn) > oneWeekAgo) {
-                    recentUploads++;
-                }
-            });
-        });
-    });
-
-    this.dashboardStats = {
-        totalProducts: this.calculateTotalFiles(),
-        totalCategories: this.categories.length,
-        recentUploads
-    };
-}
 
 private calculateTotalFiles(): number {
     let total = 0;
@@ -458,8 +609,6 @@ getCurrentItems(): Array<CategoryModel | FolderModel | CatalogFileModel> {
     }
     return this.categories;
 }
-
-// UI feedback methods
 private showSuccess(message: string): void {
     this.snackBar.open(message, 'Close', {
         duration: 3000,
@@ -473,20 +622,34 @@ private showError(message: string): void {
         panelClass: ['error-snackbar']
     });
 }
-
-// UI helper methods
 isCategory(item: any): item is CategoryModel {
-  return item?.itemType === 'category';
+    return 'categoryId' in item;
 }
 
 isFolder(item: any): item is FolderModel {
-  return item?.itemType === 'folder';
+    return 'folderId' in item;
 }
 
 isFile(item: any): item is CatalogFileModel {
-  return item?.itemType === 'file';
+    return 'fileId' in item;
 }
-
+openCreateCategoryDialog(): void {
+    const dialogRef = this.dialog.open(AddproductComponent, {
+      width: '400px',
+      data: {
+        customerId: this.customerId,
+        userId: this.userId
+      }
+    });
+  
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.categories.push(result);
+        this.updateDashboardStats();
+        this.showSuccess('Category created successfully');
+      }
+    });
+}
 getFileIcon(file: CatalogFileModel): string {
     const fileType = file.fileType.toLowerCase();
     if (fileType.includes('image')) return 'image';
@@ -510,4 +673,5 @@ formatDate(date: Date | string): string {
         day: 'numeric'
     });
 }
+
 }

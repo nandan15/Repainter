@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
+using System.Text.Json;
 
 namespace RepainterAPI.Controllers.v1.ProductManagement
 {
@@ -16,6 +17,7 @@ namespace RepainterAPI.Controllers.v1.ProductManagement
         private readonly IMediator _mediator;
 
         private readonly ICatalogService _catalogService;
+        private readonly IWebHostEnvironment _environment;
 
         public ProductManagementCommandController(ICatalogService catalogService)
         {
@@ -69,11 +71,25 @@ namespace RepainterAPI.Controllers.v1.ProductManagement
         {
             try
             {
+                Console.WriteLine($"Received folder data: {JsonSerializer.Serialize(folder)}");
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage);
+                    return BadRequest(new { errors = errors });
+                }
+                if (folder.CategoryId <= 0 || folder.CustomerId <= 0 || folder.UserId <= 0)
+                {
+                    return BadRequest(new { error = "Invalid CategoryId, CustomerId, or UserId" });
+                }
+
                 var result = await _catalogService.CreateFolderAsync(folder);
                 return Ok(result);
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error creating folder: {ex}");
                 return BadRequest($"Error creating folder: {ex.Message}");
             }
         }
@@ -107,15 +123,43 @@ namespace RepainterAPI.Controllers.v1.ProductManagement
         }
 
         [HttpPost("file")]
-        public async Task<ActionResult<CatalogFileModel>> UploadFile([FromForm] CatalogFileModel file, IFormFile uploadedFile)
+        [DisableRequestSizeLimit]
+        public async Task<ActionResult<CatalogFileModel>> UploadFile(
+      IFormFile uploadedFile,
+      [FromForm] int folderId,
+      [FromForm] int categoryId,
+      [FromForm] int customerId,
+      [FromForm] int userId)
         {
             try
             {
+                if (uploadedFile == null)
+                    return BadRequest("No file uploaded");
+
+                // Validate IDs
+                if (folderId <= 0 || categoryId <= 0 || customerId <= 0 || userId <= 0)
+                    return BadRequest("Invalid ID values provided");
+
+                var file = new CatalogFileModel
+                {
+                    Name = uploadedFile.FileName,
+                    FileType = uploadedFile.ContentType,
+                    FolderId = folderId,
+                    CategoryId = categoryId,
+                    CustomerId = customerId,
+                    UserId = userId,
+                    CreatedBy = userId,
+                    CreatedOn = DateTime.UtcNow,
+                    IsDeleted = false
+                };
+
                 var result = await _catalogService.UploadFileAsync(file, uploadedFile);
                 return Ok(result);
             }
             catch (Exception ex)
             {
+                // Log the full exception details
+                Console.WriteLine($"Error uploading file: {ex}");
                 return BadRequest($"Error uploading file: {ex.Message}");
             }
         }
@@ -173,6 +217,64 @@ namespace RepainterAPI.Controllers.v1.ProductManagement
             catch (Exception ex)
             {
                 return BadRequest($"Error retrieving files: {ex.Message}");
+            }
+        }
+        // ProductManagementCommandController.cs
+        [HttpGet("file/{filePath}")]
+        public IActionResult GetFile([FromRoute] string filePath)
+        {
+            try
+            {
+                var fullPath = Path.Combine(_environment.WebRootPath, filePath);
+                if (!System.IO.File.Exists(fullPath))
+                {
+                    return NotFound();
+                }
+
+                // Get file's MIME type
+                var mimeType = GetMimeType(Path.GetExtension(fullPath));
+                return PhysicalFile(fullPath, mimeType);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error retrieving file: {ex.Message}");
+            }
+        }
+
+        private string GetMimeType(string extension)
+        {
+            var mimeTypes = new Dictionary<string, string>
+    {
+        {".txt", "text/plain"},
+        {".pdf", "application/pdf"},
+        {".doc", "application/vnd.ms-word"},
+        {".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
+        {".xls", "application/vnd.ms-excel"},
+        {".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
+        {".png", "image/png"},
+        {".jpg", "image/jpeg"},
+        {".jpeg", "image/jpeg"},
+        {".gif", "image/gif"},
+        {".csv", "text/csv"}
+    };
+
+            return mimeTypes.TryGetValue(extension.ToLower(), out string mimeType)
+                ? mimeType
+                : "application/octet-stream";
+        }
+    
+
+[HttpGet("category/exists/{categoryName}/{customerId}")]
+        public async Task<ActionResult<bool>> CheckCategoryExists(string categoryName, int customerId)
+        {
+            try
+            {
+                var exists = await _catalogService.CheckCategoryExistsAsync(categoryName, customerId);
+                return Ok(exists);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error checking category existence: {ex.Message}");
             }
         }
     }

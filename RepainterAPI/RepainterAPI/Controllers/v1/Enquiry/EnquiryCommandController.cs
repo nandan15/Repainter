@@ -1,14 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using DataModels.Enquiry;
-using DataEntities.Enquiry;
-using MediatR;
-using DataModels.Exceptions;
-using Microsoft.AspNetCore.Authorization;
-using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
 using System.Net;
-using DataServices.Enquiry.Commands;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using DataModels.Exceptions;
 using DataModels.ImageUpload;
-using DataServices.Repository.FileUploadStorage;
+using Microsoft.AspNetCore.Authorization;
+using DataServices.Repository.CustomerRepository;
+using DataServices.Customer;
+using Newtonsoft.Json;
 namespace RepainterAPI.Controllers.v1.Enquiry
 {
     [Route("v{apiversion}/enquiry")]
@@ -16,113 +18,93 @@ namespace RepainterAPI.Controllers.v1.Enquiry
     [Authorize]
     public class EnquiryCommandController : ControllerBase
     {
-        private readonly IMediator _mediator;
+        private readonly ICustomerService _customerService;
         private readonly ILogger<EnquiryCommandController> _logger;
-        private readonly IFileStorageService _fileStorageService;
-        public EnquiryCommandController(
-        IMediator mediator,
-        ILogger<EnquiryCommandController> logger,
-        IFileStorageService fileStorageService)
+
+        public EnquiryCommandController(ICustomerService enquiryService, ILogger<EnquiryCommandController> logger)
         {
-            _mediator = mediator;
+            _customerService = enquiryService;
             _logger = logger;
-            _fileStorageService = fileStorageService;
         }
 
-        ///<summary>
-        ///create a new enquiry
-        /// </summary>
-        /// <returns></returns>
-        /// 
-        [HttpPost("create")]
-        [ProducesResponseType(typeof(EnquiryModel),(int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(InternalErrorViewModel),(int)HttpStatusCode.InternalServerError)]
-        [SwaggerOperation(Tags = new[] {"Enquiry"})]
-        public async Task<IActionResult> CreateNewEnquiry([FromBody]EnquiryModel model)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<EnquiryModel>> GetById(int id)
         {
-            var enquiry = await _mediator.Send(new AddEnquiry
+            var result = await _customerService.GetByIdAsync(id);
+            if (result == null)
             {
-               EnquiryModel =model
-            });
-            return Ok(enquiry);
-        }
-        ///<summary>
-        ///update the enquiry
-        /// </summary>
-        /// <returns></returns>
-        /// 
-        [HttpPost("update/{id}")]
-        [ProducesResponseType(typeof(EnquiryModel),(int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(InternalErrorViewModel),(int)HttpStatusCode.InternalServerError)]
-        [SwaggerOperation(Tags = new[] {"Enquiry"})]
-        public async Task<IActionResult> UpdateEnquiry([FromBody]EnquiryModel model)
-        {
-            var enquriy = await _mediator.Send(new UpdateEnquiry
-            {
-                enquirymodel = model
-            });
-            return Ok(enquriy);
-        }
-        ///<summary>
-        ///update the enquiry floor and site 
-        /// </summary>
-        /// <returns></returns>
-        /// 
-        [HttpPost("upload-image/{id}/{type}")]
-        [Consumes("multipart/form-data")]
-        [ProducesResponseType(typeof(ImageUpdateModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(InternalErrorViewModel), (int)HttpStatusCode.InternalServerError)]
-        [ProducesResponseType(typeof(BadRequestObjectResult), (int)HttpStatusCode.BadRequest)]
-        [SwaggerOperation(Tags = new[] { "Enquiry" })]
-        public async Task<IActionResult> UploadImage(int id, string type, IFormFile file)
-        {
-            try
-            {
-                if (file == null || file.Length == 0)
-                    return BadRequest("No file uploaded");
-
-                if (type != "floor" && type != "site")
-                    return BadRequest("Invalid image type. Must be either 'floor' or 'site'");
-                var fileUrl = await _fileStorageService.UploadFileAsync(file, type);
-                var result = await _mediator.Send(new UpdateEnquiryImages
-                {
-                    Id = id,
-                    Type = type,
-                    Images = new List<string> { fileUrl }
-                });
-
-                if (!result)
-                    return NotFound($"Enquiry with ID {id} not found");
-
-                return Ok(new ImageUpdateModel
-                {
-                    Success = true,
-                    FileUrl = fileUrl,
-                    Type = type,
-                    Images = new List<string> { fileUrl }
-                });
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error uploading image for enquiry {id}");
-                return StatusCode(500, new InternalErrorViewModel { Message = "Error uploading image" });
-            }
+            return Ok(result);
         }
-        ///<summary>
-        ///delete customer 
-        /// </summary>
-        [HttpDelete]
-        [Route("delete/{id}")]
-        [ProducesResponseType(typeof(EnquiryModel),(int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(InternalErrorViewModel),(int)HttpStatusCode.InternalServerError)]
-        [SwaggerOperation(Tags = new[] {"Enquiry"})]
-        public async Task<IActionResult> DeleteCustomer(int id)
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EnquiryModel))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<EnquiryModel>> Create([FromForm] string customerData,[FromForm] IFormFileCollection floorPlanImages,[FromForm] IFormFileCollection sitePlanImages)
         {
-            var customer = await _mediator.Send(new DeleteEnquiry
+            if (!ModelState.IsValid)
             {
-                EnquiryModel = new EnquiryModel { Id = id }
-            });
-            return Ok(customer);
+                return BadRequest(ModelState);
+            }
+            var enquiryModel = JsonConvert.DeserializeObject<EnquiryModel>(customerData);
+            if (enquiryModel == null)
+            {
+                return BadRequest("Invalid customer data");
+            }
+            enquiryModel.EnquiryId = null;
+            int userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+            var result = await _customerService.AddAsync(enquiryModel, userId);
+            await _customerService.UploadImagesAsync(result.Id, floorPlanImages, sitePlanImages);
+            _logger.LogInformation($"Created customer with ID: {result.Id}, EnquiryId: {result.EnquiryId}");
+            return Ok(result);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<EnquiryModel>> Update(int id, [FromBody] EnquiryModel enquiryModel)
+        {
+            if (id != enquiryModel.Id)
+            {
+                return BadRequest("ID mismatch");
+            }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            int userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+
+            var result = await _customerService.UpdateAsync(enquiryModel, userId);
+            if (result == null)
+            {
+                return NotFound();
+            }
+            return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            var result = await _customerService.DeleteAsync(id);
+            if (!result)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
+
+        [HttpPost("{id}/upload-images")]
+        public async Task<ActionResult> UploadImages(int id, [FromForm] IFormFileCollection floorPlanImages, [FromForm] IFormFileCollection sitePlanImages)
+         {
+            if ((floorPlanImages == null || floorPlanImages.Count == 0) &&
+                (sitePlanImages == null || sitePlanImages.Count == 0))
+            {
+                return BadRequest("No images provided");
+            }
+            var result = await _customerService.UploadImagesAsync(id, floorPlanImages, sitePlanImages);
+            if (!result)
+            {
+                return NotFound();
+            }
+            return Ok(new { message = "Images uploaded successfully" });
         }
     }
 }

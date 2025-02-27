@@ -1,0 +1,42 @@
+<h2 mat-dialog-title>{{data.file.name}}</h2>
+<mat-dialog-content>
+  <!-- Image preview -->
+  <img *ngIf="isImage" 
+       [src]="fileUrl" 
+       [alt]="data.file.name"
+       class="preview-image">
+  
+  <!-- PDF preview -->
+  <iframe *ngIf="isPdf"
+          [src]="fileUrl"
+          width="100%"
+          height="600px"
+          frameborder="0">
+  </iframe>
+  
+  <!-- Video preview -->
+  <video *ngIf="isVideo"
+         [src]="fileUrl"
+         controls
+         class="preview-video">
+  </video>
+  
+  <!-- Audio preview -->
+  <audio *ngIf="isAudio"
+         [src]="fileUrl"
+         controls
+         class="preview-audio">
+  </audio>
+  
+  <!-- Unsupported file type message -->
+  <div *ngIf="!isSupported" class="unsupported-message">
+    <i class="fas fa-file"></i>
+    <p>Preview not available for this file type</p>
+    <a [href]="fileUrl" target="_blank" class="download-link">
+      <i class="fas fa-download"></i> Download File
+    </a>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>

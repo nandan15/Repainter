@@ -9,13 +9,13 @@ using System.Threading.Tasks;
 
 namespace DataServices.Enquiry.Queries
 {
-    public class GetEnquiry:IRequest<IEnumerable<EnquiryModel>>
+    public class GetEnquiry : IRequest<IEnumerable<EnquiryModel>>
     {
         public Dictionary<string, string> Filters { get; set; }
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 20;
     }
-    public class GetEnquiryHandler:IRequestHandler<GetEnquiry,IEnumerable<EnquiryModel>>
+    public class GetEnquiryHandler : IRequestHandler<GetEnquiry, IEnumerable<EnquiryModel>>
     {
         private readonly IUnitOfWork _context;
         public GetEnquiryHandler(IUnitOfWork context)
@@ -49,7 +49,7 @@ namespace DataServices.Enquiry.Queries
                 return query.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).Select(e => new EnquiryModel
                 {
                     Id = e.Id,
-                    EnquiryId=e.EnquiryId,
+                    EnquiryId = e.EnquiryId,
                     Title = e.Title,
                     Name = e.Name,
                     EmailId = e.EmailId,
@@ -62,13 +62,12 @@ namespace DataServices.Enquiry.Queries
                     CarpetArea = e.CarpetArea,
                     City = e.City,
                     Configurtion = e.Configurtion,
-                    FloorPlan = e.FloorPlan,
-                    SitePlan = e.SitePlan,
+                  
                     CreatedBy = e.CreatedBy,
                     CreatedOn = e.CreatedOn,
                     LastModified = e.LastModified,
                     LastModifiedBy = e.LastModifiedBy,
-                    
+
 
                 }).ToList();
             }

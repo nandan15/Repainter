@@ -9,6 +9,7 @@ import { Customer } from 'src/app/Shared/models/customer';
 import { CustomerProvider } from 'src/app/Shared/Provider/CustomerProvider';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-view',
@@ -21,17 +22,12 @@ export class ViewComponent implements OnInit {
   @ViewChild(MapMarker) marker!: MapMarker;
   @ViewChild('floorPlanInput') floorPlanInput!: ElementRef;
   @ViewChild('sitePlanInput') sitePlanInput!: ElementRef;
-
   enquiryForm!: FormGroup;
   currentCustomer: Customer = new Customer();
   isLoading = false;
-  
-  // Form Options
   title: string[] = ['Mr', 'Ms', 'Ms & Mr', 'M/S'];
   projectTypes: string[] = ['Apartment', 'Villa', 'Independent House'];
   configurations: string[] = ['1BHK', '2BHK', '2.5BHK', '3BHK', '4BHK', '4BHK+'];
-  
-  // Map Properties
   selectedLocation: string = '';
   selectedFloorPlan: File | null = null;
   selectedSitePlan: File | null = null;
@@ -52,7 +48,8 @@ export class ViewComponent implements OnInit {
     private router: Router,
     private location: Location,
     private commonHelper: CommonHelper,
-    private customerProvider: CustomerProvider
+    private customerProvider: CustomerProvider,
+    private toaster:ToastrService
   ) {
     this.initializeForm();
   }
@@ -91,12 +88,11 @@ export class ViewComponent implements OnInit {
         this.enquiryForm.patchValue({ enquiryId: nextId });
       },
       error: (error) => {
-        console.error('Error generating customer ID:', error);
+        console.error('Error generating enquiry ID:', error);
         this.enquiryForm.patchValue({ enquiryId: 'ES6001' });
       }
     });
   }
-
   private populateFormWithCustomer(): void {
     this.enquiryForm.patchValue({
       enquiryId: this.currentCustomer.enquiryId,
@@ -173,43 +169,33 @@ export class ViewComponent implements OnInit {
     this.isMapVisible = !this.isMapVisible;
   }
 
-  onFloorPlanSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB');
-        this.floorPlanInput.nativeElement.value = '';
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64String = reader.result as string;
-        this.enquiryForm.patchValue({ floorPlan: base64String });
-      };
-      reader.readAsDataURL(file);
-      this.selectedFloorPlan = file;
+    onFloorPlanSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB');
+                this.floorPlanInput.nativeElement.value = '';
+                return;
+            }
+            this.selectedFloorPlan = file;
+            this.enquiryForm.patchValue({ floorPlan: file.name });
+        }
     }
-  }
 
-  onSitePlanSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB');
-        this.sitePlanInput.nativeElement.value = '';
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64String = reader.result as string;
-        this.enquiryForm.patchValue({ sitePlan: base64String });
-      };
-      reader.readAsDataURL(file);
-      this.selectedSitePlan = file;
+    onSitePlanSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB');
+                this.sitePlanInput.nativeElement.value = '';
+                return;
+            }
+            this.selectedSitePlan = file;
+            this.enquiryForm.patchValue({ sitePlan: file.name });
+        }
     }
-  }
 
   goBack(): void {
     this.location.back();
@@ -220,7 +206,7 @@ export class ViewComponent implements OnInit {
       this.markFormGroupTouched(this.enquiryForm);
       return;
     }
-  
+
     this.isLoading = true;
     try {
       const formValues = this.enquiryForm.getRawValue();
@@ -235,28 +221,38 @@ export class ViewComponent implements OnInit {
         projectName: formValues.projectName,
         houseNo: formValues.houseNo,
         projectType: formValues.projectType,
-        configurtion: formValues.configuration,
+        configurtion: formValues.configuration, 
         carpetArea: formValues.carpetArea,
         projectLocation: formValues.projectLocation,
         city: formValues.city,
         floorPlan: formValues.floorPlan,
         sitePlan: formValues.sitePlan
       };
-  
+
       console.log('Sending customer data:', customerData);
-      const result = await firstValueFrom(this.customerProvider.addCustomer(customerData));
+
+      const result = await firstValueFrom(
+        this.customerProvider.addCustomer(
+          customerData,
+          this.selectedFloorPlan ? [this.selectedFloorPlan] : [],
+          this.selectedSitePlan ? [this.selectedSitePlan] : []
+        )
+      );
       console.log('Received result:', result);
-  
       if (result.success && result.customerId) {
         localStorage.setItem('lastSavedCustomerId', result.customerId.toString());
+
         await Swal.fire({
           icon: 'success',
           title: 'Success!',
           text: 'Customer saved successfully',
           confirmButtonText: 'OK'
         });
-        console.log('Navigating to:', `/quotation-builder/view/${result.customerId}`);
-        this.router.navigate(['/quotation-builder/view', result.customerId]);
+        this.enquiryForm.reset();
+        this.generateCustomerId(); 
+        setTimeout(() => {
+          this.router.navigate(['/quotation-builder/view', result.customerId]);
+        }, 100);
       } else {
         throw new Error('Failed to save customer');
       }
@@ -272,7 +268,8 @@ export class ViewComponent implements OnInit {
       this.isLoading = false;
     }
   }
-  private markFormGroupTouched(formGroup: FormGroup) {
+
+ private markFormGroupTouched(formGroup: FormGroup) {
     Object.values(formGroup.controls).forEach(control => {
       control.markAsTouched();
       if (control instanceof FormGroup) {

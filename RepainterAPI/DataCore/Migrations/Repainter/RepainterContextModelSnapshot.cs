@@ -634,6 +634,10 @@ namespace DataCore.Migrations.Repainter
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<long>("FileSize")
+                        .HasMaxLength(10000)
+                        .HasColumnType("bigint");
+
                     b.Property<string>("FileType")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -755,16 +759,10 @@ namespace DataCore.Migrations.Repainter
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<int?>("ParentFolderId")
-                        .IsRequired()
-                        .HasColumnType("int");
-
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("FolderId");
-
-                    b.HasIndex("ParentFolderId");
 
                     b.HasIndex("CategoryId", "IsDeleted");
 
@@ -989,15 +987,7 @@ namespace DataCore.Migrations.Repainter
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("DataEntities.Product.Folder", "ParentFolder")
-                        .WithMany("SubFolders")
-                        .HasForeignKey("ParentFolderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Category");
-
-                    b.Navigation("ParentFolder");
                 });
 
             modelBuilder.Entity("DataEntities.Product.Category", b =>
@@ -1008,8 +998,6 @@ namespace DataCore.Migrations.Repainter
             modelBuilder.Entity("DataEntities.Product.Folder", b =>
                 {
                     b.Navigation("Files");
-
-                    b.Navigation("SubFolders");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,12 +1,12 @@
 <div class="quotation-builder-container">
   <div class="header">
     <h2>Quotation Builder - Customer Name: {{ customerName }}</h2>
-   
- <button mat-raised-button (click)="navigateToDashboard()">
-  Back to Dashboard
-</button>
 
-    <img src="/assets/left.png" width="45" height="45"style="background-size: cover; cursor: pointer;"routerLink="/customer/view" />
+    <div class="back">
+      <button mat-raised-button (click)="navigateToDashboard()">Back to Dashboard</button>
+      <img src="/assets/catalogue.png" (click)="navigateToProduct()"/>
+      <img src="/assets/left.png" routerLink="/customer/view" />
+    </div>
   </div>
   <form [formGroup]="quotationForm">
     <mat-tab-group #tabGroup [(selectedIndex)]="activeTabIndex" (selectedIndexChange)="onTabChange($event)" [preserveContent]="true">

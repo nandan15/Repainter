@@ -21,5 +21,6 @@ namespace DataServices.CatalogService
         Task<IEnumerable<CategoryModel>> GetCategoriesByCustomerAsync(int customerId, int userId);
         Task<IEnumerable<FolderModel>> GetFoldersByCategory(int categoryId, int customerId, int userId);
         Task<IEnumerable<CatalogFileModel>> GetFilesByFolder(int folderId, int customerId, int userId);
+        Task<CategoryModel> CheckCategoryExistsAsync(string categoryName, int customerId);
     }
 }
