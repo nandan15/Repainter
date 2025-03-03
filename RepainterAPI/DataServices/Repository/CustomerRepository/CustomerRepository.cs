@@ -39,26 +39,52 @@ namespace DataServices.Repository.CustomerRepository
             var savedEnquiry = await _context.Customer.FindAsync(enquiry.Id);
             return savedEnquiry;
         }
-
-        public async Task<DataEntities.Enquiry.Enquiry> UpdateAsync(DataEntities.Enquiry.Enquiry enquiry)
+        public async Task<DataEntities.Enquiry.Enquiry> UpdateAsync(DataEntities.Enquiry.Enquiry enquiry, bool partialUpdate = true)
         {
             var existingEnquiry = await _context.Customer.FindAsync(enquiry.Id);
             if (existingEnquiry == null || existingEnquiry.Deleted)
             {
                 return null;
             }
-            existingEnquiry.Title = enquiry.Title;
-            existingEnquiry.Name = enquiry.Name;
-            existingEnquiry.PhoneNumber = enquiry.PhoneNumber;
-            existingEnquiry.AlternatePhoneNumber = enquiry.AlternatePhoneNumber;
-            existingEnquiry.EmailId = enquiry.EmailId;
-            existingEnquiry.ProjectName = enquiry.ProjectName;
-            existingEnquiry.HouseNo = enquiry.HouseNo;
-            existingEnquiry.ProjectType = enquiry.ProjectType;
-            existingEnquiry.Configurtion = enquiry.Configurtion;
-            existingEnquiry.CarpetArea = enquiry.CarpetArea;
-            existingEnquiry.ProjectLocation = enquiry.ProjectLocation;
-            existingEnquiry.City = enquiry.City;
+            if (!partialUpdate || !string.IsNullOrEmpty(enquiry.EnquiryId))
+                existingEnquiry.EnquiryId = enquiry.EnquiryId;
+
+            if (!partialUpdate || !string.IsNullOrEmpty(enquiry.Title))
+                existingEnquiry.Title = enquiry.Title;
+
+            if (!partialUpdate || !string.IsNullOrEmpty(enquiry.Name))
+                existingEnquiry.Name = enquiry.Name;
+
+            if (!partialUpdate || !string.IsNullOrEmpty(enquiry.PhoneNumber))
+                existingEnquiry.PhoneNumber = enquiry.PhoneNumber;
+
+            if (!partialUpdate || !string.IsNullOrEmpty(enquiry.AlternatePhoneNumber))
+                existingEnquiry.AlternatePhoneNumber = enquiry.AlternatePhoneNumber;
+
+            if (!partialUpdate || !string.IsNullOrEmpty(enquiry.EmailId))
+                existingEnquiry.EmailId = enquiry.EmailId;
+
+            if (!partialUpdate || !string.IsNullOrEmpty(enquiry.ProjectName))
+                existingEnquiry.ProjectName = enquiry.ProjectName;
+
+            if (!partialUpdate || !string.IsNullOrEmpty(enquiry.HouseNo))
+                existingEnquiry.HouseNo = enquiry.HouseNo;
+
+            if (!partialUpdate || !string.IsNullOrEmpty(enquiry.ProjectType))
+                existingEnquiry.ProjectType = enquiry.ProjectType;
+
+            if (!partialUpdate || !string.IsNullOrEmpty(enquiry.Configurtion))
+                existingEnquiry.Configurtion = enquiry.Configurtion;
+
+            if (!partialUpdate || !string.IsNullOrEmpty(enquiry.CarpetArea))
+                existingEnquiry.CarpetArea = enquiry.CarpetArea;
+
+            if (!partialUpdate || !string.IsNullOrEmpty(enquiry.ProjectLocation))
+                existingEnquiry.ProjectLocation = enquiry.ProjectLocation;
+
+            if (!partialUpdate || !string.IsNullOrEmpty(enquiry.City))
+                existingEnquiry.City = enquiry.City;
+
             existingEnquiry.LastModified = DateTime.Now;
             existingEnquiry.LastModifiedBy = enquiry.LastModifiedBy;
             await _context.SaveChangesAsync();
