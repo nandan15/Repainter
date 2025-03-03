@@ -67,8 +67,6 @@
           <label>Configuration:</label>
           <input type="text" [(ngModel)]="selectedCustomer.configurtion" (blur)="updateCustomer()">
         </div>
-
-        <!-- Action Icons -->
         <div class="action-buttons">
           <div class="action-icons">
             <span class="icon" title="View" (click)="viewCustomer(selectedCustomer)">👁</span>
@@ -78,7 +76,6 @@
         </div>
 
         <div class="images-container">
-          <!-- Floor Plan Section -->
           <div class="image-section">
             <div class="section-header">
               <h3>Floor Plan</h3>
@@ -107,7 +104,6 @@
               </div>
             </div>
             <div class="image-preview">
-              <!-- Rest of the floor plan section remains the same -->
               <div *ngIf="selectedCustomer?.floorPlan?.length" class="image-grid">
                 <div *ngFor="let plan of getImageArray(selectedCustomer.floorPlan)" class="image-item">
                   <img [src]="getImageUrl(plan)" 
@@ -125,8 +121,7 @@
               </div>
             </div>
           </div>
-          
-          <!-- Site Plan Section - Also adding refresh button here -->
+
           <div class="image-section">
             <div class="section-header">
               <h3>Site Plan</h3>
@@ -154,7 +149,6 @@
                 </label>
               </div>
             </div>
-            <!-- Rest of the site plan section remains the same -->
             <div class="image-preview">
               <div *ngIf="selectedCustomer?.sitePlan?.length" class="image-grid">
                 <div *ngFor="let plan of getImageArray(selectedCustomer.sitePlan)" class="image-item">
@@ -174,8 +168,6 @@
             </div>
           </div>
         </div>
-        
-        <!-- Image Preview Modal - No changes needed here -->
         <div class="image-preview-modal" *ngIf="previewImage" (click)="closeImagePreview()">
           <span class="close-button" (click)="closeImagePreview()">×</span>
           <img [src]="previewImage" alt="Preview">

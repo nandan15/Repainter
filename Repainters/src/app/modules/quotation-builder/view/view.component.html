@@ -3,9 +3,9 @@
     <h2>Quotation Builder - Customer Name: {{ customerName }}</h2>
 
     <div class="back">
-      <button mat-raised-button (click)="navigateToDashboard()">Back to Dashboard</button>
-      <img src="/assets/catalogue.png" (click)="navigateToProduct()"/>
-      <img src="/assets/left.png" routerLink="/customer/view" />
+      <img src="/assets/dashboard.png" title="Dashboard" (click)="navigateToDashboard()"/>
+      <img src="/assets/catalogue.png" title="Product Catalogue" (click)="navigateToProduct()"/>
+      <img src="/assets/left.png" title="Back" routerLink="/customer/view" />
     </div>
   </div>
   <form [formGroup]="quotationForm">

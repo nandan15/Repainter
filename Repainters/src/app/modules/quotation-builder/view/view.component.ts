@@ -157,21 +157,29 @@ private initializeForm() {
             }
         });
 }
-  private loadCustomerData(customerId: number) {
-    this.customerProvider.getCustomerById(customerId).subscribe({
-        next: (customer) => {
-            if (customer) {
-                this.currentCustomer = customer;
-                this.customerName = customer.name;
-                this.showPackageTab = customer.projectType === 'Apartment';
-            }
-        },
-        error: (error) => {
-            console.error('Error loading customer:', error);
-            this.customerName = 'Unknown Customer';
-            this.showPackageTab = false;
-        }
-    });
+private loadCustomerData(customerId: number) {
+  const cachedCustomer = this.customerProvider.getCustomerByIdFromState(customerId);
+  if (cachedCustomer) {
+      this.currentCustomer = cachedCustomer;
+      this.customerName = cachedCustomer.name;
+      this.showPackageTab = cachedCustomer.projectType === 'Apartment';
+  }
+  this.customerProvider.getCustomerById(customerId).subscribe({
+      next: (customer) => {
+          if (customer) {
+              this.currentCustomer = customer;
+              this.customerName = customer.name;
+              this.showPackageTab = customer.projectType === 'Apartment';
+          }
+      },
+      error: (error) => {
+          console.error('Error loading customer:', error);
+          if (!this.currentCustomer) {
+              this.customerName = 'Unknown Customer';
+              this.showPackageTab = false;
+          }
+      }
+  });
 }
 
 ngOnDestroy() {

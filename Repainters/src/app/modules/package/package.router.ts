@@ -10,7 +10,7 @@ const packageRoutes: Routes = [
     component: ViewComponent,
     children: [
       { path: 'package/:customerId', component: PackageComponent },
-      { path: 'dashboard/:customerId', component: DashboardComponent }, // Added customerId parameter
+      { path: 'dashboard/:customerId', component: DashboardComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },

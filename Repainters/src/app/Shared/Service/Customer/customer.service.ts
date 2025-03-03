@@ -130,7 +130,6 @@ public uploadMultipleImages(customerId: number, files: File[], type: 'floor' | '
           `${this.customerMethod}/${customerId}/physical-images`
         ).pipe(
           map(response => {
-            // Transform the backend response to match our expected format
             return {
               success: true,
               data: {

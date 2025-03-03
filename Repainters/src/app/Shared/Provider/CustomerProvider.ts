@@ -121,19 +121,42 @@ export class CustomerProvider {
         this._currentCustomer.next(cachedCustomer);
         return of(cachedCustomer);
     }
-
+    const stateCustomer = this.customerList.customer.find(c => c.id === id);
+    if (stateCustomer) {
+        this._customerCache.set(id, stateCustomer);
+        this._currentCustomer.next(stateCustomer);
+        return of(stateCustomer);
+    }
     return this.customerService.getCustomerById(id).pipe(
         tap(customer => {
-            this._customerCache.set(id, customer);
-            this._currentCustomer.next(customer);
+            if (customer) {
+                this._customerCache.set(id, customer);
+                this._currentCustomer.next(customer);
+                this.cacheCustomer(customer);
+            }
         }),
         catchError(error => {
             console.error('Error fetching customer:', error);
+            if (this.customerList.customer.length === 0) {
+                this.listCustomer().subscribe();
+            }
             return throwError(() => error);
         })
     );
-  }
-
+}
+public recoverCustomerAfterError(id: number): Observable<Customer> {
+    return this.listCustomer().pipe(
+        switchMap(() => {
+            const foundCustomer = this.customerList.customer.find(c => c.id === id);
+            if (foundCustomer) {
+                this._currentCustomer.next(foundCustomer);
+                this._customerCache.set(id, foundCustomer);
+                return of(foundCustomer);
+            }
+            return throwError(() => new Error('Customer not found'));
+        })
+    );
+}
   getCustomerByIdFromState(id: number): Customer | undefined {
     const cachedCustomer = this._customerCache.get(id);
     if (cachedCustomer) {
@@ -145,12 +168,11 @@ export class CustomerProvider {
   getNextCustomerId(): Observable<string> {
     return this.customerService.getNextEnquiryId().pipe(
       map(response => {
-        // The response now has an 'enquiryId' property instead of 'lastId'
         return response.enquiryId;
       }),
       catchError(error => {
         console.error('Error fetching enquiry ID:', error);
-        return of('ES6001'); // Fallback ID
+        return of('ES6001'); 
       })
     );
   }

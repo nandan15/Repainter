@@ -40,69 +40,44 @@ using DataServices.Customer;
 using DataServices.Mappings;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
-
-// Configure services
 ConfigureServices(builder);
-
 var app = builder.Build();
-
-// Configure middleware pipeline
 ConfigureMiddleware(app);
-
-// Ensure upload directories exist
 ConfigureUploadDirectories(app);
 
 app.Run();
 
 void ConfigureServices(WebApplicationBuilder builder)
 {
-    // Configure IIS
     builder.Services.Configure<IISServerOptions>(options =>
     {
-        options.MaxRequestBodySize = 300 * 1024 * 1024; // 300MB
+        options.MaxRequestBodySize = 300 * 1024 * 1024; 
     });
-
-    // Configure Kestrel
     builder.WebHost.ConfigureKestrel(serverOptions =>
     {
-        serverOptions.Limits.MaxRequestBodySize = 300 * 1024 * 1024; // 300MB
-        serverOptions.Limits.MaxRequestBufferSize = 300 * 1024 * 1024; // 300MB
+        serverOptions.Limits.MaxRequestBodySize = 300 * 1024 * 1024; 
+        serverOptions.Limits.MaxRequestBufferSize = 300 * 1024 * 1024;
         serverOptions.Limits.MinRequestBodyDataRate = null;
         serverOptions.Limits.MinResponseDataRate = null;
     });
-
-    // Configure Form Options
     builder.Services.Configure<FormOptions>(options =>
     {
-        options.MultipartBodyLengthLimit = 300 * 1024 * 1024; // 300MB
-        options.ValueLengthLimit = 300 * 1024 * 1024; // 300MB
-        options.MemoryBufferThreshold = 300 * 1024 * 1024; // 300MB
+        options.MultipartBodyLengthLimit = 300 * 1024 * 1024; 
+        options.ValueLengthLimit = 300 * 1024 * 1024;
+        options.MemoryBufferThreshold = 300 * 1024 * 1024;
     });
-
-    // Configure Request Size Limits
     builder.Services.Configure<KestrelServerOptions>(options =>
     {
-        options.Limits.MaxRequestBodySize = 300 * 1024 * 1024; // 300MB
+        options.Limits.MaxRequestBodySize = 300 * 1024 * 1024;
     });
 
     builder.Services.Configure<IISServerOptions>(options =>
     {
-        options.MaxRequestBodySize = 300 * 1024 * 1024; // 300MB
+        options.MaxRequestBodySize = 300 * 1024 * 1024;
     });
-
-    // Database configuration
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseSqlServer(configuration["ConnectionString:EspressoDB"]));
-
-    builder.Services.AddDbContext<RepainterContext>(opts =>
-        opts.UseSqlServer(configuration["ConnectionString:EspressoDB"]));
-
-    // Identity configuration
-    builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
-        .AddEntityFrameworkStores<ApplicationDbContext>()
-        .AddDefaultTokenProviders();
-
-    // JWT Authentication
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>options.UseSqlServer(configuration["ConnectionString:EspressoDB"]));
+    builder.Services.AddDbContext<RepainterContext>(opts =>opts.UseSqlServer(configuration["ConnectionString:EspressoDB"]));
+    builder.Services.AddIdentity<ApplicationUser, ApplicationRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
     builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -122,8 +97,6 @@ void ConfigureServices(WebApplicationBuilder builder)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
         };
     });
-
-    // CORS configuration
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("UI", policyBuilder =>
@@ -143,15 +116,11 @@ void ConfigureServices(WebApplicationBuilder builder)
             }
         });
     });
-
-    // Register IDistributedCache (Redis)
     builder.Services.AddStackExchangeRedisCache(options =>
     {
         options.Configuration = configuration["Redis:Configuration"];
         options.InstanceName = configuration["Redis:InstanceName"];
     });
-
-    // MediatR and AutoMapper
     builder.Services.AddMediatR(cfg => {
         cfg.RegisterServicesFromAssemblies(
             typeof(GetEnquiryHandler).Assembly,
@@ -165,14 +134,8 @@ void ConfigureServices(WebApplicationBuilder builder)
             typeof(GetPackageByCustomerId).Assembly
         );
     });
-
-    // Add this line to your RegisterServices method
     builder.Services.AddAutoMapper(typeof(EnquiryModel).Assembly, typeof(EnquiryMappingProfile).Assembly);
-
-    // Register services
     RegisterServices(builder.Services);
-
-    // Swagger configuration
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(c =>
     {
@@ -198,10 +161,7 @@ void ConfigureMiddleware(WebApplication app)
         app.UseSwaggerUI();
         app.UseDeveloperExceptionPage();
     }
-
     app.UseHttpsRedirection();
-
-    // Static files configuration with increased size limits
     var staticFileOptions = new StaticFileOptions
     {
         FileProvider = new PhysicalFileProvider(
@@ -260,7 +220,6 @@ void RegisterServices(IServiceCollection services)
     services.AddScoped<ICatalogService, CatalogService>();
     services.AddScoped<WhatsAppService>();
     services.AddScoped<IEmailService, EmailService>();
-
     services.AddHttpClient<WhatsAppService>();
     services.AddLogging();
 }

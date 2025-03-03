@@ -875,7 +875,14 @@ export class SummaryComponent implements OnInit {
   
       currentY += yOffset + 15;
     });
-  
+    const imgData = '/assets/images/handover.jpg'; 
+    const imgWidth = 265;
+    const imgHeight = 70; 
+    
+    pdf.addImage(imgData, 'JPG', margins.left, currentY + 10, imgWidth, imgHeight);
+    
+    currentY += imgHeight + 20;
+    
     return pdf.output('blob');
   }
 }

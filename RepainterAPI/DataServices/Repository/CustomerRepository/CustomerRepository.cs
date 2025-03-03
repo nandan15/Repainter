@@ -18,33 +18,24 @@ namespace DataServices.Repository.CustomerRepository
             _context = context;
             _fileStorageService = fileStorageService;
         }
-
-        public async Task<DataEntities.Enquiry.Enquiry> GetByIdAsync(int id)
+        public Task<DataEntities.Enquiry.Enquiry> GetByIdAsync(int id)
         {
-            return await _context.Customer
-                .FirstOrDefaultAsync(e => e.Id == id && !e.Deleted);
+            var result = _context.Customer.FirstOrDefault(e => e.Id == id && !e.Deleted);
+            return Task.FromResult(result);
         }
-
         public async Task<List<DataEntities.Enquiry.Enquiry>> GetAllAsync()
         {
             return await Task.Run(() => _context.Customer.Where(e => !e.Deleted).OrderByDescending(e => e.CreatedOn).ToList());
         }
         public async Task<DataEntities.Enquiry.Enquiry> AddAsync(DataEntities.Enquiry.Enquiry enquiry)
         {
-            // Make sure Id is not set or is set to 0
-            enquiry.Id = 0; // This tells EF Core to let the database generate the Id
-
+            enquiry.Id = 0;
             enquiry.CreatedOn = DateTime.Now;
             enquiry.LastModified = DateTime.Now;
-
-            // Generate the EnquiryId before saving
             enquiry.EnquiryId = GenerateEnquiryId();
             enquiry.Deleted = false;
-
             await _context.Customer.AddAsync(enquiry);
             await _context.SaveChangesAsync();
-
-            // Double-check that we have the ID by reloading from DB
             var savedEnquiry = await _context.Customer.FindAsync(enquiry.Id);
             return savedEnquiry;
         }
@@ -175,14 +166,7 @@ namespace DataServices.Repository.CustomerRepository
         private string GenerateEnquiryId()
         {
             const string PREFIX = "ES6";
-
-            // Use more explicit ordering with multiple levels
-            var latestEnquiry = _context.Customer
-                .Where(e => e.EnquiryId.StartsWith(PREFIX) && !e.Deleted)
-                .OrderByDescending(e => e.EnquiryId.Length)
-                .ThenByDescending(e => e.EnquiryId)
-                .FirstOrDefault();
-
+            var latestEnquiry = _context.Customer.Where(e => e.EnquiryId.StartsWith(PREFIX) && !e.Deleted).OrderByDescending(e => e.EnquiryId.Length).ThenByDescending(e => e.EnquiryId).FirstOrDefault();
             int sequence = 1;
             if (latestEnquiry != null)
             {
@@ -191,58 +175,44 @@ namespace DataServices.Repository.CustomerRepository
                 {
                     sequence = lastSequence + 1;
                 }
-
-                // Add logging here in a real implementation
                 Console.WriteLine($"Latest EnquiryId found: {latestEnquiry.EnquiryId}, Next sequence: {sequence}");
             }
             else
             {
-                // Add logging here in a real implementation
                 Console.WriteLine("No existing EnquiryId found with prefix ES6, starting with sequence 1");
             }
 
-            return $"{PREFIX}{sequence:D3}"; // Format as ES6001, ES6002, etc.
+            return $"{PREFIX}{sequence:D3}"; 
         }
         public async Task<Dictionary<string, List<string>>> GetCustomerImagesFromStorageAsync(int id)
         {
             var result = new Dictionary<string, List<string>>();
-
-            // Check if customer exists and is not deleted
             var enquiry = await _context.Customer.FindAsync(id);
             if (enquiry == null || enquiry.Deleted)
             {
                 return null;
             }
-
-            // Define the paths for floor and site plan directories
             string floorPlanDirectory = Path.Combine("wwwroot", "upload", "floor", id.ToString());
             string sitePlanDirectory = Path.Combine("wwwroot", "upload", "site", id.ToString());
-
-            // Get floor plan images
             var floorPlanImages = new List<string>();
             if (Directory.Exists(floorPlanDirectory))
             {
                 var files = Directory.GetFiles(floorPlanDirectory);
                 foreach (var file in files)
                 {
-                    // Convert file system path to relative web path
                     string relativePath = Path.Combine("upload", "floor", id.ToString(), Path.GetFileName(file))
                         .Replace("\\", "/");
                     floorPlanImages.Add(relativePath);
                 }
             }
             result.Add("floorPlan", floorPlanImages);
-
-            // Get site plan images
             var sitePlanImages = new List<string>();
             if (Directory.Exists(sitePlanDirectory))
             {
                 var files = Directory.GetFiles(sitePlanDirectory);
                 foreach (var file in files)
                 {
-                    // Convert file system path to relative web path
-                    string relativePath = Path.Combine("upload", "site", id.ToString(), Path.GetFileName(file))
-                        .Replace("\\", "/");
+                    string relativePath = Path.Combine("upload", "site", id.ToString(), Path.GetFileName(file)).Replace("\\", "/");
                     sitePlanImages.Add(relativePath);
                 }
             }
