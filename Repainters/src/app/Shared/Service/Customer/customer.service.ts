@@ -63,13 +63,38 @@ export class CustomerService {
     }
     
     public updateCustomer(customer: Customer): Observable<{ success: boolean; message?: string }> {
+        // Make sure we're not sending any unexpected properties
+        const updateData = {
+          id: customer.id,
+          enquiryId: customer.enquiryId,
+          title: customer.title,
+          name: customer.name,
+          phoneNumber: customer.phoneNumber,
+          alternatePhoneNumber: customer.alternatePhoneNumber,
+          emailId: customer.emailId,
+          projectName: customer.projectName,
+          houseNo: customer.houseNo,
+          projectType: customer.projectType,
+          configurtion: customer.configurtion,
+          carpetArea: customer.carpetArea,
+          projectLocation: customer.projectLocation,
+          city: customer.city,
+          // Don't include floorPlan and sitePlan arrays
+          deleted: customer.deleted,
+          lastModified: customer.lastModified,
+          lastModifiedBy: customer.lastModifiedBy,
+          createdOn: customer.createdOn,
+          createdBy: customer.createdBy
+        };
+        
         return this.httpClient.put<{ success: boolean; message?: string }>(
-            `${this.customerMethod}/${customer.id}`,
-            customer
+          `${this.customerMethod}/${customer.id}`,
+          updateData
         ).pipe(
-            catchError(this.handleError)
+          map(response => ({ success: true, message: 'Customer updated successfully' })),
+          catchError(this.handleError)
         );
-    }
+      }
 
     public deleteCustomer(id: number): Observable<void> {
         return this.httpClient.delete<void>(`${this.customerMethod}/${id}`).pipe(

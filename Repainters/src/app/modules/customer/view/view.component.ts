@@ -7,6 +7,7 @@ import { CustomerModalComponent } from '../customer-modal/customer-modal.compone
 import { ToastrService } from 'ngx-toastr';
 import { finalize } from 'rxjs';
 import { environment } from 'src/environment/environment';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-customer-view',
@@ -110,9 +111,12 @@ export class CustomerViewComponent implements OnInit, AfterViewInit {
     this.loadCustomerImages();
   }
   viewCustomer(customer: Customer): void {
-    console.log('Viewing customer:', customer);
+    if (customer && customer.id) {
+      this.router.navigate(['/customer/edit', customer.id]);
+    } else {
+      console.error('No customer selected or invalid customer ID');
+    }
   }
-
   nextCustomer(): void {
     const currentIndex = this.customers.findIndex(c => c.id === this.selectedCustomer?.id);
     if (currentIndex < this.customers.length - 1) {
@@ -129,9 +133,42 @@ export class CustomerViewComponent implements OnInit, AfterViewInit {
   }
 
   deleteCustomer(customer: Customer): void {
-    if (confirm('Are you sure you want to delete this customer?')) {
-      this.customerProvider.deleteCustomer(customer);
+    if (!customer || !customer.id) {
+      console.error('No customer selected or invalid customer ID');
+      return;
     }
+
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `Do you want to delete ${customer.name}'s record? This action cannot be undone!`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.customerProvider.deleteCustomer(customer).subscribe({
+          next: () => {
+            Swal.fire(
+              'Deleted!',
+              `${customer.name}'s record has been deleted.`,
+              'success'
+            );
+            // If you have a list of customers, you may want to refresh it here
+          },
+          error: (error) => {
+            console.error('Error deleting customer:', error);
+            Swal.fire(
+              'Error!',
+              'There was an error deleting the customer.',
+              'error'
+            );
+          }
+        });
+      }
+    });
   }
 
   addNewCustomer(): void {
@@ -166,10 +203,9 @@ export class CustomerViewComponent implements OnInit, AfterViewInit {
     };
 
  
-    const floorPlanFiles: File[] = [/* Add your floor plan files here */];
-    const sitePlanFiles: File[] = [/* Add your site plan files here */];
+    const floorPlanFiles: File[] = [];
+    const sitePlanFiles: File[] = [];
 
-    // Call the addCustomer method with the Customer object and files
     this.customerProvider.addCustomer(newCustomer, floorPlanFiles, sitePlanFiles).subscribe({
         next: (response) => {
             if (response.success) {
@@ -189,18 +225,11 @@ export class CustomerViewComponent implements OnInit, AfterViewInit {
 
 getImageUrl(imageUrl: string): string {
   if (!imageUrl) return '';
-  
-  // If it's already a full URL, return it as is
   if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
     return imageUrl;
   }
-  
-  // Make sure imageUrl doesn't have a leading slash when we combine it with baseUrl
   const cleanPath = imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl;
-  
-  // Make sure baseUrl ends with a slash
   const formattedBaseUrl = this.baseUrl.endsWith('/') ? this.baseUrl : `${this.baseUrl}/`;
-  
   return `${formattedBaseUrl}${cleanPath}`;
 }
 
@@ -218,8 +247,6 @@ getImageArray(images: string | string[] | null): string[] {
       return [images];
     }
   }
-  
-  // Already an array
   return images;
 }
 
@@ -304,7 +331,6 @@ private loadCustomerImages(): void {
     .subscribe({
       next: (response) => {
         if (response.success && response.data) {
-          // Update the selected customer with the fetched images
           if (this.selectedCustomer) {
             this.selectedCustomer = {
               ...this.selectedCustomer,

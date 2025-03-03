@@ -84,23 +84,29 @@ export class CustomerProvider {
   }
 
   public updateCustomer(customer: Customer): Observable<{ success: boolean; message?: string }> {
+    // Make sure we're sending the proper format expected by the API
     return this.customerService.updateCustomer(customer).pipe(
-        tap(() => {
-            const index = this.customerList.customer.findIndex(c => c.id === customer.id);
-            if (index >= 0) {
-                this.customerList.customer[index] = customer;
-                this._customer.next([...this.customerList.customer]);
-                this._customerCache.set(customer.id, customer);
-            }
-            this.toaster.success('Customer updated successfully', 'Success');
-        }),
-        catchError(error => {
-            this.toaster.error('Failed to update customer', 'Error');
-            return throwError(() => error);
-        })
+      tap(() => {
+        const index = this.customerList.customer.findIndex(c => c.id === customer.id);
+        if (index >= 0) {
+          // Preserve the floorPlan and sitePlan arrays in the local state
+          const currentCustomer = this.customerList.customer[index];
+          this.customerList.customer[index] = {
+            ...customer,
+            floorPlan: currentCustomer.floorPlan || [],
+            sitePlan: currentCustomer.sitePlan || []
+          };
+          this._customer.next([...this.customerList.customer]);
+          this._customerCache.set(customer.id, this.customerList.customer[index]);
+        }
+        this.toaster.success('Customer updated successfully', 'Success');
+      }),
+      catchError(error => {
+        this.toaster.error('Failed to update customer', 'Error');
+        return throwError(() => error);
+      })
     );
   }
-
   private cacheCustomer(customer: Customer) {
     if (customer && customer.id) {
         this._customerCache.set(customer.id, customer);

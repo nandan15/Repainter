@@ -46,14 +46,14 @@ namespace DataServices.Customer
             var result = await _enquiryRepository.AddAsync(enquiry);
             return _mapper.Map<EnquiryModel>(result);
         }
-        public async Task<EnquiryModel> UpdateAsync(EnquiryModel enquiryModel, int userId)
+        public async Task<EnquiryModel> UpdateAsync(EnquiryModel enquiryModel, int userId, bool partialUpdate = true)
         {
             var enquiry = _mapper.Map<DataEntities.Enquiry.Enquiry>(enquiryModel);
             enquiry.LastModifiedBy = userId;
-
-            var result = await _enquiryRepository.UpdateAsync(enquiry);
+            var result = await _enquiryRepository.UpdateAsync(enquiry, partialUpdate);
             return _mapper.Map<EnquiryModel>(result);
         }
+        
 
         public async Task<bool> DeleteAsync(int id)
         {
