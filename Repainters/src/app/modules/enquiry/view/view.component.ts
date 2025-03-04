@@ -1,10 +1,16 @@
-import { Component, OnInit, ViewChild, ElementRef, NgZone, Input } from '@angular/core';
+// view.component.ts
+import { Component, OnInit, ViewChild, ElementRef, NgZone } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { GoogleMap, MapInfoWindow, MapMarker } from '@angular/google-maps';
 import { CommonHelper } from 'src/app/Shared/Provider/CommonHelper';
 import { Customer } from 'src/app/Shared/models/customer';
 import { CustomerProvider } from 'src/app/Shared/Provider/CustomerProvider';
+import { firstValueFrom } from 'rxjs';
+import Swal from 'sweetalert2';
+import { ToastrService } from 'ngx-toastr';
+
 @Component({
   selector: 'app-view',
   templateUrl: './view.component.html',
@@ -14,11 +20,14 @@ export class ViewComponent implements OnInit {
   @ViewChild('searchInput') searchInput!: ElementRef;
   @ViewChild(GoogleMap) map!: GoogleMap;
   @ViewChild(MapMarker) marker!: MapMarker;
-  @Input()currentCustomer:Customer=new Customer;
-  enquiryForm: FormGroup;
-  title:string[]=['Mr','Ms','Ms & Mr','M/S'];
+  @ViewChild('floorPlanInput') floorPlanInput!: ElementRef;
+  @ViewChild('sitePlanInput') sitePlanInput!: ElementRef;
+  enquiryForm!: FormGroup;
+  currentCustomer: Customer = new Customer();
+  isLoading = false;
+  title: string[] = ['Mr', 'Ms', 'Ms & Mr', 'M/S'];
   projectTypes: string[] = ['Apartment', 'Villa', 'Independent House'];
-  configurations: string[] = ['1BHK', '2BHK', '2.5BHK', '3BHK', '4BHK','4BHK +'];
+  configurations: string[] = ['1BHK', '2BHK', '2.5BHK', '3BHK', '4BHK', '4BHK+'];
   selectedLocation: string = '';
   selectedFloorPlan: File | null = null;
   selectedSitePlan: File | null = null;
@@ -28,59 +37,79 @@ export class ViewComponent implements OnInit {
   zoom = 13;
   mapOptions: google.maps.MapOptions = {
     mapTypeControl: false,
-    streetViewControl: false
+    streetViewControl: false,
+    fullscreenControl: true,
+    zoomControl: true
   };
+
   constructor(
     private formBuilder: FormBuilder,
     private ngZone: NgZone,
     private router: Router,
-    private commonHelper:CommonHelper,
-    private customerProvider:CustomerProvider
+    private location: Location,
+    private commonHelper: CommonHelper,
+    private customerProvider: CustomerProvider,
+    private toaster:ToastrService
   ) {
+    this.initializeForm();
+  }
+
+  private initializeForm(): void {
     this.enquiryForm = this.formBuilder.group({
-      enquiryId:['',Validators.required],
-      title:['',Validators.required],
-      name: ['', Validators.required],
+      enquiryId: [{ value: '', disabled: true }],
+      title: ['', Validators.required],
+      name: ['', [Validators.required, Validators.minLength(2)]],
       emailId: ['', [Validators.required, Validators.email]],
       phoneNumber: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
-      alternatePhoneNumber: ['',Validators.required],
+      alternatePhoneNumber: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
       projectType: ['', Validators.required],
       configuration: ['', Validators.required],
       projectLocation: ['', Validators.required],
       city: ['', Validators.required],
       projectName: ['', Validators.required],
       houseNo: ['', Validators.required],
-      carpetArea: ['sqft',Validators.required],
-      floorPlan: ['',Validators.required],
-      sitePlan:['',Validators.required]
+      carpetArea: ['', [Validators.required, Validators.pattern('^[0-9]*$')]],
+      floorPlan: ['', Validators.required],
+      sitePlan: ['', Validators.required]
     });
   }
-onAddCustomer(){
-    this.currentCustomer.enquiryId=this.enquiryForm.controls["enquiryId"].value;
-    this.currentCustomer.title=this.enquiryForm.controls["title"].value;
-    this.currentCustomer.name=this.enquiryForm.controls["name"].value;
-    this.currentCustomer.emailId=this.enquiryForm.controls["emailId"].value;
-    this.currentCustomer.phoneNumber=this.enquiryForm.controls["phoneNumber"].value;
-    this.currentCustomer.alternatePhoneNumber=this.enquiryForm.controls["alternatePhoneNumber"].value;
-    this.currentCustomer.projectName=this.enquiryForm.controls["projectName"].value;
-    this.currentCustomer.houseNo=this.enquiryForm.controls["houseNo"].value;
-    this.currentCustomer.projectType=this.enquiryForm.controls["projectType"].value;
-    this.currentCustomer.configurtion=this.enquiryForm.controls["configuration"].value;
-    this.currentCustomer.carpetArea=this.enquiryForm.controls["carpetArea"].value;
-    this.currentCustomer.projectLocation=this.enquiryForm.controls["projectLocation"].value;
-    this.currentCustomer.city=this.enquiryForm.controls["city"].value;
-    this.currentCustomer.floorPlan=this.enquiryForm.controls["floorPlan"].value;
-    this.currentCustomer.sitePlan=this.enquiryForm.controls["sitePlan"].value;
-    if(this.currentCustomer.id)
-    {
-      this.customerProvider.updateCustomer(this.currentCustomer);
-    }
-    else{
-      this.customerProvider.addCustomer(this.currentCustomer);  
-    }
-}
-  ngOnInit(): void {
 
+  ngOnInit(): void {
+    if (!this.currentCustomer.id) {
+      this.generateCustomerId();
+    } else {
+      this.populateFormWithCustomer();
+    }
+  }
+
+  private generateCustomerId(): void {
+    this.customerProvider.getNextCustomerId().subscribe({
+      next: (nextId) => {
+        this.enquiryForm.patchValue({ enquiryId: nextId });
+      },
+      error: (error) => {
+        console.error('Error generating enquiry ID:', error);
+        this.enquiryForm.patchValue({ enquiryId: 'ES6001' });
+      }
+    });
+  }
+  private populateFormWithCustomer(): void {
+    this.enquiryForm.patchValue({
+      enquiryId: this.currentCustomer.enquiryId,
+      title: this.currentCustomer.title,
+      name: this.currentCustomer.name,
+      emailId: this.currentCustomer.emailId,
+      phoneNumber: this.currentCustomer.phoneNumber,
+      alternatePhoneNumber: this.currentCustomer.alternatePhoneNumber,
+      projectName: this.currentCustomer.projectName,
+      houseNo: this.currentCustomer.houseNo,
+      projectType: this.currentCustomer.projectType,
+      configuration: this.currentCustomer.configurtion,
+      carpetArea: this.currentCustomer.carpetArea,
+      projectLocation: this.currentCustomer.projectLocation,
+      city: this.currentCustomer.city
+    });
+    this.selectedLocation = this.currentCustomer.projectLocation;
   }
 
   onMapClick(event: google.maps.MapMouseEvent) {
@@ -107,27 +136,30 @@ onAddCustomer(){
   onSearchPlaces(): void {
     const searchText = this.searchInput.nativeElement.value;
     const geocoder = new google.maps.Geocoder();
+    
     geocoder.geocode({ address: searchText }, (results, status) => {
       if (status === 'OK' && results && results[0]) {
         const location = results[0].geometry.location;
         this.center = { lat: location.lat(), lng: location.lng() };
         this.markerPosition = this.center;
         this.selectedLocation = results[0].formatted_address;
-        this.enquiryForm.patchValue({ location: this.selectedLocation });
+        this.enquiryForm.patchValue({ projectLocation: this.selectedLocation });
       }
     });
   }
 
   private updateLocationDetails(place: google.maps.GeocoderResult): void {
-    let address = place.formatted_address || '';
+    const address = place.formatted_address || '';
     let city = '';
+    
     place.address_components?.forEach(component => {
       if (component.types.includes('locality')) {
         city = component.long_name;
       }
     });
+
     this.enquiryForm.patchValue({
-      projectLocation: address, 
+      projectLocation: address,
       city: city
     });
     this.selectedLocation = address;
@@ -137,31 +169,112 @@ onAddCustomer(){
     this.isMapVisible = !this.isMapVisible;
   }
 
-  onFloorPlanSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64String = reader.result as string;
-        this.enquiryForm.patchValue({ floorPlan: base64String });
+    onFloorPlanSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB');
+                this.floorPlanInput.nativeElement.value = '';
+                return;
+            }
+            this.selectedFloorPlan = file;
+            this.enquiryForm.patchValue({ floorPlan: file.name });
+        }
+    }
+
+    onSitePlanSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB');
+                this.sitePlanInput.nativeElement.value = '';
+                return;
+            }
+            this.selectedSitePlan = file;
+            this.enquiryForm.patchValue({ sitePlan: file.name });
+        }
+    }
+
+  goBack(): void {
+    this.location.back();
+  }
+
+  async onAddCustomer(): Promise<void> {
+    if (this.enquiryForm.invalid) {
+      this.markFormGroupTouched(this.enquiryForm);
+      return;
+    }
+
+    this.isLoading = true;
+    try {
+      const formValues = this.enquiryForm.getRawValue();
+      const customerData = {
+        ...this.currentCustomer,
+        enquiryId: formValues.enquiryId,
+        title: formValues.title,
+        name: formValues.name,
+        emailId: formValues.emailId,
+        phoneNumber: formValues.phoneNumber,
+        alternatePhoneNumber: formValues.alternatePhoneNumber,
+        projectName: formValues.projectName,
+        houseNo: formValues.houseNo,
+        projectType: formValues.projectType,
+        configurtion: formValues.configuration, 
+        carpetArea: formValues.carpetArea,
+        projectLocation: formValues.projectLocation,
+        city: formValues.city,
+        floorPlan: formValues.floorPlan,
+        sitePlan: formValues.sitePlan
       };
-      reader.readAsDataURL(file);
-      this.selectedFloorPlan = file;
+
+      console.log('Sending customer data:', customerData);
+
+      const result = await firstValueFrom(
+        this.customerProvider.addCustomer(
+          customerData,
+          this.selectedFloorPlan ? [this.selectedFloorPlan] : [],
+          this.selectedSitePlan ? [this.selectedSitePlan] : []
+        )
+      );
+      console.log('Received result:', result);
+      if (result.success && result.customerId) {
+        localStorage.setItem('lastSavedCustomerId', result.customerId.toString());
+
+        await Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: 'Customer saved successfully',
+          confirmButtonText: 'OK'
+        });
+        this.enquiryForm.reset();
+        this.generateCustomerId(); 
+        setTimeout(() => {
+          this.router.navigate(['/quotation-builder/view', result.customerId]);
+        }, 100);
+      } else {
+        throw new Error('Failed to save customer');
+      }
+    } catch (error) {
+      console.error('Error in onAddCustomer:', error);
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to save customer. Please try again.',
+        confirmButtonText: 'OK'
+      });
+    } finally {
+      this.isLoading = false;
     }
   }
-  
-  onSitePlanSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      const reader = new FileReader();
-      reader.onload = () => {
-        const base64String = reader.result as string;
-        this.enquiryForm.patchValue({ sitePlan: base64String });
-      };
-      reader.readAsDataURL(file);
-      this.selectedSitePlan = file;
-    }
+
+ private markFormGroupTouched(formGroup: FormGroup) {
+    Object.values(formGroup.controls).forEach(control => {
+      control.markAsTouched();
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      }
+    });
   }
 }

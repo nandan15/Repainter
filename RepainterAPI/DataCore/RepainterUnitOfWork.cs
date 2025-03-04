@@ -4,33 +4,44 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Shared.Contexts.Base;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DataCore
 {
-    public  class RepainterUnitOfWork:IUnitOfWork
+    public class RepainterUnitOfWork : IUnitOfWork
     {
         private static readonly object _createRepositoryLock = new();
         private readonly Dictionary<Type, object> _repositories = new();
         private bool _disposed;
         public DbContext dfContext { get; }
-        public object Enquiry => throw new NotImplementedException();
 
+        public object Enquiry => throw new NotImplementedException();
         public object QuotationBuilder => throw new NotImplementedException();
 
         public RepainterUnitOfWork(RepainterContext context)
         {
             dfContext = context;
         }
+
+        public IDbConnection CreateConnection()
+        {
+            var connection = dfContext.Database.GetDbConnection();
+            if (connection.State == ConnectionState.Closed)
+            {
+                connection.Open();
+            }
+            return connection;
+        }
+
         public void Dispose()
         {
             if (!_disposed)
             {
                 Dispose(true);
             }
-
             GC.SuppressFinalize(this);
         }
 
@@ -47,7 +58,6 @@ namespace DataCore
                     }
                 }
             }
-
             return _repositories[typeof(TEntity)] as IRepositoryCore<TEntity>;
         }
 
@@ -58,19 +68,25 @@ namespace DataCore
                 : new NestedTransaction();
         }
 
-        public Task CommitTransactionAsync(CancellationToken cancellationToken = default)
+        public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
         {
-            return dfContext.Database.CommitTransactionAsync(cancellationToken);
+            if (dfContext.Database.CurrentTransaction != null)
+            {
+                await dfContext.Database.CommitTransactionAsync(cancellationToken);
+            }
         }
 
-        public Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
+        public async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
         {
-            return dfContext.Database.RollbackTransactionAsync(cancellationToken);
+            if (dfContext.Database.CurrentTransaction != null)
+            {
+                await dfContext.Database.RollbackTransactionAsync(cancellationToken);
+            }
         }
 
-        public Task SaveAsync(CancellationToken cancellationToken = default)
+        public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            return dfContext.SaveChangesAsync(cancellationToken);
+            await dfContext.SaveChangesAsync(cancellationToken);
         }
 
         public void Save()
@@ -91,7 +107,6 @@ namespace DataCore
         public string GetTableNameWithSchema<T>()
         {
             var entityType = dfContext.Model.FindEntityType(typeof(T));
-
             return $"{entityType.GetSchema()}.{entityType.GetTableName()}";
         }
 
@@ -105,11 +120,11 @@ namespace DataCore
             dfContext.Entry(entity).State = EntityState.Modified;
         }
 
-        public Task BulkInsertAsync<TEntity>(IEnumerable<TEntity> entities)
+        public async Task BulkInsertAsync<TEntity>(IEnumerable<TEntity> entities)
             where TEntity : class
         {
             Action<BulkConfig> action = c => c.SetOutputIdentity = true;
-            return dfContext.BulkInsertAsync(entities.ToList(), action);
+            await dfContext.BulkInsertAsync(entities.ToList(), action);
         }
 
         private void CreateRepository<TEntity>()
@@ -127,9 +142,27 @@ namespace DataCore
             }
         }
 
-        public Task SaveChangesAsync(CancellationToken cancellationToken)
+        public async Task SaveAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            await dfContext.SaveChangesAsync(cancellationToken);
         }
+    }
+
+    // Helper class for nested transactions
+    public class NestedTransaction : IDbContextTransaction
+    {
+        public Guid TransactionId => Guid.Empty;
+
+        public void Commit() { }
+
+        public void Dispose() { }
+
+        public void Rollback() { }
+
+        public Task CommitAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task RollbackAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
 }

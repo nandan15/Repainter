@@ -17,11 +17,16 @@ namespace DataCore.Configurations
             entity.Property(p => p.PanelingTabId);
             entity.Property(p => p.GeneratedId);
             entity.Property(p => p.CustomerId);
-            entity.Property(p => p.ProductCode);
             entity.Property(p => p.Type);
+            entity.Property(p => p.PaintingType);
+            entity.Property(p => p.PanelingType);
+            entity.Property(p=>p.WallPaperType);
+            entity.Property(p => p.TextureType);
             entity.Property(p => p.Price);
             entity.Property(p => p.Description);
             entity.Property(p => p.Remarks);
+            entity.Property(p=>p.Lighting);
+            entity.Property(p => p.LightingPrice);
             entity.Property(p => p.SectionTotal);
             entity.Property(p => p.Deleted);
             entity.Property(p=>p.CreatedBy);

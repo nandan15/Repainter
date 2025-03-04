@@ -29,4 +29,9 @@ export class PackageService {
     public deletePackage(packageId: number): Observable<ResponseObj> {
         return this.httpClient.delete<ResponseObj>(`${this.packageMethod}/delete/${packageId}`);
     }
+    public getPackageDataByCustomerId(customerId:number):Observable<Package[]>
+    {
+        return this.httpClient.get<Package[]>(`${this.packageMethod}/customer/${customerId}`);
+    }
+    
 }

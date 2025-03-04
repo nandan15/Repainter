@@ -1,72 +1,85 @@
-﻿using DataEntities.Enquiry;
-using MediatR;
+﻿using MediatR;
 using Shared.Contexts.Base;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
-namespace DataServices.Enquiry.Commands
+public class UpdateEnquiryImagesCommand : IRequest<bool>
 {
-    public class UpdateEnquiryImages : IRequest<bool>
+    public int EnquiryId { get; set; }
+    public string ImageType { get; set; }
+    public List<string> NewImages { get; set; }
+}
+
+public class UpdateEnquiryImagesHandler : IRequestHandler<UpdateEnquiryImagesCommand, bool>
+{
+    private readonly IUnitOfWork _context;
+    private readonly ILogger<UpdateEnquiryImagesHandler> _logger;
+
+    public UpdateEnquiryImagesHandler(IUnitOfWork context, ILogger<UpdateEnquiryImagesHandler> logger)
     {
-        public int Id { get; set; }
-        public string Type { get; set; }
-        public List<string> Images { get; set; }
+        _context = context;
+        _logger = logger;
     }
-    public class UpdateEnquiryImagesHandler : IRequestHandler<UpdateEnquiryImages, bool>
+
+    public async Task<bool> Handle(UpdateEnquiryImagesCommand request, CancellationToken cancellationToken)
     {
-        private readonly IUnitOfWork _context;
-
-        public UpdateEnquiryImagesHandler(IUnitOfWork context)
+        try
         {
-            _context = context;
+            var enquiry = await _context.Repository<DataEntities.Enquiry.Enquiry>()
+                .GetByIdAsync(request.EnquiryId);
+
+            if (enquiry == null)
+                return false;
+
+            List<string> existingImages;
+            if (request.ImageType.ToLower() == "floor")
+            {
+                existingImages = !string.IsNullOrEmpty(enquiry.FloorPlan) && IsValidJson(enquiry.FloorPlan)
+                    ? JsonSerializer.Deserialize<List<string>>(enquiry.FloorPlan)
+                    : new List<string>();
+
+                existingImages.AddRange(request.NewImages);
+                enquiry.FloorPlan = JsonSerializer.Serialize(existingImages);
+            }
+            else if (request.ImageType.ToLower() == "site")
+            {
+                existingImages = !string.IsNullOrEmpty(enquiry.SitePlan) && IsValidJson(enquiry.SitePlan)
+                    ? JsonSerializer.Deserialize<List<string>>(enquiry.SitePlan)
+                    : new List<string>();
+
+                existingImages.AddRange(request.NewImages);
+                enquiry.SitePlan = JsonSerializer.Serialize(existingImages);
+            }
+            else
+            {
+                throw new ArgumentException("Invalid image type");
+            }
+
+            enquiry.LastModified = DateTime.UtcNow;
+            await _context.SaveAsync();
+            return true;
         }
-
-        public async Task<bool> Handle(UpdateEnquiryImages request, CancellationToken cancellationToken)
+        catch (JsonException jsonEx)
         {
-            var existingEnquiry = _context.Repository<DataEntities.Enquiry.Enquiry>()
-                .Get()
-                .Where(x => x.Id == request.Id)
-                .FirstOrDefault();
+            _logger.LogError(jsonEx, "JSON deserialization error for Enquiry ID {EnquiryId}", request.EnquiryId);
+            throw new Exception($"Error deserializing images for enquiry {request.EnquiryId}: {jsonEx.Message}", jsonEx);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating enquiry images for Enquiry ID {EnquiryId}", request.EnquiryId);
+            throw new Exception($"Error updating enquiry images: {ex.Message}", ex);
+        }
+    }
 
-            if (existingEnquiry == null)
-                return false;
-
-            try
-            {
-                if (request.Type == "floor")
-                {
-                    var existingImages = string.IsNullOrEmpty(existingEnquiry.FloorPlan)
-                        ? new List<string>()
-                        : JsonSerializer.Deserialize<List<string>>(existingEnquiry.FloorPlan) ?? new List<string>();
-                    existingImages.AddRange(request.Images); // Append new images
-                    existingEnquiry.FloorPlan = JsonSerializer.Serialize(existingImages);
-                }
-                else if (request.Type == "site")
-                {
-                    var existingImages = string.IsNullOrEmpty(existingEnquiry.SitePlan)
-                        ? new List<string>()
-                        : JsonSerializer.Deserialize<List<string>>(existingEnquiry.SitePlan) ?? new List<string>();
-                    existingImages.AddRange(request.Images); // Append new images
-                    existingEnquiry.SitePlan = JsonSerializer.Serialize(existingImages);
-                }
-
-                await _context.SaveAsync();
-                return true;
-            }
-            catch (JsonException ex)
-            {
-                Console.Error.WriteLine($"JSON deserialization error: {ex.Message}");
-                return false;
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error updating images: {ex.Message}");
-                return false;
-            }
+    private bool IsValidJson(string jsonString)
+    {
+        try
+        {
+            JsonDocument.Parse(jsonString);
+            return true;
+        }
+        catch (JsonException)
+        {
+            return false;
         }
     }
 }

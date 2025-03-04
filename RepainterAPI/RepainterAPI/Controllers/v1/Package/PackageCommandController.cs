@@ -1,6 +1,8 @@
-﻿using DataModels.Exceptions;
+﻿using DataModels.Door_Grills;
+using DataModels.Exceptions;
 using DataModels.InternalPainting;
 using DataModels.Package;
+using DataServices.Door_Grills.Commands;
 using DataServices.InternalPainting.Commands;
 using DataServices.Package.Commands;
 using MediatR;
@@ -30,6 +32,22 @@ namespace RepainterAPI.Controllers.v1.Package
             var package = await _mediator.Send(new AddPackage
             {
                 PackageModel = model
+            });
+            return Ok(package);
+        }
+        ///<summary>
+        ///delete the Package
+        /// </summary>
+        [HttpDelete]
+        [Route("delete/{id}")]
+        [ProducesResponseType(typeof(PackageModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(InternalErrorViewModel), (int)HttpStatusCode.InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Package" })]
+        public async Task<IActionResult> DeletePackage(int id)
+        {
+            var package = await _mediator.Send(new DeletePackage
+            {
+                PackageModel = new PackageModel { PackageId = id }
             });
             return Ok(package);
         }

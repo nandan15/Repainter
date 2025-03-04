@@ -39,8 +39,7 @@ namespace DataServices.Enquiry.Commands
                     existingenquiry.CarpetArea = request.enquirymodel.CarpetArea;
                     existingenquiry.ProjectLocation = request.enquirymodel.ProjectLocation;
                     existingenquiry.City = request.enquirymodel.City;
-                    existingenquiry.FloorPlan = request.enquirymodel.FloorPlan;
-                    existingenquiry.SitePlan = request.enquirymodel.SitePlan;
+             
                 }
                 await _context.SaveAsync();
                 return request.enquirymodel;

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DataModels.Enquiry
+﻿namespace DataModels.Enquiry
 {
     public class EnquiryModel
     {
@@ -22,8 +16,8 @@ namespace DataModels.Enquiry
         public string CarpetArea { get; set; }
         public string ProjectLocation { get; set; }
         public string City { get; set; }
-        public string FloorPlan { get; set; }
-        public string SitePlan { get; set; }
+        public string FloorPlan { get; set; } // File paths
+        public string SitePlan { get; set; }  // File paths
         public bool Deleted { get; set; }
         public DateTime LastModified { get; set; }
         public int LastModifiedBy { get; set; }

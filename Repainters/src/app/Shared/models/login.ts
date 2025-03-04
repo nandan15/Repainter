@@ -20,5 +20,12 @@ export class ResponseObj{
 }
 
 export class ParsedAccessToken {
-    
+    jti!: string;
+    Sid!: string;  // This is our user ID
+    Email!: string;
+    Name!: string;
+    Roles!: string;
+    exp!: number;
+    iss!: string;
+    aud!: string;
 }

@@ -3,55 +3,50 @@
   
   <mat-dialog-content>
     <div class="send-options">
-      <div 
-        [class.active]="activeTab === 'email'"
-        (click)="activeTab = 'email'"
-        class="option-button">
+      <div [class.active]="activeTab === 'email'" (click)="activeTab = 'email'" class="option-button">
         <mat-icon>email</mat-icon>
         <span>Email</span>
       </div>
-      <div 
-        [class.active]="activeTab === 'whatsapp'"
-        (click)="activeTab = 'whatsapp'"
-        class="option-button">
+      <div [class.active]="activeTab === 'whatsapp'" (click)="activeTab = 'whatsapp'" class="option-button">
         <mat-icon>whatsapp</mat-icon>
         <span>WhatsApp</span>
       </div>
-      <div 
-        [class.active]="activeTab === 'download'"
-        (click)="activeTab='download'"
-        class="option-button">
+      <div [class.active]="activeTab === 'download'" (click)="activeTab='download'" class="option-button">
         <mat-icon>download</mat-icon>
         <span>Download Quote</span>
       </div>
     </div>
 
     <div class="form-container" *ngIf="activeTab === 'email'">
-      <!-- <mat-form-field appearance="outline" class="full-width">
-        <mat-label>From</mat-label>
-        <input matInput value="espresso@vibgyor.co.in" readonly>
-      </mat-form-field> -->
-
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>To (comma-separated)</mat-label>
-        <input matInput [(ngModel)]="emailForm.to" placeholder="Enter multiple emails">
+          <mat-label>To (comma-separated for multiple emails)</mat-label>
+          <input 
+              matInput 
+              [ngModel]="emailForm.to.join(', ')"
+              (ngModelChange)="onEmailInputChange($event)"
+              placeholder="Enter one or more email addresses"
+              [matTooltip]="'For multiple recipients, separate email addresses with commas'"
+              matTooltipPosition="above">
+          <mat-hint>Example: email1@example.com, email2@example.com</mat-hint>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Subject</mat-label>
-        <input matInput [(ngModel)]="emailForm.subject">
+          <mat-label>Subject</mat-label>
+          <input matInput [(ngModel)]="emailForm.subject">
       </mat-form-field>
 
       <div class="file-upload">
-        <button mat-stroked-button (click)="fileInput.click()">
-          <mat-icon>folder</mat-icon>
-          Upload Generated Quote File
-        </button>
-        <input #fileInput type="file" (change)="onFileSelected($event)" style="display: none">
-        <span *ngIf="emailForm.attachment">{{emailForm.attachment.name}}</span>
+          <button mat-stroked-button (click)="fileInput.click()">
+              <mat-icon>folder</mat-icon>
+              Upload Generated Quote File
+          </button>
+          <input #fileInput type="file" (change)="onFileSelected($event)" style="display: none">
+          <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Rename File</mat-label>
+              <input matInput [(ngModel)]="quotationFileName" placeholder="Enter new file name">
+          </mat-form-field>
       </div>
     </div>
-
     <div class="form-container" *ngIf="activeTab === 'whatsapp'">
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>WhatsApp Number</mat-label>
@@ -61,18 +56,19 @@
 
     <div class="form-container" *ngIf="activeTab === 'download'">
       <p>Your quote has been generated. Click below to download.</p>
+      <button mat-raised-button color="primary" (click)="downloadQuote()" class="download-button">
+        <mat-icon>file_download</mat-icon>
+        Download Quote
+      </button>
     </div>
-
-    <!-- Checkbox for Send & Download -->
+  
     <mat-checkbox [(ngModel)]="sendAndDownload">Send & Download</mat-checkbox>
-
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <!-- Cancel and Send buttons -->
     <button mat-button (click)="onCancel()">Cancel</button>
-    <button mat-raised-button color="primary" (click)="onSend()">
-      Send Quote
+    <button mat-raised-button color="primary" (click)="onSend()" [disabled]="isLoading">
+        <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
+        <span *ngIf="!isLoading">{{ activeTab === 'download' ? 'Close' : 'Send Quote' }}</span>
     </button>
-  </mat-dialog-actions>
-</div>
+</mat-dialog-actions>

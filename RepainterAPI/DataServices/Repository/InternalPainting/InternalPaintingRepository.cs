@@ -19,13 +19,15 @@ namespace DataServices.Repository.InternalPainting
         public async Task<IEnumerable<InternalPaintingModel>> GetByCustomerIdAsync(int customerId)
         {
             return await Task.Run(() =>
-                _context.ScInternalPainting 
+                _context.InternalPainting 
                 .Where(ip => ip.CustomerId == customerId && !ip.Deleted)
                 .Select(ip => new InternalPaintingModel
                 {
                     IntenalPaintingId = ip.IntenalPaintingId,
                     CustomerId = ip.CustomerId,
                     CarpetArea = ip.CarpetArea,
+                    ProductCode=ip.ProductCode,
+                    Color=ip.Color,
                     CeilingType = ip.CeilingType,
                     CeilingPrice = ip.CeilingPrice,
                     CeilingRemarsk = ip.CeilingRemarks,

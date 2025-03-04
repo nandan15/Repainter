@@ -1,34 +1,176 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse, HttpHeaders } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
+import { catchError, forkJoin, map, Observable, throwError } from "rxjs";
 import { environment } from "src/environment/environment";
-import { Customer } from "../../models/customer";
-import { ResponseObj } from "../../models/login";
+import { Customer, CustomerImagesModel } from "../../models/customer";
+
+export interface ResponseObj {
+    success: boolean;
+    message: string;
+    data?: any;
+    status?: boolean;
+}
+
+export interface ImageUploadResponse extends ResponseObj {
+    imageUrl?: string;
+}
+
+export interface CustomerResponse extends Customer {
+    success?: boolean;
+    message?: string;
+}
+
 @Injectable({
     providedIn: 'root'
 })
 export class CustomerService {
     baseUrl: string = environment.backend.baseURL;
-    private customerMethod = this.baseUrl + "v1/enquiry";
+    private customerMethod = this.baseUrl + "v1/enquiry"; 
+
     constructor(private httpClient: HttpClient) {}
+
     public getCustomerById(id: number): Observable<Customer> {
-        return this.httpClient.get<Customer>(`${this.customerMethod}/${id}`);
+        return this.httpClient.get<Customer>(`${this.customerMethod}/${id}`).pipe(
+            catchError(this.handleError)
+        );
     }
-    public addCustomer(customer: Customer): Observable<ResponseObj> {
-        return this.httpClient.post<ResponseObj>(this.customerMethod + "/create", customer);
+    
+    public getCustomerImages(customerId: number): Observable<CustomerImagesModel> {
+        return this.httpClient.get<CustomerImagesModel>(`${this.customerMethod}/images/${customerId}`).pipe(
+            catchError(error => {
+                console.error('Error fetching customer images:', error);
+                return throwError(() => new Error('Failed to fetch customer images'));
+            })
+        );
     }
-    public listCustomer(query: string = ""): Observable<any> {
-        return this.httpClient.get<any>(this.customerMethod + query);
+
+    public addCustomer(formData: FormData): Observable<{ success: boolean; customerId?: number; message?: string }> {
+        return this.httpClient.post<any>(`${this.customerMethod}`,formData
+        ).pipe(map(response => { return {
+                    success: true,
+                    customerId: response.id,
+                    message: 'Customer added successfully'
+                };
+            }),
+            catchError(this.handleError)
+        );
     }
-    public updateCustomer(customer: Customer): Observable<ResponseObj> {
-        return this.httpClient.post<ResponseObj>(`${this.customerMethod}/update/${customer.id}`, customer);
+    
+    public listCustomer(): Observable<Customer[]> {
+        return this.httpClient.get<Customer[]>(`${this.customerMethod}`).pipe(
+            catchError(this.handleError)
+        );
     }
-    public deleteCustomer(id: number): Observable<ResponseObj> {
-        return this.httpClient.delete<ResponseObj>(`${this.customerMethod}/${id}`);
+    
+    public updateCustomer(customer: Customer): Observable<{ success: boolean; message?: string }> {
+        // Make sure we're not sending any unexpected properties
+        const updateData = {
+          id: customer.id,
+          enquiryId: customer.enquiryId,
+          title: customer.title,
+          name: customer.name,
+          phoneNumber: customer.phoneNumber,
+          alternatePhoneNumber: customer.alternatePhoneNumber,
+          emailId: customer.emailId,
+          projectName: customer.projectName,
+          houseNo: customer.houseNo,
+          projectType: customer.projectType,
+          configurtion: customer.configurtion,
+          carpetArea: customer.carpetArea,
+          projectLocation: customer.projectLocation,
+          city: customer.city,
+          // Don't include floorPlan and sitePlan arrays
+          deleted: customer.deleted,
+          lastModified: customer.lastModified,
+          lastModifiedBy: customer.lastModifiedBy,
+          createdOn: customer.createdOn,
+          createdBy: customer.createdBy
+        };
+        
+        return this.httpClient.put<{ success: boolean; message?: string }>(
+          `${this.customerMethod}/${customer.id}`,
+          updateData
+        ).pipe(
+          map(response => ({ success: true, message: 'Customer updated successfully' })),
+          catchError(this.handleError)
+        );
+      }
+
+    public deleteCustomer(id: number): Observable<void> {
+        return this.httpClient.delete<void>(`${this.customerMethod}/${id}`).pipe(
+            catchError(this.handleError)
+        );
     }
-    public uploadImage(customerId: number, image: File, type: 'floorPlan' | 'sitePlan'): Observable<ResponseObj> {
+    public uploadImages(customerId: number, floorPlanImages: File[], sitePlanImages: File[]): Observable<any> {
         const formData = new FormData();
-        formData.append('file', image); // Use 'file' as the key (match it with the backend)
-        return this.httpClient.post<ResponseObj>(`${this.customerMethod}/upload-image/${customerId}/${type}`, formData);
+        if (floorPlanImages && floorPlanImages.length > 0) {
+            floorPlanImages.forEach(file => {
+                formData.append('floorPlanImages', file, file.name);
+            });
+        }
+        if (sitePlanImages && sitePlanImages.length > 0) {
+            sitePlanImages.forEach(file => {
+                formData.append('sitePlanImages', file, file.name);
+            });
+        }
+        
+        return this.httpClient.post(
+            `${this.customerMethod}/${customerId}/upload-images`, 
+            formData
+        ).pipe(
+            catchError(this.handleError)
+        );
+    }
+    
+public uploadMultipleImages(customerId: number, files: File[], type: 'floor' | 'site'): Observable<ImageUploadResponse[]> {
+    const formData = new FormData();
+    const imageType = type === 'floor' ? 'floorPlanImages' : 'sitePlanImages';
+    
+    files.forEach(file => {
+        formData.append(imageType, file, file.name);
+    });
+    
+    return this.httpClient.post<ImageUploadResponse[]>(
+        `${this.customerMethod}/${customerId}/upload-images`, 
+        formData
+    ).pipe(
+        catchError(this.handleError)
+    );
+}
+    private handleError(error: HttpErrorResponse) {
+        let errorMessage = 'An error occurred';
+        if (error.error instanceof ErrorEvent) {
+            errorMessage = `Error: ${error.error.message}`;
+        } else {
+            errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+        }
+        return throwError(() => new Error(errorMessage));
+    }
+
+    public getNextEnquiryId(): Observable<{ enquiryId: string }> {
+        return this.httpClient.get<{ enquiryId: string }>(`${this.customerMethod}/next-id`);
+      }
+      public getImagesById(customerId: number): Observable<{success: boolean, data: {floorPlan: string[], sitePlan: string[]}, message?: string}> {
+        return this.httpClient.get<any>(
+          `${this.customerMethod}/${customerId}/physical-images`
+        ).pipe(
+          map(response => {
+            return {
+              success: true,
+              data: {
+                floorPlan: response.floorPlan || [],
+                sitePlan: response.sitePlan || []
+              },
+              message: 'Images fetched successfully'
+            };
+          }),
+          catchError(error => {
+            console.error('Error fetching images by ID:', error);
+            return throwError(() => ({
+              success: false,
+              message: 'Failed to fetch customer images'
+            }));
+          })
+        );
       }
 }

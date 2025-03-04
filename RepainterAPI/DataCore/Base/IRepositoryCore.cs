@@ -7,7 +7,7 @@ namespace Shared.Contexts.Base
         where TEntity : class
     {
         IQueryable<TEntity> Get();
-
+        Task<TEntity> GetByIdAsync(int id);
         Task<IQueryable<TEntity>> GetAsync();
 
         IQueryable<TEntity> GetExpandable();

@@ -15,7 +15,7 @@ namespace DataCore.Configurations
       public void Configure(EntityTypeBuilder<Enquiry> entity)
         {
             entity.HasKey(e => e.Id).HasName("PK_Customer");
-            entity.ToTable("ScCustomer");
+            entity.ToTable("Customer");
             entity.Property(e => e.EnquiryId);
             entity.Property(e => e.Title);
             entity.Property(e => e.Name);

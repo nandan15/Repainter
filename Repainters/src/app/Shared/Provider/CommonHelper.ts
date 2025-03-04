@@ -1,10 +1,20 @@
 import { Injectable } from "@angular/core";
 import { AbstractControl,FormArray,FormControl,FormGroup,ValidationErrors, ValidatorFn } from "@angular/forms";
+import { ToastrService } from "ngx-toastr";
 @Injectable({
     providedIn:'root'
 })
 
 export  class CommonHelper{
+    constructor(private toastr: ToastrService) {}
+
+    async showSuccessToast(message: string): Promise<void> {
+        this.toastr.success(message);
+    }
+
+    async showErrorToast(message: string): Promise<void> {
+        this.toastr.error(message);
+    }
     validateAllFormFields(formGroup:FormGroup){
         console.log("Validating form fields");
     Object.keys(formGroup.controls).forEach(field => {

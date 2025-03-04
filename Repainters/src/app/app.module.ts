@@ -13,6 +13,7 @@ import { RouterModule } from '@angular/router';
 import { ToastrModule } from 'ngx-toastr';
 import { MatIconModule } from '@angular/material/icon';
 import { CustomerModalComponent } from './modules/customer/customer-modal/customer-modal.component';
+import { NavigationErrorHandler } from './Shared/Service/navigation-error-handler.service';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,7 @@ import { CustomerModalComponent } from './modules/customer/customer-modal/custom
       positionClass:'toast-bottom-right'
     })
   ],
-  providers: [AuthGuard,{provide:HTTP_INTERCEPTORS,useClass:APInterceptor,multi:true}],
+  providers: [AuthGuard, NavigationErrorHandler,{provide:HTTP_INTERCEPTORS,useClass:APInterceptor,multi:true}],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

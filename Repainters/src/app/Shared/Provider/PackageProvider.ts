@@ -3,6 +3,7 @@ import { ToastrService } from "ngx-toastr";
 import { BehaviorSubject, Observable } from "rxjs";
 import { Package } from "../models/package";
 import { PackageService } from "../Service/Package/Package.service";
+import Swal from "sweetalert2";
 
 @Injectable({
     providedIn: 'root'
@@ -27,27 +28,43 @@ export class PackageProvider {
     ) {}
 
     addPackage(packages: Package[]): void {
+        const updatedPackages = [...this.packageList.package]; // Preserve the current list
+    
         packages.forEach(pkg => {
             this.packageService.addPackage(pkg).subscribe({
                 next: (data) => {
                     pkg.packageId = data["created_id"];
                     pkg.createdOn = pkg.createdOn || new Date();
                     pkg.lastModifiedDate = new Date();
-                    
-                    const updatedPackages = [...this.packageList.package, pkg];
+    
+                    updatedPackages.push(pkg); // Append the new package
                     this.packageList.package = updatedPackages;
-                    this._package.next(updatedPackages);
-                    
+                    this._package.next([...updatedPackages]); // Emit new state
+    
                     this.toaster.success("Package Confirmed Successfully", "Confirmation");
+    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: 'Package added successfully',
+                        confirmButtonText: 'OK'
+                    });
                 },
                 error: (err) => {
                     this.toaster.error("Failed to add package", "Error");
-                    console.error(err);
+                    console.error('Error adding package:', err);
+    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Failed to save package.',
+                        confirmButtonText: 'OK'
+                    });
                 }
             });
         });
     }
-
+    
     listPackage(): void {
         this.packageService.listPackage().subscribe({
             next: (data) => {
@@ -80,5 +97,8 @@ export class PackageProvider {
             }
         });
     }
-    
+    getPackageDataByCustomerId(customerId:number,p0:{deleted:number;}):Observable<Package[]>
+    {
+        return this.packageService.getPackageDataByCustomerId(customerId);
+    }
 }

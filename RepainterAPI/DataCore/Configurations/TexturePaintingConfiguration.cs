@@ -14,7 +14,7 @@ namespace DataCore.Configurations
         public void Configure(EntityTypeBuilder<TexturePainting> entity)
         {
             entity.HasKey(t => t.TexturePaintingId).HasName("PK_TexturePainting");
-            entity.ToTable("ScTexturePainting");
+            entity.ToTable("TexturePainting");
             entity.Property(t => t.TexturePaintingTabId);
             entity.Property(t => t.CustomerId);
             entity.Property(t => t.Area);

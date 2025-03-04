@@ -1,0 +1,37 @@
+<mat-accordion>
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title>Additional Item</mat-panel-title>
+      </mat-expansion-panel-header>
+      <form [formGroup]="additionalForm">
+        <div class="form-container">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <input matInput formControlName="description" placeholder="Enter description">
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline">
+            <mat-label>Quantity</mat-label>
+            <mat-select formControlName="quantity">
+              <mat-option *ngFor="let qty of quantities" [value]="qty">
+                {{qty}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline">
+            <mat-label>Price</mat-label>
+            <input matInput type="number" formControlName="price" placeholder="Enter price">
+            
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline">
+            <mat-label>Amount</mat-label>
+            <input matInput type="number" formControlName="amount" readonly>
+           
+          </mat-form-field>
+        </div>
+      </form>
+      
+    </mat-expansion-panel>
+  </mat-accordion>

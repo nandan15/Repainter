@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NavigationService } from 'src/app/Shared/Service/Navigation.service';
 
@@ -16,7 +16,9 @@ interface StatData {
 export class DashboardComponent implements OnInit {
   isSidebarExpanded = true;
   customerId: string | null;
-  
+  showDropdown = false;
+  username: string = '';
+
   statsData: StatData[] = [
     {
       icon: '/assets/icon1.png',
@@ -57,8 +59,29 @@ export class DashboardComponent implements OnInit {
     this.customerId = this.navigationService.getCustomerId();
   }
 
-  ngOnInit(): void {}
+  ngOnInit() {
+    // Get user data from localStorage
+    const userData = localStorage.getItem('User');
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      this.username = parsedUser.unique_name || parsedUser.name || 'User';
+    }
+  }
+  toggleDropdown() {
+    this.showDropdown = !this.showDropdown;
+  }
 
+  logout() {
+    localStorage.clear();
+    this.router.navigate(['/login/logout']);
+  }
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const element = event.target as HTMLElement;
+    if (!element.closest('.user-profile')) {
+      this.showDropdown = false;
+    }
+  }
   onSidebarToggle(expanded: boolean): void {
     this.isSidebarExpanded = expanded;
   }

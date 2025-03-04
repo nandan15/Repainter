@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace DataServices.Repository.Wallpaper
 {
-    internal class WallpaperRepository:IWallpaperRepository
+    public class WallpaperRepository:IWallpaperRepository
     {
         private readonly RepainterContext _context;
 
@@ -22,7 +22,7 @@ namespace DataServices.Repository.Wallpaper
         public async Task<IEnumerable<WallpaperModel>> GetByCustomerIdAsync(int customerId)
         {
             return await Task.Run(() =>
-                _context.ScWallpaper
+                _context.Wallpaper
                 .Where(w => w.CustomerId == customerId && !w.Deleted)
                 .Select(w => new WallpaperModel
                 {

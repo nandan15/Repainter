@@ -30,9 +30,14 @@ namespace DataServices.WallPaneling.Commands
                     existingWallPaneling.PanelingTabId = request.panelingModel.PanelingTabId;
                     existingWallPaneling.GeneratedId = request.panelingModel.GeneratedId;
                     existingWallPaneling.CustomerId = request.panelingModel.CustomerId;
-                    existingWallPaneling.ProductCode = request.panelingModel.ProductCode;
                     existingWallPaneling.Type = request.panelingModel.Type;
+                    existingWallPaneling.PanelingType = request.panelingModel.PanelingType;
+                    existingWallPaneling.PanelingType = request.panelingModel.PanelingType;
+                    existingWallPaneling.TextureType=request.panelingModel.TextureType;
+                    existingWallPaneling.WallPaperType = request.panelingModel.WallPaperType;
                     existingWallPaneling.Price = request.panelingModel.Price;
+                    existingWallPaneling.Lighting = request.panelingModel.Lighting;
+                    existingWallPaneling.LightingPrice = request.panelingModel.LightingPrice;
                     existingWallPaneling.Description = request.panelingModel.Description;
                     existingWallPaneling.Remarks = request.panelingModel.Remarks;
                     existingWallPaneling.CreatedOn = request.panelingModel.CreatedOn;

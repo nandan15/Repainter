@@ -52,14 +52,14 @@ export class ViewComponent {
   baseMenuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', link: '/dashboard/dashboard', notification: '' },
     { icon: Users, label: 'Customers', link: '/customer/view', notifications: '' },
-    { icon: Package, label: 'Products', link: '/quotation-builder/view', notifications: 5 }
+    { icon: Package, label: 'Products', link: '/product/product', notifications: '' }
   ];
 
   protectedMenuItems = [
     { icon: PieChart, label: 'Reports', link: '/reports', requiresAuth: true },
     { icon: BaggageClaim, label: 'Procurement', link: '/procurement/procurement', requiresAuth: true },
     { icon: Truck, label: 'GRN', link: '/grn', requiresAuth: true },
-    { icon: Settings, label: 'Settings', link: '/register/view', requiresAuth: true }
+    { icon: Settings, label: 'Settings', link: '/adminsetting/view', requiresAuth: true }
   ];
 
   bottomMenuItems = [

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
+using System.Data;
 
 namespace Shared.Contexts.Base
 {
@@ -32,6 +33,9 @@ namespace Shared.Contexts.Base
         void Detach<T>(T entity);
 
         void Attach<T>(T entity);
+
         Task SaveChangesAsync(CancellationToken cancellationToken);
+
+        IDbConnection CreateConnection();
     }
 }

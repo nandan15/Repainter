@@ -6,6 +6,7 @@ export class Package
     customerId!:number;
     packageType!:string;
     productCode!:string;
+    selectedCode!:string;
     type!:string;
     amount!:number;
     specification!:string;

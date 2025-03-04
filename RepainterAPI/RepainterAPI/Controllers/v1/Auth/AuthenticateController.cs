@@ -1,32 +1,31 @@
-﻿using Azure;
-using DataModels.Authenticate;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
+using DataCore.Identity;
+using DataModels.Authenticate;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Response = DataModels.Authenticate.Response;
+
 namespace RepainterAPI.Controllers.v1.Auth
 {
     [Route("api/[controller]")]
     [ApiController]
     public class AuthenticateController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IConfiguration _configuration;
 
         public AuthenticateController(
-            UserManager<IdentityUser> userManager,
-            RoleManager<IdentityRole> roleManager,
+            UserManager<ApplicationUser> userManager,
+            RoleManager<ApplicationRole> roleManager,
             IConfiguration configuration)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
         }
-
 
         [HttpPost]
         [Route("login")]
@@ -41,7 +40,7 @@ namespace RepainterAPI.Controllers.v1.Auth
                 var authClaims = new List<Claim>
                 {
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim("Sid", user.Id),
+                    new Claim("Sid", user.Id.ToString()),
                     new Claim("Email", user.Email),
                     new Claim("Name", user.UserName),
                 };
@@ -60,7 +59,6 @@ namespace RepainterAPI.Controllers.v1.Auth
                     role = userRoles.FirstOrDefault()
                 });
             }
-
             return Unauthorized();
         }
         [HttpPost]
@@ -69,20 +67,23 @@ namespace RepainterAPI.Controllers.v1.Auth
         {
             var userExists = await _userManager.FindByNameAsync(model.Username);
             if (userExists != null)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new Response { Status = "Error", Message = "User already exists!" });
 
-            IdentityUser user = new()
+            ApplicationUser user = new()
             {
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = model.Username
             };
+
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
-                return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
 
             if (!await _roleManager.RoleExistsAsync(model.Role))
-                await _roleManager.CreateAsync(new IdentityRole(model.Role));
+                await _roleManager.CreateAsync(new ApplicationRole(model.Role));
 
             if (await _roleManager.RoleExistsAsync(model.Role))
             {
@@ -93,7 +94,6 @@ namespace RepainterAPI.Controllers.v1.Auth
         }
 
 
-
         [HttpPost]
         [Route("register-admin")]
         public async Task<IActionResult> RegisterAdmin([FromBody] RegisterModel model)
@@ -102,7 +102,7 @@ namespace RepainterAPI.Controllers.v1.Auth
             if (userExists != null)
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User already exists!" });
 
-            IdentityUser user = new()
+            ApplicationUser user = new()
             {
                 Email = model.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
@@ -113,7 +113,7 @@ namespace RepainterAPI.Controllers.v1.Auth
                 return StatusCode(StatusCodes.Status500InternalServerError, new Response { Status = "Error", Message = "User creation failed! Please check user details and try again." });
 
             if (!await _roleManager.RoleExistsAsync(model.Role))
-                await _roleManager.CreateAsync(new IdentityRole(model.Role));
+                await _roleManager.CreateAsync(new ApplicationRole(model.Role));
 
             if (await _roleManager.RoleExistsAsync(model.Role))
             {

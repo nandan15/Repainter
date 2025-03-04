@@ -28,7 +28,7 @@ namespace DataServices.Enquiry.Queries
                 var enquiry = _context.Repository<DataEntities.Enquiry.Enquiry>().Get().FirstOrDefault(e => e.Id == request.Id);
                 if (enquiry == null)
                 {
-                    return null;  
+                    return null;
                 }
                 return new EnquiryModel
                 {
@@ -49,8 +49,7 @@ namespace DataServices.Enquiry.Queries
                     CreatedBy = enquiry.CreatedBy,
                     CreatedOn = enquiry.CreatedOn,
                     Deleted = enquiry.Deleted,
-                    FloorPlan = enquiry.FloorPlan,
-                    SitePlan = enquiry.SitePlan,
+
                     LastModified = enquiry.LastModified,
                     LastModifiedBy = enquiry.LastModifiedBy,
                 };

@@ -34,7 +34,7 @@ namespace DataServices.WallPaneling.Queries
                         switch (filter.Key)
                         {
                             case "productCode":
-                                query = query.Where(p => p.ProductCode.Contains((string)filter.Value));
+                                query = query.Where(p => p.PanelingType.Contains((string)filter.Value));
                                 break;
                             case "type":
                                 query = query.Where(p => p.Type.Contains((string)filter.Value));
@@ -52,9 +52,14 @@ namespace DataServices.WallPaneling.Queries
                     PanelingTabId = p.PanelingTabId,
                     GeneratedId = p.GeneratedId,
                     CustomerId = p.CustomerId,
-                    ProductCode = p.ProductCode,
                     Type = p.Type,
+                    PaintingType = p.PaintingType,
+                    PanelingType   = p.PanelingType,
+                    TextureType = p.TextureType,
+                    WallPaperType = p.WallPaperType,
                     Price = p.Price,
+                    Lighting=p.Lighting,
+                    LightingPrice=p.LightingPrice,
                     Remarks = p.Remarks,
                     Description = p.Description,
                     Deleted = p.Deleted,

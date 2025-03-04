@@ -1,14 +1,14 @@
 ﻿using DataCore;
 using DataModels.Enquiry;
 using DataModels.Exceptions;
-using DataServices.Enquiry.Queries;
-using MediatR;
+using DataServices.Customer;
+using DataServices.Repository.CustomerRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Data.Entity;
+using System.Collections.Generic;
 using System.Net;
-using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace RepainterAPI.Controllers.v1.Enquiry
 {
@@ -17,57 +17,58 @@ namespace RepainterAPI.Controllers.v1.Enquiry
     [Authorize]
     public class EnquiryQueryController : ControllerBase
     {
-        private readonly IMediator _mediator;
-        private readonly RepainterContext _context; // Add this line
+        private readonly ICustomerService _customerService;
+        private readonly ILogger<EnquiryCommandController> _logger;
 
-        public EnquiryQueryController(IMediator mediator, RepainterContext context) // Inject the context
+        public EnquiryQueryController(ICustomerService enquiryService, ILogger<EnquiryCommandController> logger)
         {
-            _mediator = mediator;
-            _context = context; // Initialize the context
+            _customerService = enquiryService;
+            _logger = logger;
         }
 
-        [HttpGet("")]
-        [ProducesResponseType(typeof(IEnumerable<EnquiryModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(InternalErrorViewModel), (int)HttpStatusCode.InternalServerError)]
-        [SwaggerOperation(Tags = new[] { "Enquiry" })]
-        public async Task<IActionResult> GetAllEnquiry([FromQuery] Dictionary<string, string> filters, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<EnquiryModel>>> GetAll()
         {
-            var enquiry = await _mediator.Send(new GetEnquiry { Filters = filters, PageSize = pageSize, Page = page });
-            return Ok(enquiry);
+            var enquiries = await _customerService.GetAllAsync();
+            return Ok(enquiries);
         }
 
-        [HttpGet("id")]
-        [ProducesResponseType(typeof(IEnumerable<EnquiryModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(InternalErrorViewModel), (int)HttpStatusCode.InternalServerError)]
-        [SwaggerOperation(Tags = new[] { "Enquiry" })]
-        public async Task<IActionResult> GetEnquiryById(int id)
+        [HttpGet("next-id")]
+        public async Task<ActionResult<object>> GetNextEnquiryId()
         {
-            var enquiry = await _mediator.Send(new GetEnquiryById { Id = id });
-            return Ok(enquiry);
+            var nextId = await _customerService.GetNextEnquiryIdAsync();
+            return Ok(new { enquiryId = nextId });
         }
-
-        [HttpGet("get-images/{id}")]
-        [ProducesResponseType(typeof(List<string>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(InternalErrorViewModel), (int)HttpStatusCode.InternalServerError)]
-        [SwaggerOperation(Tags = new[] { "Enquiry" })]
-        public async Task<IActionResult> GetImages(int id, [FromQuery] string type)
+        [HttpGet("{id}/physical-images")]
+        [ProducesResponseType(typeof(Dictionary<string, List<string>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [SwaggerOperation(Summary = "Get all physical images for a customer",
+     Description = "Retrieves all floor plan and site plan images from physical storage for a specific customer")]
+        public async Task<ActionResult<Dictionary<string, List<string>>>> GetCustomerPhysicalImages(int id)
         {
             try
             {
-                var enquiry = await _context.ScCustomer.FirstOrDefaultAsync(x => x.Id == id); 
-
-                if (enquiry == null)
-                    return NotFound();
-
-                List<string> images = type == "floor"
-                    ? JsonSerializer.Deserialize<List<string>>(enquiry.FloorPlan) ?? new List<string>()
-                    : JsonSerializer.Deserialize<List<string>>(enquiry.SitePlan) ?? new List<string>();
+                var images = await _customerService.GetCustomerImagesFromStorageAsync(id);
+                if (images == null)
+                {
+                    return NotFound(new { message = $"Customer with ID {id} not found or has been deleted" });
+                }
+                var baseUrl = $"{Request.Scheme}://{Request.Host.Value}/";
+                foreach (var key in images.Keys)
+                {
+                    for (int i = 0; i < images[key].Count; i++)
+                    {
+                        images[key][i] = baseUrl + images[key][i];
+                    }
+                }
 
                 return Ok(images);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new InternalErrorViewModel { Message = ex.Message });
+                _logger.LogError(ex, $"Error retrieving physical images for customer {id}");
+                return StatusCode((int)HttpStatusCode.InternalServerError,
+                    new { message = "An error occurred while retrieving customer images from physical storage" });
             }
         }
     }

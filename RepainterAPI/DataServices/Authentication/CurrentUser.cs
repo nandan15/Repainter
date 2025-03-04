@@ -9,28 +9,25 @@ using System.Threading.Tasks;
 
 namespace DataServices.Authentication
 {
-    public class Currentuser:ICurrentUser
+    public class CurrentUser : ICurrentUser
     {
-        private readonly Lazy<string> _userId;
+        private readonly Lazy<int> _userId;
         private readonly Lazy<string> _email;
         private readonly Lazy<string> _fullName;
 
-        public Guid UserId => new Guid(_userId?.Value);
-
+        public int UserId => _userId.Value;
         public string Email => _email?.Value;
-
         public string FullName => _fullName?.Value;
 
-        public Currentuser(IHttpContextAccessor httpContextAccessor)
+        public CurrentUser(IHttpContextAccessor httpContextAccessor)
         {
             var identity = httpContextAccessor?.HttpContext?.User?.Identity as ClaimsIdentity;
-
             if (identity == null)
             {
                 return;
             }
 
-            _userId = new Lazy<string>(() => identity.GetUserId());
+            _userId = new Lazy<int>(() => int.Parse(identity.GetUserId() ?? "0"));
             _email = new Lazy<string>(() => identity.GetUserEmail());
             _fullName = new Lazy<string>(() => identity.GetUserFullName());
         }

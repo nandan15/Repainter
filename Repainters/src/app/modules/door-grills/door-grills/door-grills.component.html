@@ -7,36 +7,52 @@
     <div class="section-subtitle">Main Door</div>
     <button type="button" class="add-btn" (click)="addMainDoor()">Add Door</button>
   </div>
-  <div id="mainDoorSection">
-    <div class="field-container">
+  <div id="mainDoorSection" *ngIf="showMainDoorSection">
+    <div class="field-container" *ngFor="let mainDoor of currentDoor_Grill.mainDoors; let i = index">
       <div class="field">
         <label class="label-text">Width in Ft</label>
-        <input type="number" class="form-input" placeholder="Length">
+        <input type="number" class="form-input" placeholder="Length" 
+               [(ngModel)]="mainDoor.length"
+               (input)="updatePrice($event, i, 'mainDoor')">
       </div>
       <div class="field">
         <label class="label-text">Height in Ft</label>
-        <input type="number" class="form-input" placeholder="Height">
+        <input type="number" class="form-input" placeholder="Height" 
+               [(ngModel)]="mainDoor.height"
+               (input)="updatePrice($event, i, 'mainDoor')">
       </div>
       <div class="field">
         <label class="label-text">Number of Doors</label>
-        <input type="number" class="form-input" placeholder="Number of Doors">
+        <input type="number" class="form-input" placeholder="Number of Doors" 
+               [(ngModel)]="mainDoor.numberOfDoors"
+               (input)="updatePrice($event, i, 'mainDoor')">
       </div>
       <div class="field">
         <label class="label-text">Surface</label>
         <div class="checkbox-group">
-          <label><input type="radio" name="surface" value="1"> 1</label>
-          <label><input type="radio" name="surface" value="2"> 2</label>
+          <label>
+            <input type="radio" name="surface{{i}}" value="1" 
+                   [(ngModel)]="mainDoor.surface"
+                   (change)="updatePrice($event, i, 'mainDoor')"> 1
+          </label>
+          <label>
+            <input type="radio" name="surface{{i}}" value="2" 
+                   [(ngModel)]="mainDoor.surface"
+                   (change)="updatePrice($event, i, 'mainDoor')"> 2
+          </label>
         </div>
       </div>
       <div class="field">
         <label class="label-text">Price</label>
-        <input type="number" class="form-input price-input" placeholder="Price" readonly>
+        <input type="number" class="form-input price-input" 
+               placeholder="Price" readonly 
+               [value]="mainDoor.price">
       </div>
       <div class="field">
         <label class="label-text">Remarks</label>
-        <input type="text" class="form-input" placeholder="Remarks">
+        <input type="text" class="form-input" placeholder="Remarks" [(ngModel)]="mainDoor.remarks">
       </div>
-      <button type="button" class="remove-btn" (click)="removeSection($event)">Remove</button>
+      <button type="button" class="remove-btn" (click)="removeMainDoor(i)">Remove</button>
     </div>
   </div>
 
@@ -45,36 +61,53 @@
     <div class="section-subtitle">Internal Door</div>
     <button type="button" class="add-btn" (click)="addInternalDoor()">Add Door</button>
   </div>
-  <div id="internalDoorSection">
-    <div class="field-container">
+  <div id="internalDoorSection" *ngIf="showInternalDoorSection">
+    <div class="field-container" *ngFor="let internalDoor of currentDoor_Grill.internalDoors; let i = index">
+      <!-- Similar modifications as main door section -->
       <div class="field">
         <label class="label-text">Width in Ft</label>
-        <input type="number" class="form-input" placeholder="Length">
+        <input type="number" class="form-input" placeholder="Length" 
+               [(ngModel)]="internalDoor.length"
+               (input)="updatePrice($event, i, 'internalDoor')">
       </div>
       <div class="field">
         <label class="label-text">Height in Ft</label>
-        <input type="number" class="form-input" placeholder="Height">
+        <input type="number" class="form-input" placeholder="Height" 
+               [(ngModel)]="internalDoor.height"
+               (input)="updatePrice($event, i, 'internalDoor')">
       </div>
       <div class="field">
         <label class="label-text">Number of Doors</label>
-        <input type="number" class="form-input" placeholder="Number of Doors">
+        <input type="number" class="form-input" placeholder="Number of Doors" 
+               [(ngModel)]="internalDoor.numberOfDoors"
+               (input)="updatePrice($event, i, 'internalDoor')">
       </div>
       <div class="field">
         <label class="label-text">Surface</label>
         <div class="checkbox-group">
-          <label><input type="radio" name="surface-internal" value="1"> 1</label>
-          <label><input type="radio" name="surface-internal" value="2"> 2</label>
+          <label>
+            <input type="radio" name="surface-internal{{i}}" value="1" 
+                   [(ngModel)]="internalDoor.surface"
+                   (change)="updatePrice($event, i, 'internalDoor')"> 1
+          </label>
+          <label>
+            <input type="radio" name="surface-internal{{i}}" value="2" 
+                   [(ngModel)]="internalDoor.surface"
+                   (change)="updatePrice($event, i, 'internalDoor')"> 2
+          </label>
         </div>
       </div>
       <div class="field">
         <label class="label-text">Price</label>
-        <input type="number" class="form-input price-input" placeholder="Price" readonly>
+        <input type="number" class="form-input price-input" 
+               placeholder="Price" readonly 
+               [value]="internalDoor.price">
       </div>
       <div class="field">
         <label class="label-text">Remarks</label>
-        <input type="text" class="form-input" placeholder="Remarks">
+        <input type="text" class="form-input" placeholder="Remarks" [(ngModel)]="internalDoor.remarks">
       </div>
-      <button type="button" class="remove-btn" (click)="removeSection($event)">Remove</button>
+      <button type="button" class="remove-btn" (click)="removeInternalDoor(i)">Remove</button>
     </div>
   </div>
 
@@ -83,25 +116,25 @@
     <div class="section-subtitle">Window Grill</div>
     <button type="button" class="add-btn" (click)="addWindow()">Add Window</button>
   </div>
-  <div id="windowGrillSection">
-    <div class="field-container">
+  <div id="windowGrillSection" *ngIf="showWindowGrillSection">
+    <div class="field-container" *ngFor="let windowGrill of currentDoor_Grill.windowGrills; let i = index">
       <div class="field">
         <label class="label-text">Length</label>
-        <input type="number" class="form-input window-length" (input)="calculateWindowGrill($event)">
+        <input type="number" class="form-input window-length" [(ngModel)]="windowGrill.length" (input)="calculateWindowGrill($event, i)">
       </div>
       <div class="field">
         <label class="label-text">Height</label>
-        <input type="number" class="form-input window-height" (input)="calculateWindowGrill($event)">
+        <input type="number" class="form-input window-height" [(ngModel)]="windowGrill.height" (input)="calculateWindowGrill($event, i)">
       </div>
       <div class="field">
         <label class="label-text">Price</label>
-        <input type="number" class="form-input price-input" readonly>
+        <input type="number" class="form-input price-input" readonly [(ngModel)]="windowGrill.price">
       </div>
       <div class="field">
         <label class="label-text">Remarks</label>
-        <input type="text" class="form-input" placeholder="Remarks">
+        <input type="text" class="form-input" placeholder="Remarks" [(ngModel)]="windowGrill.remarks">
       </div>
-      <button type="button" class="remove-btn" (click)="removeSection($event)">Remove</button>
+      <button type="button" class="remove-btn" (click)="removeWindowGrill(i)">Remove</button>
     </div>
   </div>
 
@@ -110,25 +143,25 @@
     <div class="section-subtitle">Balcony Grill</div>
     <button type="button" class="add-btn" (click)="addBalcony()">Add Balcony</button>
   </div>
-  <div id="balconyGrillSection">
-    <div class="field-container">
+  <div id="balconyGrillSection" *ngIf="showBalconyGrillSection">
+    <div class="field-container" *ngFor="let balconyGrill of currentDoor_Grill.balconyGrills; let i = index">
       <div class="field">
         <label class="label-text">Length</label>
-        <input type="number" class="form-input balcony-length" (input)="calculateBalconyGrill($event)">
+        <input type="number" class="form-input balcony-length" [(ngModel)]="balconyGrill.length" (input)="calculateBalconyGrill($event, i)">
       </div>
       <div class="field">
         <label class="label-text">Height</label>
-        <input type="number" class="form-input balcony-height" (input)="calculateBalconyGrill($event)">
+        <input type="number" class="form-input balcony-height" [(ngModel)]="balconyGrill.height" (input)="calculateBalconyGrill($event, i)">
       </div>
       <div class="field">
         <label class="label-text">Price</label>
-        <input type="number" class="form-input price-input" readonly>
+        <input type="number" class="form-input price-input" readonly [(ngModel)]="balconyGrill.price">
       </div>
       <div class="field">
         <label class="label-text">Remarks</label>
-        <input type="text" class="form-input" placeholder="Remarks">
+        <input type="text" class="form-input" placeholder="Remarks" [(ngModel)]="balconyGrill.remarks">
       </div>
-      <button type="button" class="remove-btn" (click)="removeSection($event)">Remove</button>
+      <button type="button" class="remove-btn" (click)="removeBalconyGrill(i)">Remove</button>
     </div>
   </div>
 
@@ -136,6 +169,10 @@
   <div class="section-title">Total</div>
   <div class="field">
     <label class="label-text">Section Total</label>
-    <input type="number" id="sectionTotal" class="form-input" placeholder="Total" readonly>
+    <input type="number" id="sectionTotal" class="form-input" 
+           placeholder="Total" readonly 
+           [(ngModel)]="currentDoor_Grill.sectionTotal">
   </div>
+  
+  <button type="button" class="save-btn door_grillbtn" (click)="saveDoorGrill()">Confirm</button>
 </div>

@@ -4,8 +4,8 @@ import { QuotationBuilderComponent } from "./quotation-builder/quotation-builder
 import { NgModule } from "@angular/core";
 const quotationbuilderroutes: Routes = [
   { path: '',component: QuotationBuilderComponent,children: [
-  { path: 'view/:customerId',component: ViewComponent},
-  { path: 'view', redirectTo: '', pathMatch: 'full' }
+    { path: 'view/:customerId', component: ViewComponent }, 
+    { path: 'view', redirectTo: '', pathMatch: 'full' }
     ],
   },
 ];

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DataServices.Repository.Wallpaper
 {
-    internal interface IWallpaperRepository
+    public interface IWallpaperRepository
     {
         Task<IEnumerable<WallpaperModel>> GetByCustomerIdAsync(int customerId);
     }

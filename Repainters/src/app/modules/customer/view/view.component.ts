@@ -1,23 +1,27 @@
-import { Component, Input, OnInit, ViewChild,AfterViewInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { Customer } from 'src/app/Shared/models/customer';
+import { Customer, CustomerImagesModel } from 'src/app/Shared/models/customer';
 import { CustomerProvider } from 'src/app/Shared/Provider/CustomerProvider';
-import { CustomerService } from 'src/app/Shared/Service/Customer/customer.service';
+import { CustomerService, ImageUploadResponse } from 'src/app/Shared/Service/Customer/customer.service';
 import { CustomerModalComponent } from '../customer-modal/customer-modal.component';
 import { ToastrService } from 'ngx-toastr';
-import { ResponseObj } from 'src/app/Shared/models/login';
-
+import { finalize } from 'rxjs';
+import { environment } from 'src/environment/environment';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-customer-view',
   templateUrl: './view.component.html',
   styleUrls: ['./view.component.css']
 })
-export class CustomerViewComponent implements OnInit {
+export class CustomerViewComponent implements OnInit, AfterViewInit {
   @ViewChild(CustomerModalComponent) 
   customerListModal!: CustomerModalComponent;
-  @ViewChild('floorPlanInput') floorPlanInput!: any;
-  @ViewChild('sitePlanInput') sitePlanInput!: any;
+  @ViewChild('floorPlanInput') floorPlanInput!: ElementRef;
+  @ViewChild('sitePlanInput') sitePlanInput!: ElementRef;
+  private baseUrl = environment.backend.baseURL;
+  uploadingFloorPlan = false;
+  uploadingSitePlan = false;
   previewImage: string | null = null;
 
   @Input() currentCustomer: Customer = new Customer;
@@ -30,25 +34,29 @@ export class CustomerViewComponent implements OnInit {
   pageSize: number = 10;
   searchTerm: string = '';
 
-  constructor(private customerProvider: CustomerProvider,
-    private customerService: CustomerService,private router: Router, private toastr: ToastrService) {}
+  constructor(
+    private customerProvider: CustomerProvider,
+    private customerService: CustomerService,
+    private router: Router,
+    private toastr: ToastrService
+  ) {}
 
   ngOnInit(): void {
     this.customerProvider.customer.subscribe(customers => {
       this.customers = customers;
-      this.filteredCustomers = [...customers];
+      this.filteredCustomers = [...customers]; 
       if (this.customers.length > 0 && !this.selectedCustomer) {
         this.selectCustomer(this.customers[0]);
       }
     });
-    this.customerProvider.listCustomer();
   }
+
   ngAfterViewInit() {
-    // This ensures ViewChild is properly initialized
     setTimeout(() => {
-      console.log('Modal component:', this.customerListModal); // Debug log
+      console.log('Modal component:', this.customerListModal);
     });
   }
+
   toggleSidebar() {
     this.isSidebarCollapsed = !this.isSidebarCollapsed;
   }
@@ -61,8 +69,10 @@ export class CustomerViewComponent implements OnInit {
     } else {
       this.filteredCustomers = this.customers.filter(customer => 
         customer.name.toLowerCase().includes(searchValue) ||
-        customer.city.toLowerCase().includes(searchValue) ||
-        customer.phoneNumber.includes(searchValue)
+        customer.phoneNumber.includes(searchValue) ||
+        customer.enquiryId.toLowerCase().includes(searchValue) ||
+        customer.projectName.toLowerCase().includes(searchValue) ||
+        customer.city.toLowerCase().includes(searchValue)
       );
     }
   
@@ -88,81 +98,307 @@ export class CustomerViewComponent implements OnInit {
     }
   }
 
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.filteredCustomers = [...this.customers];
+    if (this.customers.length > 0) {
+      this.selectCustomer(this.customers[0]);
+    }
+  }
+
   selectCustomer(customer: Customer): void {
     this.selectedCustomer = { ...customer };
+    this.loadCustomerImages();
   }
-
   viewCustomer(customer: Customer): void {
-    console.log('Viewing customer:', customer);
+    if (customer && customer.id) {
+      this.router.navigate(['/customer/edit', customer.id]);
+    } else {
+      console.error('No customer selected or invalid customer ID');
+    }
   }
-
   nextCustomer(): void {
     const currentIndex = this.customers.findIndex(c => c.id === this.selectedCustomer?.id);
     if (currentIndex < this.customers.length - 1) {
       this.selectCustomer(this.customers[currentIndex + 1]);
     }
   }
- openCustomerList() {
+
+  openCustomerList() {
     if (this.customerListModal) {
       this.customerListModal.showModal();
     } else {
       console.error('Modal component not initialized');
     }
   }
+
   deleteCustomer(customer: Customer): void {
-    if (confirm('Are you sure you want to delete this customer?')) {
-      this.customerProvider.deleteCustomer(customer);
+    if (!customer || !customer.id) {
+      console.error('No customer selected or invalid customer ID');
+      return;
     }
+
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `Do you want to delete ${customer.name}'s record? This action cannot be undone!`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.customerProvider.deleteCustomer(customer).subscribe({
+          next: () => {
+            Swal.fire(
+              'Deleted!',
+              `${customer.name}'s record has been deleted.`,
+              'success'
+            );
+            // If you have a list of customers, you may want to refresh it here
+          },
+          error: (error) => {
+            console.error('Error deleting customer:', error);
+            Swal.fire(
+              'Error!',
+              'There was an error deleting the customer.',
+              'error'
+            );
+          }
+        });
+      }
+    });
   }
 
   addNewCustomer(): void {
+    const userId = localStorage.getItem('UserId');
+    if (!userId) {
+        this.toastr.error('User ID not found, Please try logging in again.');
+        return;
+    }
+
     const newCustomer: Customer = {
-      id: 0,
-      enquiryId: 0,
-      title: '',
-      name: '',
-      emailId: '',
-      phoneNumber: '',
-      alternatePhoneNumber: '',
-      projectName: '',
-      houseNo: '',
-      projectType: '',
-      configurtion: '',
-      carpetArea: '',
-      projectLocation: '',
-      city: '',
-      floorPlan: [],
-      sitePlan: []
+        id: 0,
+        enquiryId: '0',
+        title: '',
+        name: '',
+        emailId: '',
+        phoneNumber: '',
+        alternatePhoneNumber: '',
+        projectName: '',
+        houseNo: '',
+        projectType: '',
+        configurtion: '',
+        carpetArea: '',
+        projectLocation: '',
+        city: '',
+        floorPlan: [],
+        sitePlan: [],
+        deleted: false,
+        lastModified: new Date(),
+        lastModifiedBy: parseInt(userId),
+        createdOn: new Date(),
+        createdBy: parseInt(userId)
     };
-    this.customerService.addCustomer(newCustomer);
-  }
 
-  getImageArray(images: string | string[]): string[] {
-    if (!images) return [];
-    if (typeof images === 'string') {
-      try {
-        return JSON.parse(images);
-      } catch {
-        return [images];
-      }
-    }
-    return images;
-  }
+ 
+    const floorPlanFiles: File[] = [];
+    const sitePlanFiles: File[] = [];
 
-  onFileSelected(event: any, type: 'floorPlan' | 'sitePlan'): void {
-    const file = event.target.files[0];
-    if (file && this.selectedCustomer) {
-      this.customerService.uploadImage(this.selectedCustomer.id, file, type).subscribe(
-        (response: any) => {
-          this.toastr.success(`${type === 'floorPlan' ? 'Floor plan' : 'Site plan'} uploaded successfully`);
-          this.refreshCustomerData();
+    this.customerProvider.addCustomer(newCustomer, floorPlanFiles, sitePlanFiles).subscribe({
+        next: (response) => {
+            if (response.success) {
+                this.toastr.success('Customer added successfully');
+            
+            } else {
+             
+                this.toastr.error('Failed to add customer');
+            }
         },
-        (error: any) => {
-          this.toastr.error(`Failed to upload ${type === 'floorPlan' ? 'floor plan' : 'site plan'}`);
-          console.error('Upload error:', error);
+        error: (error) => {
+            console.error('Error adding customer:', error);
+            this.toastr.error(error.message || 'Failed to add customer');
         }
-      );
+    });
+}
+
+getImageUrl(imageUrl: string): string {
+  if (!imageUrl) return '';
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl;
+  }
+  const cleanPath = imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl;
+  const formattedBaseUrl = this.baseUrl.endsWith('/') ? this.baseUrl : `${this.baseUrl}/`;
+  return `${formattedBaseUrl}${cleanPath}`;
+}
+
+
+getImageArray(images: string | string[] | null): string[] {
+  if (!images) return [];
+  if (typeof images === 'string') {
+    if (images.includes(',')) {
+      return images.split(',').map(img => img.trim());
     }
+    try {
+      const parsed = JSON.parse(images);
+      return Array.isArray(parsed) ? parsed : [images];
+    } catch {
+      return [images];
+    }
+  }
+  return images;
+}
+
+
+onFileSelected(event: Event, type: 'floorPlan' | 'sitePlan'): void {
+  const input = event.target as HTMLInputElement;
+  const files = input.files;
+
+  if (!files || files.length === 0) {
+    this.toastr.error('No file selected');
+    return;
+  }
+
+  if (!this.selectedCustomer) {
+    this.toastr.error('No customer selected');
+    return;
+  }
+
+  const uploadType: 'floor' | 'site' = type === 'floorPlan' ? 'floor' : 'site';
+
+  const filesToUpload = Array.from(files).filter(file => {
+    if (!this.isValidFileType(file)) {
+      this.toastr.error(`Invalid file type for ${file.name}`);
+      return false;
+    }
+    if (!this.isValidFileSize(file)) {
+      this.toastr.error(`File ${file.name} is too large`);
+      return false;
+    }
+    return true;
+  });
+
+  if (filesToUpload.length === 0) {
+    input.value = '';
+    return;
+  }
+
+  if (type === 'floorPlan') {
+    this.uploadingFloorPlan = true;
+  } else {
+    this.uploadingSitePlan = true;
+  }
+
+  this.customerProvider.uploadMultipleImages(this.selectedCustomer.id, filesToUpload, uploadType)
+    .pipe(
+      finalize(() => {
+        input.value = '';
+        if (type === 'floorPlan') {
+          this.uploadingFloorPlan = false;
+        } else {
+          this.uploadingSitePlan = false;
+        }
+      })
+    )
+    .subscribe({
+      next: (responses: ImageUploadResponse[]) => {
+        const successCount = responses.filter(r => r.success).length;
+        if (successCount > 0) {
+          this.toastr.success(`Successfully uploaded ${successCount} images`);
+          this.loadCustomerImages();
+        }
+        if (successCount < filesToUpload.length) {
+          this.toastr.warning(`Failed to upload ${filesToUpload.length - successCount} images`);
+        }
+      },
+      error: (error) => {
+        console.error('Upload error:', error);
+        this.toastr.error('Failed to upload images');
+      }
+    });
+}
+private loadCustomerImages(): void {
+  if (!this.selectedCustomer) return;
+
+  this.customerService.getImagesById(this.selectedCustomer.id)
+    .pipe(
+      finalize(() => {
+        this.uploadingFloorPlan = false;
+        this.uploadingSitePlan = false;
+      })
+    )
+    .subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          if (this.selectedCustomer) {
+            this.selectedCustomer = {
+              ...this.selectedCustomer,
+              floorPlan: response.data.floorPlan || [],
+              sitePlan: response.data.sitePlan || []
+            };
+          }
+        } else {
+          this.toastr.error(response.message || 'Failed to load customer images');
+        }
+      },
+      error: (error) => {
+        console.error('Error loading customer images:', error);
+        this.toastr.error('Failed to load customer images');
+      }
+    });
+}
+  private resetUploadState(type: 'floorPlan' | 'sitePlan'): void {
+    if (type === 'floorPlan') {
+      this.uploadingFloorPlan = false;
+    } else {
+      this.uploadingSitePlan = false;
+    }
+  }
+
+  private isValidFileType(file: File): boolean {
+    const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    return validTypes.includes(file.type);
+  }
+
+  private isValidFileSize(file: File): boolean {
+    const maxSize = 100 * 1024 * 1024; 
+    return file.size <= maxSize;
+  }
+  refreshImages(): void {
+    if (this.selectedCustomer) {
+      this.loadCustomerImages();
+    }
+  }
+  refreshCustomerImages(): void {
+    if (!this.selectedCustomer) return;
+
+    this.customerService.getCustomerById(this.selectedCustomer.id)
+      .pipe(finalize(() => {
+        this.uploadingFloorPlan = false;
+        this.uploadingSitePlan = false;
+      }))
+      .subscribe({
+        next: (customer: Customer) => {
+          if (customer) {
+            this.selectedCustomer = {
+              ...customer,
+              floorPlan: this.getImageArray(customer.floorPlan),
+              sitePlan: this.getImageArray(customer.sitePlan)
+            };
+            
+            const index = this.customers.findIndex(c => c.id === customer.id);
+            if (index !== -1) {
+              this.customers[index] = this.selectedCustomer;
+              this.filteredCustomers = this.applySearch(this.customers);
+            }
+          }
+        },
+        error: (error) => {
+          console.error('Error refreshing customer images:', error);
+          this.toastr.error('Failed to refresh images');
+        }
+      });
   }
 
   downloadImage(imageUrl: string): void {
@@ -175,26 +411,33 @@ export class CustomerViewComponent implements OnInit {
   }
 
   openImagePreview(imageUrl: string): void {
-    this.previewImage = imageUrl;
+    this.previewImage = this.getImageUrl(imageUrl);
   }
 
   closeImagePreview(): void {
     this.previewImage = null;
   }
-
   refreshCustomerData(): void {
     if (this.selectedCustomer) {
-      this.customerService.getCustomerById(this.selectedCustomer.id).subscribe(
-        (customer: Customer) => {
-          this.selectedCustomer = customer;
+      this.customerService.getCustomerById(this.selectedCustomer.id).subscribe({
+        next: (customer: Customer) => {
+          if (customer) {
+            this.selectedCustomer = {
+              ...customer,
+              floorPlan: this.getImageArray(customer.floorPlan),
+              sitePlan: this.getImageArray(customer.sitePlan)
+            };
+          } else {
+            this.toastr.error('Customer not found');
+          }
         },
-        (error: any) => {
-          this.toastr.error('Failed to refresh customer data');
+        error: (error: any) => {
           console.error('Error refreshing customer data:', error);
         }
-      );
+      });
     }
   }
+
   updateCustomer(): void {
     if (this.selectedCustomer) {
       this.customerProvider.updateCustomer(this.selectedCustomer);
@@ -203,16 +446,21 @@ export class CustomerViewComponent implements OnInit {
 
   private applySearch(customers: Customer[]): Customer[] {
     if (!this.searchTerm) return [...customers];
+    const searchValue = this.searchTerm.toLowerCase();
+    
     return customers.filter(customer => 
-      customer.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      customer.city.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      customer.phoneNumber.includes(this.searchTerm)
+      customer.name.toLowerCase().includes(searchValue) ||
+      customer.phoneNumber.includes(searchValue) ||
+      customer.enquiryId.toLowerCase().includes(searchValue) ||
+      customer.projectName.toLowerCase().includes(searchValue) ||
+      customer.city.toLowerCase().includes(searchValue)
     );
   }
 
   trackByCustomerId(index: number, customer: Customer): number {
     return customer.id;
   }
+
   navigateToQuotationBuilder(customer: Customer): void {
     if (customer && customer.id) {
       console.log('Navigating to quotation builder with customer:', customer);
@@ -221,5 +469,4 @@ export class CustomerViewComponent implements OnInit {
       console.error('No customer selected or invalid customer ID');
     }
   }  
-  
 }

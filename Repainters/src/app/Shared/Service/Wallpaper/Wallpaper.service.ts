@@ -24,7 +24,7 @@ export class WallpaperSerivce{
     public deleteWallpaper(wallpaperId:number):Observable<ResponseObj>{
         return this.httpClient.delete<ResponseObj>(`${this.wallpaperMethod}/delete/${wallpaperId}`);
     }
-    public getWallpaperByCustomerId(customerId:number):Observable<Wallpaper[]>{
+    public getWallpaperByCustomerId(customerId: number): Observable<Wallpaper[]> {
         return this.httpClient.get<Wallpaper[]>(`${this.wallpaperMethod}/customer/${customerId}`);
-    }
+      }
 }

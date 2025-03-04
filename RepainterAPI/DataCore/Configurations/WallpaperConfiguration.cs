@@ -15,7 +15,7 @@ namespace DataCore.Configurations
         public void Configure(EntityTypeBuilder<Wallpaper> entity)
         {
             entity.HasKey(w => w.WallpaperId).HasName("PK_Wallpaper");
-            entity.ToTable("ScWallpaper");
+            entity.ToTable("Wallpaper");
             entity.Property(w => w.CustomerId);
             entity.Property(w => w.ProductType);
             entity.Property(w => w.ProductCode);

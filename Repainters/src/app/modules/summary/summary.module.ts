@@ -14,6 +14,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { SendQuoteDialogComponentComponent } from './send-quote-dialog-component/send-quote-dialog-component.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import{MatCheckboxModule} from'@angular/material/checkbox';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import{MatTooltipModule}from '@angular/material/tooltip'
+import { HttpClientModule } from '@angular/common/http';
+import{MatChipsModule} from '@angular/material/chips';
+import{MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 @NgModule({
   declarations: [
     SummaryComponent,
@@ -32,7 +37,12 @@ import{MatCheckboxModule} from'@angular/material/checkbox';
     MatInputModule,
     MatIconModule,
     MatDialogModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatSnackBarModule,
+    MatTooltipModule,
+    HttpClientModule,
+    MatChipsModule,
+    MatProgressSpinnerModule,
   ],
   exports:[
     SummaryComponent,

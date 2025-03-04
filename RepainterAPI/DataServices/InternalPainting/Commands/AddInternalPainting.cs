@@ -30,6 +30,8 @@ namespace DataServices.InternalPainting.Commands
                 var InternalPainting = new DataEntities.InternalPainting.InternalPainting
                 {
                     CarpetArea = request.InternalPaintingModel.CarpetArea,
+                    ProductCode=request.InternalPaintingModel.ProductCode,
+                    Color=request.InternalPaintingModel.Color,
                     CustomerId=request.InternalPaintingModel.CustomerId,
                     CeilingType = request.InternalPaintingModel.CeilingType,
                     CeilingPrice = request.InternalPaintingModel.CeilingPrice,

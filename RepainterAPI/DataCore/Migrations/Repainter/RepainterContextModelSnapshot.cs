@@ -22,6 +22,257 @@ namespace DataCore.Migrations.Repainter
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
+            modelBuilder.Entity("DataEntities.Curtain.Curtain", b =>
+                {
+                    b.Property<int>("CurtainId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CurtainId"), 1L, 1);
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CurtainRemarks")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("CurtainTabId")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("CurtainType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("FabricType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("FinialPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("FinialProductCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FinialRemarks")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FinialType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("GeneratedId")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("LastModifiedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastModifiedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("RodPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("RodProductCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RodRemarks")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RodType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("SectionTotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("SectionTotalCurtain")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("SectionTotalWindow")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("WindowCurtainPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("WindowCurtainProductCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WindowCurtainRemarks")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WindowCurtainType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WindowFabricType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("WindowFinialPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("WindowFinialProductCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WindowFinialRemarks")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WindowFinialType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("WindowRodPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("WindowRodProductCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WindowRodRemarks")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WindowRodType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("CurtainId");
+
+                    b.ToTable("Curtains");
+                });
+
+            modelBuilder.Entity("DataEntities.Door_Grills.Door_Grills", b =>
+                {
+                    b.Property<int>("Door_GrillId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Door_GrillId"), 1L, 1);
+
+                    b.Property<decimal>("Balcony_GrillHeight")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Balcony_GrillLength")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Balcony_GrillPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Balcony_GrillRemarks")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Door_GrillTabId")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("GeneratedId")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("InternalDoorHeight")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("InternalDoorLength")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("InternalDoorNumber_of_Doors")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("InternalDoorPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("InternalDoorRemarks")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("InternalDoorSurface")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("LastModifiedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastModifiedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("MainDoorHeight")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("MainDoorLength")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("MainDoorNumber_of_Doors")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("MainDoorPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("MainDoorRemarks")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MainDoorSurface")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("SectionTotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Window_GrillHeight")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Window_GrillLength")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Window_GrillPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Window_GrillRemarks")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Door_GrillId");
+
+                    b.ToTable("Door_Grills");
+                });
+
             modelBuilder.Entity("DataEntities.Enquiry.Enquiry", b =>
                 {
                     b.Property<int>("Id")
@@ -107,7 +358,66 @@ namespace DataCore.Migrations.Repainter
 
                     b.HasKey("Id");
 
-                    b.ToTable("ScCustomer");
+                    b.ToTable("Customer");
+                });
+
+            modelBuilder.Entity("DataEntities.Furniture.Furniture", b =>
+                {
+                    b.Property<int>("FurnitureId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FurnitureId"), 1L, 1);
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FurnitureTabId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GeneratedId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LastModifiedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastModifiedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Remarks")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("SectionTotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("FurnitureId");
+
+                    b.ToTable("Furniture");
                 });
 
             modelBuilder.Entity("DataEntities.InternalPainting.InternalPainting", b =>
@@ -129,6 +439,10 @@ namespace DataCore.Migrations.Repainter
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CeilingType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Color")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -161,6 +475,10 @@ namespace DataCore.Migrations.Repainter
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("SectionTotalPost_tax")
                         .HasColumnType("decimal(18,2)");
 
@@ -184,7 +502,7 @@ namespace DataCore.Migrations.Repainter
 
                     b.HasKey("IntenalPaintingId");
 
-                    b.ToTable("ScInternalPainting");
+                    b.ToTable("InternalPainting");
                 });
 
             modelBuilder.Entity("DataEntities.Package.Package", b =>
@@ -244,6 +562,10 @@ namespace DataCore.Migrations.Repainter
                     b.Property<decimal>("SectionTotalPreTax")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("SelectedCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Specification")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -254,7 +576,7 @@ namespace DataCore.Migrations.Repainter
 
                     b.HasKey("PackageId");
 
-                    b.ToTable("ScPackage");
+                    b.ToTable("Package");
                 });
 
             modelBuilder.Entity("DataEntities.PackageData.PackageData", b =>
@@ -285,6 +607,168 @@ namespace DataCore.Migrations.Repainter
                     b.HasKey("PackageId");
 
                     b.ToTable("packageData");
+                });
+
+            modelBuilder.Entity("DataEntities.Product.CatalogFile", b =>
+                {
+                    b.Property<int>("FileId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FileId"), 1L, 1);
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<long>("FileSize")
+                        .HasMaxLength(10000)
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("FileType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("FolderId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int?>("LastModifiedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("LastModifiedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("FileId");
+
+                    b.HasIndex("FileType");
+
+                    b.HasIndex("CategoryId", "IsDeleted");
+
+                    b.HasIndex("CustomerId", "UserId");
+
+                    b.HasIndex("FolderId", "IsDeleted");
+
+                    b.ToTable("CatalogFile");
+                });
+
+            modelBuilder.Entity("DataEntities.Product.Category", b =>
+                {
+                    b.Property<int>("CategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"), 1L, 1);
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int?>("LastModifiedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("LastModifiedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CategoryId");
+
+                    b.HasIndex("IsDeleted");
+
+                    b.HasIndex("CustomerId", "UserId");
+
+                    b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("DataEntities.Product.Folder", b =>
+                {
+                    b.Property<int>("FolderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FolderId"), 1L, 1);
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<int?>("LastModifiedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("LastModifiedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("FolderId");
+
+                    b.HasIndex("CategoryId", "IsDeleted");
+
+                    b.HasIndex("CustomerId", "UserId");
+
+                    b.ToTable("Folders");
                 });
 
             modelBuilder.Entity("DataEntities.TexturePainting.TexturePainting", b =>
@@ -343,7 +827,7 @@ namespace DataCore.Migrations.Repainter
 
                     b.HasKey("TexturePaintingId");
 
-                    b.ToTable("ScTexturePainting");
+                    b.ToTable("TexturePainting");
                 });
 
             modelBuilder.Entity("DataEntities.WallPaneling.Paneling", b =>
@@ -379,15 +863,26 @@ namespace DataCore.Migrations.Repainter
                     b.Property<DateTime>("LastModifiedOn")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Lighting")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("LightingPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("PaintingType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("PanelingTabId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("ProductCode")
+                    b.Property<string>("PanelingType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Remarks")
                         .IsRequired()
@@ -396,7 +891,15 @@ namespace DataCore.Migrations.Repainter
                     b.Property<decimal>("SectionTotal")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("TextureType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WallPaperType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -454,7 +957,47 @@ namespace DataCore.Migrations.Repainter
 
                     b.HasKey("WallpaperId");
 
-                    b.ToTable("ScWallpaper");
+                    b.ToTable("Wallpaper");
+                });
+
+            modelBuilder.Entity("DataEntities.Product.CatalogFile", b =>
+                {
+                    b.HasOne("DataEntities.Product.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DataEntities.Product.Folder", "Folder")
+                        .WithMany("Files")
+                        .HasForeignKey("FolderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Folder");
+                });
+
+            modelBuilder.Entity("DataEntities.Product.Folder", b =>
+                {
+                    b.HasOne("DataEntities.Product.Category", "Category")
+                        .WithMany("Folders")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("DataEntities.Product.Category", b =>
+                {
+                    b.Navigation("Folders");
+                });
+
+            modelBuilder.Entity("DataEntities.Product.Folder", b =>
+                {
+                    b.Navigation("Files");
                 });
 #pragma warning restore 612, 618
         }

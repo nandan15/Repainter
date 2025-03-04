@@ -43,18 +43,18 @@ namespace RepainterAPI.Controllers.v1.Wallpaper
             return Ok(internalPainting);
         }
         [HttpGet("customer/{customerId}")]
-        [ProducesResponseType(typeof(IEnumerable<InternalPaintingModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<WallpaperModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(InternalErrorViewModel), (int)HttpStatusCode.InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Wallpaper" })]
-        public async Task<IActionResult> GetInternalPaintingByCustomerId(int customerId)
+        public async Task<IActionResult> GetWallpaperByCustomerId(int customerId)
         {
             if (customerId <= 0)
             {
                 return BadRequest("Invalid Customer ID.");
             }
-            var internalPainting = await _mediator.Send(new GetInternalPaintingByCustomerId(customerId));
 
-            return Ok(internalPainting);
+            var wallpapers = await _mediator.Send(new GetWallpaperByCustomerId(customerId));
+            return Ok(wallpapers);
         }
 
     }

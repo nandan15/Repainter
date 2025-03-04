@@ -14,6 +14,7 @@ namespace DataEntities.Package
         public string PackageType { get;set; }
         public string ProductCode { get;set; }
         public string Type { get;set; }
+        public string SelectedCode { get; set; }
         public decimal Amount {  get;set; } 
         public string Specification { get;set; }
         public string Condition { get;set; }
