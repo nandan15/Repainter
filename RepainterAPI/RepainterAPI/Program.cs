@@ -38,8 +38,10 @@ using Microsoft.Extensions.Caching.StackExchangeRedis;
 using DataServices.Repository.CustomerRepository;
 using DataServices.Customer;
 using DataServices.Mappings;
+using DataServices.CurtainData;
+using DataServices.Repository.CurtainData;
+
 var builder = WebApplication.CreateBuilder(args);
-var configuration = builder.Configuration;
 ConfigureServices(builder);
 var app = builder.Build();
 ConfigureMiddleware(app);
@@ -51,18 +53,18 @@ void ConfigureServices(WebApplicationBuilder builder)
 {
     builder.Services.Configure<IISServerOptions>(options =>
     {
-        options.MaxRequestBodySize = 300 * 1024 * 1024; 
+        options.MaxRequestBodySize = 300 * 1024 * 1024;
     });
     builder.WebHost.ConfigureKestrel(serverOptions =>
     {
-        serverOptions.Limits.MaxRequestBodySize = 300 * 1024 * 1024; 
+        serverOptions.Limits.MaxRequestBodySize = 300 * 1024 * 1024;
         serverOptions.Limits.MaxRequestBufferSize = 300 * 1024 * 1024;
         serverOptions.Limits.MinRequestBodyDataRate = null;
         serverOptions.Limits.MinResponseDataRate = null;
     });
     builder.Services.Configure<FormOptions>(options =>
     {
-        options.MultipartBodyLengthLimit = 300 * 1024 * 1024; 
+        options.MultipartBodyLengthLimit = 300 * 1024 * 1024;
         options.ValueLengthLimit = 300 * 1024 * 1024;
         options.MemoryBufferThreshold = 300 * 1024 * 1024;
     });
@@ -70,14 +72,32 @@ void ConfigureServices(WebApplicationBuilder builder)
     {
         options.Limits.MaxRequestBodySize = 300 * 1024 * 1024;
     });
-
-    builder.Services.Configure<IISServerOptions>(options =>
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlServer(
+            builder.Configuration.GetConnectionString("EspressoDB"),
+            b => b.MigrationsAssembly("RepainterAPI")
+        )
+    );
+    builder.Services.AddDbContext<RepainterContext>(opts =>
+        opts.UseSqlServer(
+            builder.Configuration.GetConnectionString("EspressoDB"),
+            b => b.MigrationsAssembly("RepainterAPI")
+        )
+    );
+    builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
     {
-        options.MaxRequestBodySize = 300 * 1024 * 1024;
-    });
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>options.UseSqlServer(configuration["ConnectionString:EspressoDB"]));
-    builder.Services.AddDbContext<RepainterContext>(opts =>opts.UseSqlServer(configuration["ConnectionString:EspressoDB"]));
-    builder.Services.AddIdentity<ApplicationUser, ApplicationRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequiredLength = 8;
+        options.Password.RequireNonAlphanumeric = true;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.AllowedForNewUsers = true;
+        options.User.RequireUniqueEmail = true;
+    })
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
     builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -87,21 +107,24 @@ void ConfigureServices(WebApplicationBuilder builder)
     .AddJwtBearer(options =>
     {
         options.SaveToken = true;
-        options.RequireHttpsMetadata = true;
+        options.RequireHttpsMetadata = false;
         options.TokenValidationParameters = new TokenValidationParameters()
         {
             ValidateIssuer = true,
             ValidateAudience = true,
-            ValidAudience = configuration["JWT:ValidAudience"],
-            ValidIssuer = configuration["JWT:ValidIssuer"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
+            ValidAudience = builder.Configuration["JWT:ValidAudience"],
+            ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"])),
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
         };
     });
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("UI", policyBuilder =>
         {
-            var corsOriginAllowed = configuration["CorsOriginAllowed"];
+            var corsOriginAllowed = builder.Configuration["CorsOriginAllowed"];
             if (!string.IsNullOrEmpty(corsOriginAllowed))
             {
                 policyBuilder.WithOrigins(corsOriginAllowed.Split(','))
@@ -116,22 +139,17 @@ void ConfigureServices(WebApplicationBuilder builder)
             }
         });
     });
+    builder.Services.AddDistributedMemoryCache();
     builder.Services.AddStackExchangeRedisCache(options =>
     {
-        options.Configuration = configuration["Redis:Configuration"];
-        options.InstanceName = configuration["Redis:InstanceName"];
+        options.Configuration = builder.Configuration["Redis:Configuration"];
+        options.InstanceName = builder.Configuration["Redis:InstanceName"];
     });
     builder.Services.AddMediatR(cfg => {
         cfg.RegisterServicesFromAssemblies(
             typeof(GetEnquiryHandler).Assembly,
             typeof(GetInternalPaintingByCustomerIdHandler).Assembly,
-            typeof(GetCurtainByCustomerId).Assembly,
-            typeof(GetWallpaperByCustomerId).Assembly,
-            typeof(GetPanelingByCustomerId).Assembly,
-            typeof(GetFurnitureByCustomerId).Assembly,
-            typeof(GetDoor_GrillByCustomerId).Assembly,
-            typeof(GetTexturePaintingByCustomerId).Assembly,
-            typeof(GetPackageByCustomerId).Assembly
+            typeof(GetCurtainByCustomerId).Assembly
         );
     });
     builder.Services.AddAutoMapper(typeof(EnquiryModel).Assembly, typeof(EnquiryMappingProfile).Assembly);
@@ -153,6 +171,7 @@ void ConfigureServices(WebApplicationBuilder builder)
 
     builder.Services.AddControllers();
 }
+
 void ConfigureMiddleware(WebApplication app)
 {
     if (app.Environment.IsDevelopment())
@@ -161,7 +180,9 @@ void ConfigureMiddleware(WebApplication app)
         app.UseSwaggerUI();
         app.UseDeveloperExceptionPage();
     }
+
     app.UseHttpsRedirection();
+
     var staticFileOptions = new StaticFileOptions
     {
         FileProvider = new PhysicalFileProvider(
@@ -177,7 +198,6 @@ void ConfigureMiddleware(WebApplication app)
     };
 
     app.UseStaticFiles(staticFileOptions);
-
     app.UseCors("UI");
     app.UseAuthentication();
     app.UseAuthorization();
@@ -218,6 +238,8 @@ void RegisterServices(IServiceCollection services)
     services.AddScoped<IPackageRepository, PackageRepository>();
     services.AddScoped<IFileStorageService, FileStorageService>();
     services.AddScoped<ICatalogService, CatalogService>();
+    services.AddScoped<ICurtainDataService, CurtainDataService>();
+    services.AddScoped<ICurtainDataRepository, CurtainDataRepository>();
     services.AddScoped<WhatsAppService>();
     services.AddScoped<IEmailService, EmailService>();
     services.AddHttpClient<WhatsAppService>();
