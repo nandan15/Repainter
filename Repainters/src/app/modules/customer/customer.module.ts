@@ -17,7 +17,6 @@ import { CustomerModalComponent } from './customer-modal/customer-modal.componen
     CustomerViewComponent,
     UploadDialogComponent,
     CustomerModalComponent
-    CustomerModalComponent,
   ],
   imports: [
     CommonModule,

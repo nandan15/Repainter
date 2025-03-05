@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace DataServices.Summary.Queries
 {
-    public class GetSummaryDataById:IRequest<SummaryModel>
+    public class GetSummaryDataById : IRequest<SummaryModel>
     {
         public int UserId { get; set; }
         public int CustomerId { get; set; }
@@ -22,7 +22,7 @@ namespace DataServices.Summary.Queries
     public class GetSummaryDataByIdHandler : IRequestHandler<GetSummaryDataById, SummaryModel>
     {
         private readonly IUnitOfWork _context;
-        private readonly ILogger<GetSummaryDataByIdHandler> _logger; 
+        private readonly ILogger<GetSummaryDataByIdHandler> _logger;
 
         public GetSummaryDataByIdHandler(IUnitOfWork context, ILogger<GetSummaryDataByIdHandler> logger)
         {
