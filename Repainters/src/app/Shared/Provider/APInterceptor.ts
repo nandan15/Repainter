@@ -15,19 +15,34 @@ export class APInterceptor implements HttpInterceptor {
   }
 
   intercept(httpRequest: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    console.log('Request URL:', httpRequest.url);
-    console.log('Request Headers:', httpRequest.headers);
-  
+    console.log('Original Request URL:', httpRequest.url);
+    
+    // Check if the URL contains localhost:7149 with any protocol
+    if (httpRequest.url.includes('localhost:7149')) {
+        // Force HTTP protocol 
+        const httpUrl = httpRequest.url.replace(/^https?:\/\//, 'http://');
+        
+        // Create a new request with the modified URL
+        const modifiedRequest = httpRequest.clone({
+            url: httpUrl
+        });
+        
+        console.log('Modified Request URL:', modifiedRequest.url);
+        httpRequest = modifiedRequest;
+    }
     if (localStorage.getItem('Token')) {
-      return next.handle(httpRequest.clone({ setHeaders: { "Authorization": localStorage.getItem('TokenType') + " " + localStorage.getItem('Token') } })).pipe(
-        catchError(this.handleError)
-      );
+        return next.handle(httpRequest.clone({ 
+            setHeaders: { 
+                "Authorization": localStorage.getItem('TokenType') + " " + localStorage.getItem('Token') 
+            } 
+        })).pipe(
+            catchError(this.handleError)
+        );
     }
     return next.handle(httpRequest).pipe(
-      catchError(this.handleError)
+        catchError(this.handleError)
     );
-  }
-  
+}
 
   handleError(error: HttpErrorResponse) {
     switch (error.status) {

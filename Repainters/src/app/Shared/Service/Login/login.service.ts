@@ -8,10 +8,20 @@ import { Login, token } from "../../models/login";
     providedIn: 'root'
 })
 export class LoginService {
-    baseUrl: string = environment.backend.baseURL;
-    private loginMethod = this.baseUrl + "api/Authenticate/login";
-    constructor(private httpClient: HttpClient) { }
+    private loginMethod: string;
+    
+    constructor(private httpClient: HttpClient) { 
+        // Force HTTP protocol with full URL
+        this.loginMethod = "http://localhost:7149/api/Authenticate/login";
+    }
+    
     public login(login: Login): Observable<token> {
-        return this.httpClient.post<token>(this.loginMethod, login);
+        console.log('Login URL being used:', this.loginMethod);
+        // Create a new HttpRequest with the explicit URL
+        return this.httpClient.post<token>(this.loginMethod, login, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
     }
 }

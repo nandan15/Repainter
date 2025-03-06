@@ -38,6 +38,8 @@ using Microsoft.Extensions.Caching.StackExchangeRedis;
 using DataServices.Repository.CustomerRepository;
 using DataServices.Customer;
 using DataServices.Mappings;
+using Microsoft.AspNetCore.Http;
+
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 ConfigureServices(builder);
@@ -75,6 +77,11 @@ void ConfigureServices(WebApplicationBuilder builder)
     {
         options.MaxRequestBodySize = 300 * 1024 * 1024;
     });
+    builder.Services.AddHttpsRedirection(options =>
+    {
+        options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
+        options.HttpsPort = -1; 
+    });
     builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configuration["ConnectionString:EspressoDB"]));
     builder.Services.AddDbContext<RepainterContext>(opts => opts.UseSqlServer(configuration["ConnectionString:EspressoDB"]));
     builder.Services.AddIdentity<ApplicationUser, ApplicationRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
@@ -87,7 +94,7 @@ void ConfigureServices(WebApplicationBuilder builder)
     .AddJwtBearer(options =>
     {
         options.SaveToken = true;
-        options.RequireHttpsMetadata = true;
+        options.RequireHttpsMetadata = false;
         options.TokenValidationParameters = new TokenValidationParameters()
         {
             ValidateIssuer = true,
@@ -150,9 +157,9 @@ void ConfigureServices(WebApplicationBuilder builder)
         });
         c.OperationFilter<AuthorizationHeaderParameterOperationFilter>();
     });
-
     builder.Services.AddControllers();
 }
+
 void ConfigureMiddleware(WebApplication app)
 {
     if (app.Environment.IsDevelopment())
@@ -161,27 +168,18 @@ void ConfigureMiddleware(WebApplication app)
         app.UseSwaggerUI();
         app.UseDeveloperExceptionPage();
     }
-    app.UseHttpsRedirection();
-    var staticFileOptions = new StaticFileOptions
-    {
-        FileProvider = new PhysicalFileProvider(
-            Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
-        RequestPath = "",
-        OnPrepareResponse = ctx =>
-        {
-            ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
-            ctx.Context.Response.Headers.Append(
-                "Access-Control-Allow-Headers",
-                "Origin, X-Requested-With, Content-Type, Accept");
-        }
-    };
-
-    app.UseStaticFiles(staticFileOptions);
+    app.UseStaticFiles();
 
     app.UseCors("UI");
+    app.UseRouting();
     app.UseAuthentication();
     app.UseAuthorization();
-    app.MapControllers();
+
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapControllers();
+        endpoints.MapFallbackToFile("index.html");
+    });
 }
 
 void ConfigureUploadDirectories(WebApplication app)
@@ -201,7 +199,6 @@ void ConfigureUploadDirectories(WebApplication app)
         }
     }
 }
-
 void RegisterServices(IServiceCollection services)
 {
     services.AddScoped<ICustomerRepository, CustomerRepository>();
