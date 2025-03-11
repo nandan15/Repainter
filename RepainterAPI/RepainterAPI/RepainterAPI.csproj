@@ -4,6 +4,11 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<UseIISExpress>true</UseIISExpress>
+		<UseIIS>false</UseIIS>
+		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+		<UseSSL>false</UseSSL>
+		<SSLPort>0</SSLPort>
 	</PropertyGroup>
 
 	<ItemGroup>
